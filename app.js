@@ -5,7 +5,7 @@ const multer = require('multer');
 const admin = require('firebase-admin');
 const serviceAccount = require('./prv.json');
 const User = require('./models/user');
-
+const Job = require('./models/job');
 const app = express();
 const port = 3001;
 
@@ -22,6 +22,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 mongoose.connect(
   "mongodb+srv://yessinebensalah:14501578@connectcareerdb.3vb0ahj.mongodb.net/"
 );
+console.log("Connected to MongoDB");
+
+
+
 /*
 const userSchema = new mongoose.Schema({
   username: String,
@@ -33,6 +37,56 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model("User", userSchema);*/
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+
+app.get('/',(req,res)=>{
+  res.send('Helloo')
+})
+
+
+
+// Route for adding a job
+app.post('/addJob', upload.single('logo'), async (req, res) => {
+  try {
+    const {
+      jobPoster,
+      jobDetails,
+      companyDetails,
+      termsAndConditions,
+    } = req.body;
+
+    // Validate job data
+    if (!jobPoster || !jobDetails || !companyDetails || !termsAndConditions) {
+      return res.status(400).json({ message: 'Invalid job data' });
+    }
+
+    // Upload logo to Firebase Storage if provided
+    let logoUrl = '';
+    if (req.file) {
+      const bucket = admin.storage().bucket();
+      const file = bucket.file(req.file.originalname);
+      await file.createWriteStream().end(req.file.buffer);
+      logoUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${file.name}`;
+    }
+
+    // Create a new job
+const newJob = new Job({
+  jobPoster, 
+  jobDetails,
+  companyDetails,
+  termsAndConditions,
+  logo: logoUrl,
+});
+
+    // Save the job to the database
+    await newJob.save();
+
+    res.status(201).json({ message: 'Job added successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error adding job' });
+  }
+});
+
 // Route pour l'inscription d'un utilisateur
 
 app.post("/inscriptionRecruiter", upload.any('image'), async (req, res) => {
