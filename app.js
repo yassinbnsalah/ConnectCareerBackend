@@ -11,6 +11,8 @@ const jwt = require("jsonwebtoken");
 const getListeOfRecruiter = require("./routes/recruiterapi/recruiter");
 const CreateRecruiter = require("./routes/recruiterapi/createRecruiter");
 const Authentificaiton = require("./routes/authentification");
+const getListeOfStudent = require("./routes/studentapi/student");
+const CreateStudent = require("./routes/studentapi/createStudent");
 const app = express();
 const port = 3001;
 app.use(cors());
@@ -35,6 +37,9 @@ app.post("/login", async (req, res) => {
 app.get("/recruiters", async (req, res) => {
   await getListeOfRecruiter(res);
 });
+app.get("/students", async (req, res) => {
+  await getListeOfStudent(res);
+});
 
 app.post(
   "/inscriptionRecruiter",
@@ -44,6 +49,15 @@ app.post(
   ]),
   async (req, res) => {
     await CreateRecruiter(req, res, admin);
+  }
+);
+app.post(
+  "/signupStudent",
+  upload.fields([
+    { name: "profileImage", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    await CreateStudent(req, res, admin);
   }
 );
 //// DONT USE IT
