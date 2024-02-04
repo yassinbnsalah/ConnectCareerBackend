@@ -2,12 +2,15 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const multer = require("multer");
+const bcrypt = require("bcrypt");
 const admin = require("firebase-admin");
 const serviceAccount = require("./prv.json");
 const User = require("./models/user");
-const Entreprise = require("./models/entreprise");
 const cors = require("cors");
-
+const jwt = require("jsonwebtoken");
+const getListeOfRecruiter = require("./routes/recruiterapi/recruiter");
+const CreateRecruiter = require("./routes/recruiterapi/createRecruiter");
+const Authentificaiton = require("./routes/authentification");
 const app = express();
 const port = 3001;
 app.use(cors());
@@ -26,6 +29,12 @@ mongoose.connect(
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+app.post("/login", async (req, res) => {
+  await Authentificaiton(req, res);
+});
+app.get("/recruiters", async (req, res) => {
+  await getListeOfRecruiter(res);
+});
 
 app.post(
   "/inscriptionRecruiter",
@@ -34,80 +43,10 @@ app.post(
     { name: "CompanyLogo", maxCount: 1 },
   ]),
   async (req, res) => {
-    try {
-      const {
-        firstname,
-        lastname,
-        email,
-        phoneNumber,
-        gender,
-        password,
-        jobTitle,
-        jobType,
-        CompanyName,
-        CompanyAdress,
-        CompanyCity,
-        CompanyType,
-        matriculeFiscale,
-        description,
-      } = req.body;
-      const role = "Recruiter";
-      let profileImage = "";
-      let CompanyLogo = "";
-      if (req.files["profileImage"]) {
-        const profileImageFile = req.files["profileImage"][0];
-        const imageExtension = profileImageFile.originalname.split(".").pop();
-        const imageName = `${firstname}${lastname}.${imageExtension}`;
-
-        const profileImageBucket = admin.storage().bucket();
-        const profileImageFileObject = profileImageBucket.file(imageName);
-        await profileImageFileObject
-          .createWriteStream()
-          .end(profileImageFile.buffer);
-        profileImage = `https://firebasestorage.googleapis.com/v0/b/${profileImageBucket.name}/o/${profileImageFileObject.name}`;
-      }
-      if (req.files["CompanyLogo"]) {
-        const CompanyLogoFile = req.files["CompanyLogo"][0];
-        const CompanyLogoBucket = admin.storage().bucket();
-        const CompanyLogoFileObject = CompanyLogoBucket.file(
-          CompanyLogoFile.originalname
-        );
-        await CompanyLogoFileObject.createWriteStream().end(
-          CompanyLogoFile.buffer
-        );
-        CompanyLogo = `https://firebasestorage.googleapis.com/v0/b/${CompanyLogoBucket.name}/o/${CompanyLogoFileObject.name}`;
-      }
-      const entreprise = new Entreprise({
-        CompanyName,
-        CompanyAdress,
-        CompanyCity,
-        CompanyType,
-        matriculeFiscale,
-        description,
-        CompanyLogo,
-      });
-      await entreprise.save();
-      const newUser = new User({
-        firstname,
-        lastname,
-        email,
-        phoneNumber,
-        gender,
-        password,
-        jobTitle,
-        jobType,
-        role,
-        profileImage,
-        entreprise,
-      });
-      await newUser.save();
-      res.status(201).json({ message: "Utilisateur inscrit avec succès" });
-    } catch (error) {
-      console.error(error);
-    }
+    await CreateRecruiter(req, res, admin);
   }
 );
-//// DONT USE IT 
+//// DONT USE IT
 app.post("/inscription", upload.single("image"), async (req, res) => {
   try {
     const { username, password, email } = req.body;
@@ -154,7 +93,6 @@ app.post("/inscription", upload.single("image"), async (req, res) => {
     }
   }
 });
-
 
 app.get("/", (req, res) => {
   res.send("Hello, Express!");
