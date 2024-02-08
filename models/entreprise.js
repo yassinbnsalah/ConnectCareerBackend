@@ -6,7 +6,7 @@ const entrepriseSchema = new mongoose.Schema({
     CompanyAdress: String,
     CompanyCity: String,
     matriculeFiscale : String , 
-    logo : String , 
+    CompanyLogo : String , 
     description : String , 
 });
 
