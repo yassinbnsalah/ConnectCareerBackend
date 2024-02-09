@@ -107,7 +107,40 @@ app.post("/inscription", upload.single("image"), async (req, res) => {
     }
   }
 });
+// In-memory data store to simulate database
+const existingUniqueIds = new Set();
 
+// Endpoint to check the uniqueness of uniqueid
+app.post('/checkUniqueid', (req, res) => {
+  const { uniqueid } = req.body;
+
+  // Check if uniqueid is already in use
+  if (existingUniqueIds.has(uniqueid)) {
+    return res.status(200).json({ isUnique: false });
+  }
+
+  // If uniqueid is unique, add it to the in-memory store (simulating database)
+  existingUniqueIds.add(uniqueid);
+
+  return res.status(200).json({ isUnique: true });
+});
+
+const existingEmails = new Set();
+
+// Endpoint to check the uniqueness of email
+app.post('/checkEmail', (req, res) => {
+  const { email } = req.body;
+
+  // Check if email is already in use
+  if (existingEmails.has(email)) {
+    return res.status(200).json({ isUnique: false });
+  }
+
+  // If email is unique, add it to the in-memory store (simulating database)
+  existingEmails.add(email);
+
+  return res.status(200).json({ isUnique: true });
+});
 app.get("/", (req, res) => {
   res.send("Hello, Express!");
 });
