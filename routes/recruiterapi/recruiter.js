@@ -7,7 +7,7 @@ const getListeOfRecruiter = async (res) => {
       const recruiters = await User.find({ role: 'Recruiter' }).populate('entreprise');
   
       // Send the list of recruiters as a JSON response
-      res.json(recruiters);
+      res.json({"recruiters":recruiters});
     } catch (error) {
       // Handle errors
       console.error(error);

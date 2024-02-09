@@ -12,6 +12,8 @@ const jwt = require("jsonwebtoken");
 const getListeOfRecruiter = require("./routes/recruiterapi/recruiter");
 const CreateRecruiter = require("./routes/recruiterapi/createRecruiter");
 const Authentificaiton = require("./routes/authentification");
+const getListeOfStudent = require("./routes/studentapi/student");
+const CreateStudent = require("./routes/studentapi/createStudent");
 const app = express();
 const port = 3001;
 app.use(cors());
@@ -104,6 +106,9 @@ app.post('/addJob', upload.single('logo'), async (req, res) => {
 
    
 
+app.get("/students", async (req, res) => {
+  await getListeOfStudent(res);
+});
 
 app.post(
   "/inscriptionRecruiter",
@@ -113,6 +118,15 @@ app.post(
   ]),
   async (req, res) => {
     await CreateRecruiter(req, res, admin);
+  }
+);
+app.post(
+  "/signupStudent",
+  upload.fields([
+    { name: "profileImage", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    await CreateStudent(req, res, admin);
   }
 );
 //// DONT USE IT
@@ -162,7 +176,40 @@ app.post("/inscription", upload.single("image"), async (req, res) => {
     }
   }
 });
+// In-memory data store to simulate database
+const existingUniqueIds = new Set();
 
+// Endpoint to check the uniqueness of uniqueid
+app.post('/checkUniqueid', (req, res) => {
+  const { uniqueid } = req.body;
+
+  // Check if uniqueid is already in use
+  if (existingUniqueIds.has(uniqueid)) {
+    return res.status(200).json({ isUnique: false });
+  }
+
+  // If uniqueid is unique, add it to the in-memory store (simulating database)
+  existingUniqueIds.add(uniqueid);
+
+  return res.status(200).json({ isUnique: true });
+});
+
+const existingEmails = new Set();
+
+// Endpoint to check the uniqueness of email
+app.post('/checkEmail', (req, res) => {
+  const { email } = req.body;
+
+  // Check if email is already in use
+  if (existingEmails.has(email)) {
+    return res.status(200).json({ isUnique: false });
+  }
+
+  // If email is unique, add it to the in-memory store (simulating database)
+  existingEmails.add(email);
+
+  return res.status(200).json({ isUnique: true });
+});
 app.get("/", (req, res) => {
   res.send("Hello, Express!");
 });
