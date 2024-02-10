@@ -11,7 +11,7 @@ const jobSchema = new mongoose.Schema({
       department:String,
       location: String,
       jobType: String, 
-      salary: Number ,
+      salary: String ,
       description: String,
     
       companyName:String,
