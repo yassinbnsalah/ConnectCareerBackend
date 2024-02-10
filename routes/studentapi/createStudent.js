@@ -14,7 +14,7 @@ const CreateStudent = async (req, res, admin) => {
       institution,
       jobTitle,
       jobType
-
+ 
     } = req.body;
     const role = "Student";
     let profileImage = "";
