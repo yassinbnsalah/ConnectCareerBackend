@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema({
     Hpassword : String ,
     jobTitle : String, 
     jobType : String , 
+    isVerify:Boolean,
     profileImage:String,
     role : String ,
     entreprise: {

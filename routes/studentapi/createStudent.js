@@ -12,8 +12,6 @@ const CreateStudent = async (req, res, admin) => {
       password,
       uniqueid,
       institution,
-      jobTitle,
-      jobType
  
     } = req.body;
     const role = "Student";
@@ -45,10 +43,9 @@ const CreateStudent = async (req, res, admin) => {
       institution,
       password,
       Hpassword,
-      jobTitle,
-      jobType,
       role,
       profileImage,
+      isVerify:0,
 
     });
     await newUser.save();

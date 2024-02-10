@@ -14,6 +14,8 @@ const CreateRecruiter = require("./routes/recruiterapi/createRecruiter");
 const Authentificaiton = require("./routes/authentification");
 const getListeOfStudent = require("./routes/studentapi/student");
 const CreateStudent = require("./routes/studentapi/createStudent");
+const path = require("path");
+const nodemailer = require('nodemailer');
 const app = express();
 const port = 3001;
 app.use(cors());
@@ -55,21 +57,21 @@ app.post('/addJob', upload.single('logo'), async (req, res) => {
       companyName,
       companyWebsite,
       industry,
-     
+
       companyDescription,
       termsAndConditions,
     } = req.body;
 
-   
 
-     // Upload logo to Firebase Storage if provided
-     let logoUrl = '';
-     if (req.file) {
-       const bucket = admin.storage().bucket();
-       const file = bucket.file(req.file.originalname);
-       await file.createWriteStream().end(req.file.buffer);
-       logoUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${file.name}`;
-     }
+
+    // Upload logo to Firebase Storage if provided
+    let logoUrl = '';
+    if (req.file) {
+      const bucket = admin.storage().bucket();
+      const file = bucket.file(req.file.originalname);
+      await file.createWriteStream().end(req.file.buffer);
+      logoUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${file.name}`;
+    }
 
     // Create a new job
     const newJob = new Job({
@@ -100,11 +102,84 @@ app.post('/addJob', upload.single('logo'), async (req, res) => {
     res.status(500).json({ message: 'Error adding job' });
   }
 });
+const secretKey = 'qsdsqdqdssqds';
+app.post('/activate-account', async (req, res) => {
+  const {email} = req.body;
+  const token = jwt.sign({ email }, secretKey, { expiresIn: '1d' });
+  // create reusable transporter object using the default SMTP transport
+  let transporter = nodemailer.createTransport({
+      service:"gmail",
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false, // true for 465, false for other ports
+      auth: {
+          user: "contact.fithealth23@gmail.com", // ethereal user
+          pass: "ebrh bilu ygsn zrkw", // ethereal password
+      },
+  });
+  
+  const msg = {
+      from:{
+        name:'ConnectCareer Esprit',
+        address:"contact.fithealth23@gmail.com"}, // sender address
+      to: `${email}`, // list of receivers
+      subject: "Sup", // Subject line
+      text: "text: `Click on the following link to activate your account: http://localhost:3001/activate/${token}`,",
+      html:`<b><b>Hello World ? <a href="http://localhost:3001/activate/${token}">Activate Your Account</a></b>`, // plain text body
 
+      //pdf & image
+      /*attachments:[{
+        filename:'serie1PL_Correction.pdf',
+        path:path.join(__dirname,'serie1PL_Correction.pdf'),
+        contentType:'application/pdf'
+      },
+      {
+        filename:'Samsung.png',
+        path:path.join(__dirname,'Samsung.png'),
+        contentType: 'image/jpg'
+      },
+    ]*/
+    }
+  const sendMail =async(transporter,msg)=> {
+    try {
+      await transporter.sendMail(msg);
+      console.log("Email has been sent !");
+    }catch(error){
+      console.error(error);
+    }
+  }
+  sendMail(transporter,msg);
+ 
 
-   
+});
 
-   
+app.get('/activate/:token', (req, res) => {
+  const token = req.params.token;
+
+  jwt.verify(token, secretKey, async (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ message: 'Token invalide ou expiré' });
+    }
+
+    // Assuming 'decoded.email' is the email associated with the user
+    const userEmail = decoded.email;
+
+    try {
+      // Update the user in the database to set 'isVerify' to true
+      const updatedUser = await User.findOneAndUpdate({ email: userEmail }, { isVerify: true }, { new: true });
+
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'Utilisateur non trouvé' });
+      }
+
+      res.status(200).json({ message: 'Compte activé avec succès' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Erreur lors de l\'activation du compte' });
+    }
+  });
+});
+
 
 app.get("/students", async (req, res) => {
   await getListeOfStudent(res);
