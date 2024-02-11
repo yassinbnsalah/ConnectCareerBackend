@@ -1,0 +1,23 @@
+const mongoose = require("mongoose");
+const { Schema } = mongoose;
+const jobSchema = new mongoose.Schema({
+  recruiter: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+  },
+
+  jobTitle: String,
+  department: String,
+  location: String,
+  jobType: String,
+  salary: String,
+  description: String,
+
+
+
+  termsAndConditions: Boolean,
+});
+
+const Job = mongoose.model("Job", jobSchema);
+
+module.exports = Job;

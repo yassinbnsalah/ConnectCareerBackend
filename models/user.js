@@ -1,17 +1,26 @@
-// models/book.js
+// models/User.js
 const mongoose = require('mongoose');
-
+const Entreprise = require('./entreprise');
+const { Schema } = mongoose;
 const userSchema = new mongoose.Schema({
     firstname: String,
     lastname: String,
     email: String,
     phoneNumber : String , 
-    gender : String , 
+    gender : String ,
+    uniqueid:String,
+    institution:String, 
     password : String , 
+    Hpassword : String ,
     jobTitle : String, 
     jobType : String , 
+    isVerify:Boolean,
     profileImage:String,
-    role : String 
+    role : String ,
+    entreprise: {
+        type: Schema.Types.ObjectId,
+        ref: 'Entreprise'
+    }
 });
 
 const User = mongoose.model('User', userSchema);
