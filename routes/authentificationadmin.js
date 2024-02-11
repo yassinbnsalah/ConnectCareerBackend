@@ -1,13 +1,15 @@
+
+
 const User = require("../models/user");
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require("bcrypt");
-const Authentificaiton = async(req, res) =>{
+const AuthentificaitonAdmin = async(req, res) =>{
     try {
         const { email, password } = req.body;
-    
+        const role = "Admin" ;
         // Find the user by username
-        const user = await User.findOne({ email }).populate('entreprise');
+        const user = await User.findOne({ email , role });
         if (!user) {
           return res.status(401).json({ error: 'Invalid credentials' });
         }
@@ -28,5 +30,5 @@ const Authentificaiton = async(req, res) =>{
         res.status(500).json({ error: 'Error logging in' });
       }
 }
-module.exports = Authentificaiton;
+module.exports = AuthentificaitonAdmin;
   
