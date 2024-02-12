@@ -199,7 +199,9 @@ app.get("/students", async (req, res) => {
   await getListeOfStudent(res);
 });
 
- 
+app.get("/experiences/:userId", async (req, res) => {
+  await getListOfExperience(req, res);
+});
 
 app.post(
   "/inscriptionRecruiter",
