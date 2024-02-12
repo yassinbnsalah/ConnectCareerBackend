@@ -2,24 +2,16 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const multer = require("multer");
-const bcrypt = require("bcrypt");
 const admin = require("firebase-admin");
 const serviceAccount = require("./prv.json");
 const User = require("./models/user");
-const Job = require("./models/job");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
-const getListeOfRecruiter = require("./routes/recruiterapi/recruiter");
-const CreateRecruiter = require("./routes/recruiterapi/createRecruiter");
 const Authentificaiton = require("./routes/authentification");
-const getListeOfStudent = require("./routes/studentapi/student");
 const CreateStudent = require("./routes/studentapi/createStudent");
 const CreateAdmin = require("./services/createadmin");
 const AuthentificaitonAdmin = require("./routes/authentificationadmin");
-const GetJobDetails = require("./routes/jobapi/JobDetails");
-const GetJobDetailsData = require("./routes/jobapi/JobDetailsData");
-const getEntrepriseDetails = require("./routes/entrepriseapi/entrepriseDetails");
-const path = require("path");
+
 const nodemailer = require('nodemailer');
 const app = express();
 const port = 3001;
@@ -39,9 +31,18 @@ mongoose.connect(
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
-app.get("/entreprise/:idEntreprise", async (req, res) => {
-  await getEntrepriseDetails(req, res);
-});
+const studentRoute = require('./routes/students');
+const recruiterRoute = require('./routes/recruiters');
+const entrepriseRoute = require('./routes/entreprise');
+const jobRoutes = require('./routes/jobs')
+const postulationRoute = require('./routes/postulation')
+app.use('/studentapi/', studentRoute);
+app.use('/recruiterapi/', recruiterRoute);
+app.use('/entrepriseapi/' , entrepriseRoute);
+app.use('/jobapi/' , jobRoutes);
+app.use('/postulationapi/' , postulationRoute)
+
+/********************************************* */
 
 app.post("/login", async (req, res) => {
   await Authentificaiton(req, res);
@@ -50,60 +51,7 @@ app.post("/login", async (req, res) => {
 app.post("/loginadmin", async (req, res) => {
   await AuthentificaitonAdmin(req, res);
 });
-app.get("/recruiters", async (req, res) => {
-  await getListeOfRecruiter(res);
-});
-// Route for adding a job
-app.post("/addJob", upload.single("logo"), async (req, res) => {
-  try {
-    const {
-      recruiter,
-      jobTitle,
-      department,
-      location,
-      jobType,
-      salary,
-      description,
 
-      termsAndConditions,
-    } = req.body;
-
-    console.log(recruiter);
-
-    // Upload logo to Firebase Storage if provided
-    let logoUrl = "";
-    //  if (req.file) {
-    //    const bucket = admin.storage().bucket();
-    //    const file = bucket.file(req.file.originalname);
-    //    await file.createWriteStream().end(req.file.buffer);
-    //    logoUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${file.name}`;
-    //  }
-
-    // Create a new job
-    const newJob = new Job({
-      recruiter,
-      jobTitle,
-      department,
-      location,
-      jobType,
-      salary,
-      description,
-
-      termsAndConditions,
-    });
-
-    // Save the job to the database
-    await newJob.save();
-
-    res.status(201).json({ message: "Job added successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error adding job" });
-  }
-});
-app.get('/jobs/:userId', async (req, res) => {
-  await GetJobDetails(req,res);
-});
 const secretKey = 'qsdsqdqdssqds';
 app.post('/activate-account', async (req, res) => {
   const {email} = req.body;
@@ -154,9 +102,6 @@ app.post('/activate-account', async (req, res) => {
  
 });
 
-app.get('/job/:jobId', async (req, res) => {
-  await GetJobDetailsData(req,res);
-});
 app.post("/createAdmin", async (req, res) => {
   await CreateAdmin(req, res);
 });
@@ -188,28 +133,14 @@ app.get('/activate/:token', (req, res) => {
   });
 });
 
-
-app.get("/students", async (req, res) => {
-  await getListeOfStudent(res);
-});
-
-app.post(
-  "/inscriptionRecruiter",
-  upload.fields([
-    { name: "profileImage", maxCount: 1 },
-    { name: "CompanyLogo", maxCount: 1 },
-  ]),
-  async (req, res) => {
-    await CreateRecruiter(req, res, admin);
-  }
-);
-app.post(
-  "/signupStudent",
+app.post( "/signupStudent",
   upload.fields([{ name: "profileImage", maxCount: 1 }]),
   async (req, res) => {
     await CreateStudent(req, res, admin);
   }
 );
+
+
 //// DONT USE IT
 app.post("/inscription", upload.single("image"), async (req, res) => {
   try {
