@@ -8,7 +8,6 @@ const Authentificaiton = async(req, res) =>{
     
         // Find the user by username
         const user = await User.findOne({ email }).populate('entreprise');
-        console.log(email);
         if (!user) {
           return res.status(401).json({ error: 'Invalid credentials' });
         }

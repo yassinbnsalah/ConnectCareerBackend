@@ -1,30 +1,22 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
+const { Schema } = mongoose;
 const jobSchema = new mongoose.Schema({
+  recruiter: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+  },
 
-      firstName: String,
-      lastName: String,
-      email:String,
-      phoneNumber:String,
- 
- 
-      jobTitle: String,
-      department:String,
-      location: String,
-      jobType: String, 
-      salary: String ,
-      description: String,
-    
-      companyName:String,
-      companyWebsite:  String,
-      industry: String,
-      logo:  String ,
-      companyDescription: String,
- 
-    termsAndConditions: Boolean,
+  jobTitle: String,
+  location: String,
+  jobType: String,
+  salary: String,
+  description: String,
 
-    });
-  
-  const Job = mongoose.model('Job', jobSchema);
-  
-  module.exports = Job;
-  
+
+
+  termsAndConditions: Boolean,
+});
+
+const Job = mongoose.model("Job", jobSchema);
+
+module.exports = Job;

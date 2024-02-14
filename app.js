@@ -2,16 +2,17 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const multer = require("multer");
-const bcrypt = require("bcrypt");
 const admin = require("firebase-admin");
 const serviceAccount = require("./prv.json");
 const User = require("./models/user");
-const Job = require('./models/job');
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
-const getListeOfRecruiter = require("./routes/recruiterapi/recruiter");
-const CreateRecruiter = require("./routes/recruiterapi/createRecruiter");
 const Authentificaiton = require("./routes/authentification");
+const CreateStudent = require("./routes/studentapi/createStudent");
+const CreateAdmin = require("./services/createadmin");
+const AuthentificaitonAdmin = require("./routes/authentificationadmin");
+
+const nodemailer = require('nodemailer');
 const app = express();
 const port = 3001;
 app.use(cors());
@@ -30,91 +31,116 @@ mongoose.connect(
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+const studentRoute = require('./routes/students');
+const recruiterRoute = require('./routes/recruiters');
+const entrepriseRoute = require('./routes/entreprise');
+const jobRoutes = require('./routes/jobs')
+const postulationRoute = require('./routes/postulation')
+app.use('/studentapi/', studentRoute);
+app.use('/recruiterapi/', recruiterRoute);
+app.use('/entrepriseapi/' , entrepriseRoute);
+app.use('/jobapi/' , jobRoutes);
+app.use('/postulationapi/' , postulationRoute)
+
+/********************************************* */
+
 app.post("/login", async (req, res) => {
   await Authentificaiton(req, res);
 });
-app.get("/recruiters", async (req, res) => {
-  await getListeOfRecruiter(res);
+
+app.post("/loginadmin", async (req, res) => {
+  await AuthentificaitonAdmin(req, res);
 });
-// Route for adding a job
-app.post('/addJob', upload.single('logo'), async (req, res) => {
-  try {
-    const {
-      firstName,
-      lastName,
-      email,
-      phoneNumber,
-      jobTitle,
-      department,
-      location,
-      jobType,
-      salary,
-      description,
-      companyName,
-      companyWebsite,
-      industry,
-     
-      companyDescription,
-      termsAndConditions,
-    } = req.body;
 
-   
+const secretKey = 'qsdsqdqdssqds';
+app.post('/activate-account', async (req, res) => {
+  const {email} = req.body;
+  const token = jwt.sign({ email }, secretKey, { expiresIn: '1d' });
+  // create reusable transporter object using the default SMTP transport
+  let transporter = nodemailer.createTransport({
+      service:"gmail",
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false, // true for 465, false for other ports
+      auth: {
+          user: "contact.fithealth23@gmail.com", // ethereal user
+          pass: "ebrh bilu ygsn zrkw", // ethereal password
+      },
+  });
+  
+  const msg = {
+      from:{
+        name:'ConnectCareer Esprit',
+        address:"contact.fithealth23@gmail.com"}, // sender address
+      to: `${email}`, // list of receivers
+      subject: "Sup", // Subject line
+      text: "text: `Click on the following link to activate your account: http://localhost:3001/activate/${token}`,",
+      html:`<b><b>Hello World ? <a href="http://localhost:3001/activate/${token}">Activate Your Account</a></b>`, // plain text body
 
-     // Upload logo to Firebase Storage if provided
-     let logoUrl = '';
-     if (req.file) {
-       const bucket = admin.storage().bucket();
-       const file = bucket.file(req.file.originalname);
-       await file.createWriteStream().end(req.file.buffer);
-       logoUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${file.name}`;
-     }
-
-    // Create a new job
-    const newJob = new Job({
-      firstName,
-      lastName,
-      email,
-      phoneNumber,
-      jobTitle,
-      department,
-      location,
-      jobType,
-      salary,
-      description,
-      companyName,
-      companyWebsite,
-      industry,
-      logo: logoUrl,
-      companyDescription,
-      termsAndConditions,
-    });
-
-    // Save the job to the database
-    await newJob.save();
-
-    res.status(201).json({ message: 'Job added successfully' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error adding job' });
+      //pdf & image
+      /*attachments:[{
+        filename:'serie1PL_Correction.pdf',
+        path:path.join(__dirname,'serie1PL_Correction.pdf'),
+        contentType:'application/pdf'
+      },
+      {
+        filename:'Samsung.png',
+        path:path.join(__dirname,'Samsung.png'),
+        contentType: 'image/jpg'
+      },
+    ]*/
+    }
+  const sendMail =async(transporter,msg)=> {
+    try {
+      await transporter.sendMail(msg);
+      console.log("Email has been sent !");
+    }catch(error){
+      console.error(error);
+    }
   }
+  sendMail(transporter,msg);
+ 
 });
 
+app.post("/createAdmin", async (req, res) => {
+  await CreateAdmin(req, res);
+});
 
-   
+app.get('/activate/:token', (req, res) => {
+  const token = req.params.token;
 
-   
+  jwt.verify(token, secretKey, async (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ message: 'Token invalide ou expiré' });
+    }
 
+    // Assuming 'decoded.email' is the email associated with the user
+    const userEmail = decoded.email;
 
-app.post(
-  "/inscriptionRecruiter",
-  upload.fields([
-    { name: "profileImage", maxCount: 1 },
-    { name: "CompanyLogo", maxCount: 1 },
-  ]),
+    try {
+      // Update the user in the database to set 'isVerify' to true
+      const updatedUser = await User.findOneAndUpdate({ email: userEmail }, { isVerify: true }, { new: true });
+
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'Utilisateur non trouvé' });
+      }
+
+      res.status(200).json({ message: 'Compte activé avec succès' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Erreur lors de l\'activation du compte' });
+    }
+  });
+});
+
+app.post( "/signupStudent",
+  upload.fields([{ name: "profileImage", maxCount: 1 }]),
   async (req, res) => {
-    await CreateRecruiter(req, res, admin);
+    await CreateStudent(req, res, admin);
   }
 );
+
+
 //// DONT USE IT
 app.post("/inscription", upload.single("image"), async (req, res) => {
   try {
@@ -162,7 +188,40 @@ app.post("/inscription", upload.single("image"), async (req, res) => {
     }
   }
 });
+// In-memory data store to simulate database
+const existingUniqueIds = new Set();
 
+// Endpoint to check the uniqueness of uniqueid
+app.post("/checkUniqueid", (req, res) => {
+  const { uniqueid } = req.body;
+
+  // Check if uniqueid is already in use
+  if (existingUniqueIds.has(uniqueid)) {
+    return res.status(200).json({ isUnique: false });
+  }
+
+  // If uniqueid is unique, add it to the in-memory store (simulating database)
+  existingUniqueIds.add(uniqueid);
+
+  return res.status(200).json({ isUnique: true });
+});
+
+const existingEmails = new Set();
+
+// Endpoint to check the uniqueness of email
+app.post("/checkEmail", (req, res) => {
+  const { email } = req.body;
+
+  // Check if email is already in use
+  if (existingEmails.has(email)) {
+    return res.status(200).json({ isUnique: false });
+  }
+
+  // If email is unique, add it to the in-memory store (simulating database)
+  existingEmails.add(email);
+
+  return res.status(200).json({ isUnique: true });
+});
 app.get("/", (req, res) => {
   res.send("Hello, Express!");
 });
