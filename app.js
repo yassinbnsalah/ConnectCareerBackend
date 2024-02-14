@@ -23,6 +23,9 @@ const getEntrepriseDetails = require("./routes/entrepriseapi/entrepriseDetails")
 const path = require("path");
 const nodemailer = require('nodemailer');
 const getListOfExperience = require("./routes/experienceapi/experience");
+const deleteExperienceById = require("./routes/experienceapi/deleteExperience");
+const updateExperience = require("./routes/experienceapi/updateExperience");
+const getListOfExperienceById = require("./routes/experienceapi/detailsExperience");
 const app = express();
 const port = 3001;
 app.use(cors());
@@ -106,6 +109,7 @@ app.post("/addJob", upload.single("logo"), async (req, res) => {
 app.get('/jobs/:userId', async (req, res) => {
   await GetJobDetails(req,res);
 });
+
 const secretKey = 'qsdsqdqdssqds';
 app.post('/activate-account', async (req, res) => {
   const {email} = req.body;
@@ -165,7 +169,15 @@ app.post("/createAdmin", async (req, res) => {
 app.post("/createExperience", async (req, res) => {
   await CreateExperience(req, res);
 });
-
+app.delete('/experiences/:experienceId', async (req, res) => {
+  await deleteExperienceById(req,res);
+});
+app.put('/experiences/:experienceId', async (req, res) => {
+  await updateExperience(req, res);
+});
+app.get('/experiencesDetail/:Id', async (req, res) => {
+  await getListOfExperienceById(req, res);
+});
 
 app.get('/activate/:token', (req, res) => {
   const token = req.params.token;
