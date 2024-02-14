@@ -60,6 +60,7 @@ router.put('/update-job/:jobID', async (req, res) => {
     
     jobTitle: req.body.jobTitle,
     location: req.body.location,
+    typeofworkplace: req.body.typeofworkplace,
     jobType: req.body.jobType,
     salary: req.body.salary,
     description: req.body.description,
