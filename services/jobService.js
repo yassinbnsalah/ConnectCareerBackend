@@ -18,8 +18,9 @@ async function AddJob(req, res) {
     const {
       recruiter,
       jobTitle,
-      department,
+     
       location,
+      typeofworkplace,
       jobType,
       salary,
       description,
@@ -32,8 +33,9 @@ async function AddJob(req, res) {
     const newJob = new Job({
       recruiter,
       jobTitle,
-      department,
+
       location,
+      typeofworkplace,
       jobType,
       salary,
       description,
