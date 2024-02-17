@@ -1,5 +1,5 @@
 const express = require("express");
-const mongoose = require("mongoose");
+
 const bodyParser = require("body-parser");
 const multer = require("multer");
 const admin = require("firebase-admin");
@@ -24,7 +24,7 @@ admin.initializeApp({
 // Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
+const mongoose = require("mongoose");
 mongoose.connect(
   "mongodb+srv://yessinebensalah:14501578@connectcareerdb.3vb0ahj.mongodb.net/"
 );
