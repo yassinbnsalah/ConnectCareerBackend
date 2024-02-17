@@ -16,6 +16,7 @@ const jobSchema = new mongoose.Schema({
 
 
   termsAndConditions: Boolean,
+  isActive: Boolean,
 });
 
 const Job = mongoose.model("Job", jobSchema);

@@ -64,6 +64,7 @@ router.put('/update-job/:jobID', async (req, res) => {
     jobType: req.body.jobType,
     salary: req.body.salary,
     description: req.body.description,
+    isActive: req.body.isActive,
    
    
   };
