@@ -18,13 +18,15 @@ async function AddJob(req, res) {
     const {
       recruiter,
       jobTitle,
-      department,
+     
       location,
+      typeofworkplace,
       jobType,
       salary,
       description,
 
       termsAndConditions,
+      isActive,
     } = req.body;
 
     console.log(req.body);
@@ -32,12 +34,14 @@ async function AddJob(req, res) {
     const newJob = new Job({
       recruiter,
       jobTitle,
-      department,
       location,
+      typeofworkplace,
       jobType,
       salary,
       description,
       termsAndConditions,
+      isActive: true,
+      creationDate: new Date(),
     });
     await newJob.save();
   } catch (error) {
