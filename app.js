@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+
 const multer = require("multer");
 const bcrypt = require("bcrypt");
 const admin = require("firebase-admin");
@@ -26,6 +27,11 @@ const getListOfExperience = require("./routes/experienceapi/experience");
 const deleteExperienceById = require("./routes/experienceapi/deleteExperience");
 const updateExperience = require("./routes/experienceapi/updateExperience");
 const getListOfExperienceById = require("./routes/experienceapi/detailsExperience");
+const CreateEducation = require("./routes/educationapi/createEducation");
+const getListOfEducation = require("./routes/educationapi/education");
+const getListOfEducationById = require("./routes/educationapi/detailsEducation");
+const deleteEducationById = require("./routes/educationapi/deleteEducation");
+const updateEducation = require("./routes/educationapi/updateEducation");
 const app = express();
 const port = 3001;
 app.use(cors());
@@ -166,6 +172,41 @@ app.get('/job/:jobId', async (req, res) => {
 app.post("/createAdmin", async (req, res) => {
   await CreateAdmin(req, res);
 });
+
+
+app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
+app.use(bodyParser.json({ limit: '50mb' }));
+
+const uploadd = multer({ limits: { fileSize: 50 * 1024 * 1024 } });
+app.post(
+  "/createEducation",
+  uploadd.fields([
+    { name: "attestation", maxCount: 1 }
+  ]),
+  async (req, res) => {
+    try {
+      await CreateEducation(req, res, admin); // Pass admin object here
+      console.log('Received payload size:', req.headers['content-length']);
+    } catch (error) {
+      console.error(error);
+      console.log('Received payload size:', req.headers['content-length']);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+);
+app.get("/educations/:userId", async (req, res) => {
+  await getListOfEducation(req, res);
+});
+app.get('/educationsDetail/:Id', async (req, res) => {
+  await getListOfEducationById(req, res);
+});
+app.delete('/educations/:educationId', async (req, res) => {
+  await deleteEducationById(req,res);
+});
+app.put('/educations/:educationId', async (req, res) => {
+  await updateEducation(req, res);
+});
+
 app.post("/createExperience", async (req, res) => {
   await CreateExperience(req, res);
 });
@@ -178,7 +219,9 @@ app.put('/experiences/:experienceId', async (req, res) => {
 app.get('/experiencesDetail/:Id', async (req, res) => {
   await getListOfExperienceById(req, res);
 });
-
+app.get("/experiences/:userId", async (req, res) => {
+  await getListOfExperience(req, res);
+});
 app.get('/activate/:token', (req, res) => {
   const token = req.params.token;
 
@@ -211,9 +254,7 @@ app.get("/students", async (req, res) => {
   await getListeOfStudent(res);
 });
 
-app.get("/experiences/:userId", async (req, res) => {
-  await getListOfExperience(req, res);
-});
+
 
 app.post(
   "/inscriptionRecruiter",
