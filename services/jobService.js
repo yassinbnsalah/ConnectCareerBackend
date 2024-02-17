@@ -41,6 +41,7 @@ async function AddJob(req, res) {
       description,
       termsAndConditions,
       isActive: true,
+      creationDate: new Date(),
     });
     await newJob.save();
   } catch (error) {

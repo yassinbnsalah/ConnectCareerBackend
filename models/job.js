@@ -17,6 +17,10 @@ const jobSchema = new mongoose.Schema({
 
   termsAndConditions: Boolean,
   isActive: Boolean,
+  creationDate: {
+    type: Date,
+    default: Date.now, 
+  },
 });
 
 const Job = mongoose.model("Job", jobSchema);
