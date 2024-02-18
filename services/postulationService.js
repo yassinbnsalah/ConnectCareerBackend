@@ -39,38 +39,49 @@ async function CreateNewCandidate(req, res, admin) {
 
 async function getApplications(owner) {
   try {
-    const postulations = await Postulation.find({ owner: owner }).populate('job');
+    const postulations = await Postulation.find({ owner: owner }).populate(
+      "job"
+    );
     return postulations;
   } catch (error) {
     console.error("Error fetching postulations by owner:", error);
-    throw error; 
+    throw error;
   }
 }
 
-
-async function verifyIfApplicatedOnOpportunite(owner , job){
-  try{
-    const postula = await Postulation.find({owner: owner , job : job})
-    return postula ;
-  }catch(error){
-    console.error("Erroo")
-    throw error ;
+async function verifyIfApplicatedOnOpportunite(owner, job) {
+  try {
+    const postula = await Postulation.find({ owner: owner, job: job });
+    return postula;
+  } catch (error) {
+    console.error("Erroo");
+    throw error;
   }
 }
 
-
-async function getApplicationbyJobID(job){
-  try{
-    const applications = await Postulation.find({job : job}).populate('owner');
-    return applications ;
-  }catch(error){
-    console.error("Erroo")
-    throw error ;
+async function getApplicationbyJobID(job) {
+  try {
+    const applications = await Postulation.find({ job: job }).populate("owner");
+    return applications;
+  } catch (error) {
+    console.error("Erroo");
+    throw error;
   }
 }
+async function getApplicationDetails(applicationID) {
+  try {
+    const application = await Postulation.findById(applicationID).populate("owner");
+    return application;
+  } catch (error) {
+    console.error(error); // Print the actual error instead of a string "error"
+    throw error;
+  }
+}
+
 module.exports = {
   CreateNewCandidate,
   getApplications,
   verifyIfApplicatedOnOpportunite,
-  getApplicationbyJobID
+  getApplicationbyJobID,
+  getApplicationDetails,
 };

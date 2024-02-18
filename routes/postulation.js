@@ -62,4 +62,15 @@ router.get("/applicationlistebyJob/:jobID", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+router.get("/application/:applicationID" , async (req,res) =>{
+  const applicationID = req.params.applicationID ; 
+  try {
+    const application = await postulationService.getApplicationDetails(applicationID);
+    res.json(application)
+  }catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+})
 module.exports = router;
