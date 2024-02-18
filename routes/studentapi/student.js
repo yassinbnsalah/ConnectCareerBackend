@@ -14,6 +14,6 @@ const getListeOfStudent = async (res) => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   }
-  
+ 
   module.exports = getListeOfStudent;
   
