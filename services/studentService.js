@@ -1,5 +1,13 @@
 const User = require("../models/user");
-
+async function getStudentDetails(studentId) {
+  try {
+    const student = await User.findById(studentId);
+    return student;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Internal Server Error");
+  }
+}
 async function getListStudents() {
     try {
         const students = await User.find({ role: "Student" });
@@ -46,5 +54,6 @@ async function becomeAlumni(studentId, req,res, admin) {
   }
 module.exports = {
     getListStudents,
-    becomeAlumni
+    becomeAlumni,
+    getStudentDetails
 };
