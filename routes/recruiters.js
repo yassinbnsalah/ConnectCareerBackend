@@ -1,9 +1,10 @@
 const express = require("express");
 const recruiterService = require("../services/recruiterService");
 const router = express.Router();
-const bodyParser = require("body-parser");
+
 const admin = require("firebase-admin");
 const multer = require("multer");
+const bodyParser = require("body-parser");
 router.use(bodyParser.urlencoded({ extended: true }));
 const upload = multer();
 router.get("/", async (req, res) => {
@@ -15,7 +16,16 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
+router.get("/verify/:email" ,   async (req, res) => {
+  try {
+    const email = req.params.email
+    const emailExiste = await recruiterService.verifyrecruiter(email);
+    return res.status(200).json({ emailExiste: emailExiste});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+})
 router.post(
     "/add",
     upload.fields([

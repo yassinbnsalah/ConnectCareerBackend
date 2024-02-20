@@ -1,5 +1,8 @@
 const Entreprise = require("../models/entreprise");
 const User = require("../models/user");
+const jwt = require("jsonwebtoken");
+const fs = require('fs');
+const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 async function getListeRecruiter() {
   try {
@@ -67,7 +70,7 @@ async function createRecruiter(req, res, admin) {
       description,
       CompanyLogo,
     });
-    await entreprise.save();
+    //await entreprise.save();
     let Hpassword = await bcrypt.hash(password, 10);
     const newUser = new User({
       firstname,
@@ -82,14 +85,68 @@ async function createRecruiter(req, res, admin) {
       role,
       profileImage,
       entreprise,
+      isVerify: false,
     });
     await newUser.save();
+    sendMailtorecruiter(email,firstname+lastname);
   } catch (error) {
     console.error(error);
   }
 }
 
+async function verifyrecruiter(email) {
+  try {
+    const recruiter = await User.find({ email: email });
+    console.log(recruiter);
+    if (recruiter.length != 0) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
+const secretKey = "qsdsqdqdssqds";
+async function sendMailtorecruiter(email,fullname) {
+  const token = jwt.sign({ email }, secretKey, { expiresIn: "1d" });
+  // create reusable transporter object using the default SMTP transport
+  const htmlTemplate = fs.readFileSync(
+    "services/templateemails/confirmeMail.html",
+    "utf8"
+  );
+  let transporter = nodemailer.createTransport({
+    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: "contact.fithealth23@gmail.com", // ethereal user
+      pass: "ebrh bilu ygsn zrkw", // ethereal password
+    },
+  });
+
+  const msg = {
+    from: {
+      name: "ConnectCareer Esprit",
+      address: "contact.fithealth23@gmail.com",
+    },
+    to: `${email}`,
+    subject: "CONNECTCAREER Account Confirmation",
+    html: htmlTemplate.replace('{{username}}', fullname).replace('{{token}}', token),
+  };
+  const sendMail = async (transporter, msg) => {
+    try {
+      await transporter.sendMail(msg);
+      console.log("Email has been sent !");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  sendMail(transporter, msg);
+}
 module.exports = {
   getListeRecruiter,
   createRecruiter,
+  verifyrecruiter,
 };

@@ -73,7 +73,19 @@ async function getApplicationDetails(applicationID) {
     const application = await Postulation.findById(applicationID).populate("owner");
     return application;
   } catch (error) {
-    console.error(error); // Print the actual error instead of a string "error"
+    console.error(error); 
+    throw error;
+  }
+}
+
+async function UpdateApplicationState(applicationiD , state){
+  try {
+    const application = await Postulation.findById(applicationiD);
+    application.State = state;
+    await application.save();
+    return application;
+  } catch (error) {
+    console.error(error); 
     throw error;
   }
 }
@@ -84,4 +96,5 @@ module.exports = {
   verifyIfApplicatedOnOpportunite,
   getApplicationbyJobID,
   getApplicationDetails,
+  UpdateApplicationState
 };

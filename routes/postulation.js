@@ -73,4 +73,17 @@ router.get("/application/:applicationID" , async (req,res) =>{
     res.status(500).json({ error: "Internal Server Error" });
   }
 })
+router.put("/application/updatestate/:applicationID" , async (req,res) =>{
+  const applicationID = req.params.applicationID ; 
+  const state = req.body.state; 
+  console.log(state);
+  try {
+    const application = await postulationService.UpdateApplicationState(applicationID,state);
+    res.json(application)
+  }catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+})
+
 module.exports = router;
