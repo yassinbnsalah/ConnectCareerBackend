@@ -17,6 +17,9 @@ const userSchema = new mongoose.Schema({
     isVerify:Boolean,
     profileImage:String,
     role : String ,
+    diploma : String ,
+    state:String,
+    request:Boolean,
     entreprise: {
         type: Schema.Types.ObjectId,
         ref: 'Entreprise'
