@@ -46,7 +46,8 @@ const studentRoute = require('./routes/students');
 const recruiterRoute = require('./routes/recruiters');
 const entrepriseRoute = require('./routes/entreprise');
 const jobRoutes = require('./routes/jobs')
-const postulationRoute = require('./routes/postulation')
+const postulationRoute = require('./routes/postulation');
+const confirmedExperience = require("./routes/experienceapi/confirmedExperience");
 app.use('/studentapi/', studentRoute);
 app.use('/recruiterapi/', recruiterRoute);
 app.use('/entrepriseapi/' , entrepriseRoute);
@@ -147,19 +148,68 @@ app.get('/educationsDetail/:Id', async (req, res) => {
 app.delete('/educations/:educationId', async (req, res) => {
   await deleteEducationById(req,res);
 });
-app.put('/educations/:educationId', async (req, res) => {
-  await updateEducation(req, res);
-});
 
-app.post("/createExperience", async (req, res) => {
-  await CreateExperience(req, res);
+app.put(
+  "/educations/:educationId",
+  uploadd.fields([
+    { name: "attestation", maxCount: 1 }
+  ]),
+  async (req, res) => {
+    try {
+      await updateEducation(req, res, admin); // Pass admin object here
+      console.log('Received payload size:', req.headers['content-length']);
+    } catch (error) {
+      console.error(error);
+      console.log('Received payload size:', req.headers['content-length']);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+);
+app.put('/confirmedExperience/:experienceId', async (req, res) => {
+  try {
+    
+    await confirmedExperience(req, res, admin);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 });
+app.post(
+  "/createExperience",
+  uploadd.fields([
+    { name: "attestation", maxCount: 1 }
+  ]),
+  async (req, res) => {
+    try {
+      await CreateExperience(req, res, admin); // Pass admin object here
+      console.log('Received payload size:', req.headers['content-length']);
+    } catch (error) {
+      console.error(error);
+      console.log('Received payload size:', req.headers['content-length']);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+);
 app.delete('/experiences/:experienceId', async (req, res) => {
   await deleteExperienceById(req,res);
 });
-app.put('/experiences/:experienceId', async (req, res) => {
-  await updateExperience(req, res);
-});
+
+app.put(
+  "/experiences/:experienceId",
+  uploadd.fields([
+    { name: "attestation", maxCount: 1 }
+  ]),
+  async (req, res) => {
+    try {
+      await updateExperience(req, res, admin);
+      console.log('Received payload size:', req.headers['content-length']);
+    } catch (error) {
+      console.error(error);
+      console.log('Received payload size:', req.headers['content-length']);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+);
 app.get('/experiencesDetail/:Id', async (req, res) => {
   await getListOfExperienceById(req, res);
 });
