@@ -6,12 +6,14 @@ const experienceSchema = new mongoose.Schema({
     ref: "User",
   },
   entrepriseName: String,
-  typeExpérience: String,
+  typeExperience: String,
   Lieu:String,
   jobDescription: String,
   startedOn: Date,
   endAt: Date,
   entrepriseSecture: String,
+  etat:Boolean,
+  Attestation: String,
 
 
 });
