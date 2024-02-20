@@ -70,7 +70,7 @@ async function createRecruiter(req, res, admin) {
       description,
       CompanyLogo,
     });
-    //await entreprise.save();
+    await entreprise.save();
     let Hpassword = await bcrypt.hash(password, 10);
     const newUser = new User({
       firstname,
