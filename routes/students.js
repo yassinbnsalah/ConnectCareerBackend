@@ -6,6 +6,16 @@ const multer = require("multer");
 router.use(bodyParser.urlencoded({ extended: true }));
 const upload = multer();
 const admin = require("firebase-admin");
+router.get("/request", async (req, res) => {
+    try {
+        const students = await StudentService.getRequestListe();
+        res.json(students);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 router.get("/:studentId", async (req, res) => {
   try {
     const { studentId } = req.params;
@@ -27,6 +37,7 @@ router.get("/", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
 router.post('/becomeAlumni/:studentId',   
 upload.fields([
     { name: "diploma", maxCount: 1 }
