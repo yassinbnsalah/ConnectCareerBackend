@@ -1,4 +1,8 @@
 const User = require("../models/user");
+const jwt = require("jsonwebtoken");
+const fs = require('fs');
+const nodemailer = require("nodemailer");
+const bcrypt = require("bcrypt");
 async function getStudentDetails(studentId) {
   try {
     const student = await User.findById(studentId);
@@ -19,14 +23,14 @@ async function getListStudents() {
 }
 
 async function getRequestListe() {
-    try {
-        const students = await User.find({ role: "Student", request: true });
-        console.log(students);
-        return students;
-    } catch (error) {
-        console.error(error);
-        throw new Error("Internal Server Error");
-    }
+  try {
+    const students = await User.find({ role: "Student", request: true });
+    console.log(students);
+    return students;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Internal Server Error");
+  }
 }
 
 async function becomeAlumni(studentId, req, res, admin) {
@@ -63,9 +67,50 @@ async function becomeAlumni(studentId, req, res, admin) {
     throw new Error("Internal Server Error");
   }
 }
+const secretKey = "qsdsqdqdssqds";
+async function sendMailtoStudent(email, fullname) {
+  const token = jwt.sign({ email }, secretKey, { expiresIn: "1d" });
+  // create reusable transporter object using the default SMTP transport
+  const htmlTemplate = fs.readFileSync(
+    "services/templateemails/confirmeMail.html",
+    "utf8"
+  );
+  let transporter = nodemailer.createTransport({
+    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: "contact.fithealth23@gmail.com", // ethereal user
+      pass: "ebrh bilu ygsn zrkw", // ethereal password
+    },
+  });
+
+  const msg = {
+    from: {
+      name: "ConnectCareer Esprit",
+      address: "contact.fithealth23@gmail.com",
+    },
+    to: `${email}`,
+    subject: "CONNECTCAREER Account Confirmation",
+    html: htmlTemplate
+      .replace("{{username}}", fullname)
+      .replace("{{token}}", token),
+  };
+  const sendMail = async (transporter, msg) => {
+    try {
+      await transporter.sendMail(msg);
+      console.log("Email has been sent !");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  sendMail(transporter, msg);
+}
 module.exports = {
   getListStudents,
   becomeAlumni,
   getStudentDetails,
-  getRequestListe
+  getRequestListe,
+  sendMailtoStudent,
 };

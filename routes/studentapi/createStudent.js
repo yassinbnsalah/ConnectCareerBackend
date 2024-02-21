@@ -1,5 +1,6 @@
 const User = require("../../models/user");
 const bcrypt = require("bcrypt");
+const { sendMailtoStudent } = require("../../services/studentService");
 
 const CreateStudent = async (req, res, admin) => {
   try {
@@ -51,6 +52,7 @@ const CreateStudent = async (req, res, admin) => {
 
     });
     await newUser.save();
+    sendMailtoStudent(email,firstname+lastname);
     res.status(201).json({ message: "Utilisateur inscrit avec succès" });
   } catch (error) {
     console.error(error);
