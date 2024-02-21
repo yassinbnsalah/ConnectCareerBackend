@@ -28,7 +28,19 @@ async function getRequestListe() {
         throw new Error("Internal Server Error");
     }
 }
-
+async function updateStudent(studentId, updates) {
+  try {
+    const updatedStudent = await User.findByIdAndUpdate(
+      studentId,
+      { $set: updates },
+      { new: true }
+    );
+    return updatedStudent;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Internal Server Error");
+  }
+}
 async function becomeAlumni(studentId, req, res, admin) {
   try {
     const state = "En cours de traitement";
@@ -67,5 +79,6 @@ module.exports = {
   getListStudents,
   becomeAlumni,
   getStudentDetails,
-  getRequestListe
+  getRequestListe,
+  updateStudent
 };

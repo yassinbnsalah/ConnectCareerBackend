@@ -15,6 +15,21 @@ router.get("/request", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+router.put("/:studentId", async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const { state } = req.body;
+
+    const updatedStudent = await StudentService.updateStudent(studentId, 
+      { state });
+
+    res.json(updatedStudent);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+
+});
 
 router.get("/:studentId", async (req, res) => {
   try {
