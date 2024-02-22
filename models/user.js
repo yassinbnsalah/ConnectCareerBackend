@@ -19,6 +19,7 @@ const userSchema = new mongoose.Schema({
     role : String ,
     diploma : String ,
     state:String,
+    resume: String,
     request:Boolean,
     entreprise: {
         type: Schema.Types.ObjectId,
