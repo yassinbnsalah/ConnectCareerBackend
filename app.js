@@ -48,6 +48,7 @@ const entrepriseRoute = require('./routes/entreprise');
 const jobRoutes = require('./routes/jobs')
 const postulationRoute = require('./routes/postulation');
 const confirmedExperience = require("./routes/experienceapi/confirmedExperience");
+
 app.use('/studentapi/', studentRoute);
 app.use('/recruiterapi/', recruiterRoute);
 app.use('/entrepriseapi/' , entrepriseRoute);
@@ -113,6 +114,97 @@ app.post('/activate-account', async (req, res) => {
   sendMail(transporter,msg);
  
 });
+
+
+
+app.post('/forgotpassword', async (req, res) => {
+  console.log("Received request to reset password:", req.body.email);
+  const {email} = req.body;
+  const token = jwt.sign({ email }, secretKey, { expiresIn: '1d' });
+  // create reusable transporter object using the default SMTP transport
+  let transporter = nodemailer.createTransport({
+      service:"gmail",
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false, // true for 465, false for other ports
+      auth: {
+          user: "contact.fithealth23@gmail.com", // ethereal user
+          pass: "ebrh bilu ygsn zrkw", // ethereal password
+      },
+  });
+  
+  const msg = {
+      from:{
+        name:'ConnectCareer Esprit',
+        address:"contact.fithealth23@gmail.com"}, // sender address
+      to: `${email}`, // list of receivers
+      subject: "ResetPassword", // Subject line
+      text: "text: `Click on the following link to reset your password: http://localhost:3000/resetpassword/${token}`,",
+      html:`<b><b>Hello World ? <a href="http://localhost:3000/resetpassword/${token}">reset Your password</a></b>`,
+
+      //pdf & image
+      /*attachments:[{
+        filename:'serie1PL_Correction.pdf',
+        path:path.join(__dirname,'serie1PL_Correction.pdf'),
+        contentType:'application/pdf'
+      },
+      {
+        filename:'Samsung.png',
+        path:path.join(__dirname,'Samsung.png'),
+        contentType: 'image/jpg'
+      },
+    ]*/
+    }
+  const sendMail =async(transporter,msg)=> {
+    try {
+      await transporter.sendMail(msg);
+      res.send("Email has been sent ! ")
+      console.log("Email has been sent !");
+    }catch(error){
+      console.error(error);
+    }
+  }
+  sendMail(transporter,msg);
+ 
+});
+
+app.post('/resetpassword/:token', (req, res) => {
+  const token = req.params.token;
+
+  jwt.verify(token, secretKey, async (err, decoded) => {
+    if (err) {
+      console.error(err);
+      return res.status(401).json({ message: 'Token invalide ou expiré' });
+    }
+
+    // Assuming 'decoded.email' is the email associated with the user
+    const userEmail = decoded.email;
+
+    try {
+      // Use the new password directly without hashing
+      const newPassword = req.body.newPassword;
+
+      // Update the user in the database to set the new password
+      const updatedUser = await User.findOneAndUpdate({ email: userEmail }, { password: newPassword }, { new: true });
+
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'Utilisateur non trouvé' });
+      }
+
+      console.log('Password reset successful for user:', userEmail);
+      res.status(200).json({ message: 'Mot de passe réinitialisé avec succès' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Erreur lors de la réinitialisation du mot de passe' });
+    }
+  });
+});
+
+
+
+
+
+
 
 app.post("/createAdmin", async (req, res) => {
   await CreateAdmin(req, res);
