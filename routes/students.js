@@ -17,7 +17,7 @@ router.get("/request", async (req, res) => {
 });
 router.put(
   "/:studentId",
-  upload.fields([{ name: "profileImage", maxCount: 1 }]),
+  upload.fields([{ name: "profileImage", maxCount: 1 },{ name: "resume", maxCount: 1 }]),
   async (req, res) => {
     try {
       const { studentId } = req.params;
