@@ -32,7 +32,67 @@ async function getRequestListe() {
     throw new Error("Internal Server Error");
   }
 }
+async function updateStudent(studentId, updates) {
+  try {
+    const updatedStudent = await User.findByIdAndUpdate(
+      studentId,
+      { $set: updates },
+      { new: true }
+    );
+    return updatedStudent;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Internal Server Error");
+  }
+}
+async function updateStudent2(req,res,admin) {
+  try {
+    const updatedStudent = await User.findByIdAndUpdate(
+      req.params.studentId,
+      { $set: req.body },
+      { new: true }
+    );
+    let profileImage ="" ; 
+    if (req.files["profileImage"]) {
+      console.log("new Profile image");
+      const profileImageFile = req.files["profileImage"][0];
+      const imageExtension = profileImageFile.originalname.split(".").pop();
+      const imageName = `${req.body.email}.${imageExtension}`;
 
+      const profileImageBucket = admin.storage().bucket();
+      const profileImageFileObject = profileImageBucket.file(imageName);
+      await profileImageFileObject
+        .createWriteStream()
+        .end(profileImageFile.buffer);
+      profileImage = `https://firebasestorage.googleapis.com/v0/b/${profileImageBucket.name}/o/${profileImageFileObject.name}`;
+      updatedStudent.profileImage = profileImage
+      await updatedStudent.save()
+    }
+    // demain 
+    if (req.files["resume"]) {
+  
+      const resumeFile = req.files["resume"][0];
+        const ResumeBucket = admin.storage().bucket();
+        const folderName = "student";
+        const fileName = resumeFile.originalname;
+        const fileFullPath = `${folderName}/${fileName}`;
+
+        const ResumeFileObject = ResumeBucket.file(fileFullPath);
+
+        await ResumeFileObject.createWriteStream().end(resumeFile.buffer);
+
+        let resume = `https://firebasestorage.googleapis.com/v0/b/${
+          ResumeBucket.name
+        }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
+      updatedStudent.resume = resume
+      await updatedStudent.save()
+    }
+    return updatedStudent;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Internal Server Error");
+  }
+}
 async function becomeAlumni(studentId, req, res, admin) {
   try {
     const state = "En cours de traitement";
@@ -113,4 +173,6 @@ module.exports = {
   getStudentDetails,
   getRequestListe,
   sendMailtoStudent,
+  updateStudent,
+  updateStudent2
 };

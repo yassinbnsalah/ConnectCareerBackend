@@ -15,6 +15,35 @@ router.get("/request", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+router.put(
+  "/:studentId",
+  upload.fields([{ name: "profileImage", maxCount: 1 }]),
+  async (req, res) => {
+    try {
+      const { studentId } = req.params;
+      const updatedFields = {
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
+        email: req.body.email,
+        uniqueid: req.body.uniqueid,
+        institution: req.body.institution,
+        state: req.body.state,
+      };
+
+      // const updatedStudent = await StudentService.updateStudent(studentId,
+      //   updatedFields);
+      const updatedStudent2 = await StudentService.updateStudent2(
+        req,
+        res,
+        admin
+      );
+      res.json(updatedStudent2);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+);
 
 router.get("/:studentId", async (req, res) => {
   try {
