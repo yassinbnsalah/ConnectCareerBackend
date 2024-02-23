@@ -16,6 +16,36 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+router.put(
+  "/:recruitertId",
+  upload.fields([{ name: "profileImage", maxCount: 1 }]),
+  async (req, res) => {
+    try {
+
+      const updatedRecruiter = await recruiterService.updateRecruiter(
+        req,
+        res,
+        admin
+      );
+      res.json(updatedRecruiter);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+);
+router.get("/:recruitertId", async (req, res) => {
+  try {
+    const { recruitertId } = req.params;
+
+    const recruiterDetails = await recruiterService.getRecruiterDetails(recruitertId);
+
+    res.json(recruiterDetails);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 router.get("/verify/:email" ,   async (req, res) => {
   try {
     const email = req.params.email
@@ -26,6 +56,7 @@ router.get("/verify/:email" ,   async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 })
+
 router.post(
     "/add",
     upload.fields([

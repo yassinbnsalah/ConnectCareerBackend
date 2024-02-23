@@ -32,19 +32,7 @@ async function getRequestListe() {
     throw new Error("Internal Server Error");
   }
 }
-async function updateStudent(studentId, updates) {
-  try {
-    const updatedStudent = await User.findByIdAndUpdate(
-      studentId,
-      { $set: updates },
-      { new: true }
-    );
-    return updatedStudent;
-  } catch (error) {
-    console.error(error);
-    throw new Error("Internal Server Error");
-  }
-}
+
 async function updateStudent2(req,res,admin) {
   try {
     const updatedStudent = await User.findByIdAndUpdate(
@@ -68,7 +56,7 @@ async function updateStudent2(req,res,admin) {
       updatedStudent.profileImage = profileImage
       await updatedStudent.save()
     }
-    // demain 
+
     if (req.files["resume"]) {
   
       const resumeFile = req.files["resume"][0];
@@ -173,6 +161,5 @@ module.exports = {
   getStudentDetails,
   getRequestListe,
   sendMailtoStudent,
-  updateStudent,
   updateStudent2
 };

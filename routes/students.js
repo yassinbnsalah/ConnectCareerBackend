@@ -25,13 +25,13 @@ router.put(
         firstname: req.body.firstname,
         lastname: req.body.lastname,
         email: req.body.email,
+        phoneNumber: req.body.phoneNumber,
         uniqueid: req.body.uniqueid,
         institution: req.body.institution,
         state: req.body.state,
       };
 
-      // const updatedStudent = await StudentService.updateStudent(studentId,
-      //   updatedFields);
+   
       const updatedStudent2 = await StudentService.updateStudent2(
         req,
         res,
