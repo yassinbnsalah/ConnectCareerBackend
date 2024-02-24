@@ -77,10 +77,10 @@ const CreateExperience = async (req, res, admin) => {
       Lieu,
       jobDescription,
       startedOn,
-      endAt: null,
+      endAt: endAt || null,
       etat: false,
       entrepriseSecture,
-      Attestation: Attestation, // Set Attestation based on the condition
+      Attestation: Attestation, 
     });
 
     await newExperience.save();
