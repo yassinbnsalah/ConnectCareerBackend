@@ -145,8 +145,51 @@ async function sendMailtorecruiter(email,fullname) {
   };
   sendMail(transporter, msg);
 }
+async function getRecruiterDetails(recruiterId) {
+  try {
+    const recruiter = await User.findById(recruiterId);
+    return recruiter;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Internal Server Error");
+  }
+}
+async function updateRecruiter(req,res,admin) {
+  try {
+    const updatedRecruiter = await User.findByIdAndUpdate(
+      req.params.recruiterId,
+      { $set: req.body },
+      { new: true }
+    );
+ 
+    let profileImage ="" ; 
+    if (req.files["profileImage"]) {
+      console.log("new Profile image");
+      const profileImageFile = req.files["profileImage"][0];
+      const imageExtension = profileImageFile.originalname.split(".").pop();
+      const imageName = `${req.body.email}.${imageExtension}`;
+
+      const profileImageBucket = admin.storage().bucket();
+      const profileImageFileObject = profileImageBucket.file(imageName);
+      await profileImageFileObject
+        .createWriteStream()
+        .end(profileImageFile.buffer);
+      profileImage = `https://firebasestorage.googleapis.com/v0/b/${profileImageBucket.name}/o/${profileImageFileObject.name}`;
+      updatedRecruiter.profileImage = profileImage
+      await updatedRecruiter.save()
+    }
+   
+ 
+    return updatedRecruiter;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Internal Server Error");
+  }
+}
 module.exports = {
   getListeRecruiter,
   createRecruiter,
   verifyrecruiter,
+  getRecruiterDetails,
+  updateRecruiter,
 };

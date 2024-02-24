@@ -26,7 +26,7 @@ router.post(
 );
 router.put(
   "/:studentId",
-  upload.fields([{ name: "profileImage", maxCount: 1 },{ name: "resume", maxCount: 1 }]),
+  upload.fields([{ name: "profileImage", maxCount: 1 },{ name: "resume", maxCount: 1 },{ name: "carteEtudiant", maxCount: 1 }]),
   async (req, res) => {
     try {
       const updatedStudent2 = await StudentService.updateStudent2(

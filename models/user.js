@@ -21,6 +21,8 @@ const userSchema = new mongoose.Schema({
     state:String,
     resume: String,
     request:Boolean,
+    carteEtudiant:String,
+    aboutme:String,
     entreprise: {
         type: Schema.Types.ObjectId,
         ref: 'Entreprise'

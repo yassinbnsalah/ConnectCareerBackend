@@ -11,6 +11,7 @@ const CreateStudent = async (req, res, admin) => {
       lastname,
       email,
       phoneNumber,
+      aboutme,
       gender,
       password,
       uniqueid,
@@ -42,6 +43,7 @@ const CreateStudent = async (req, res, admin) => {
       lastname,
       email,
       phoneNumber,
+      aboutme,
       gender,
       uniqueid,
       institution,
@@ -89,19 +91,7 @@ async function getRequestListe() {
     throw new Error("Internal Server Error");
   }
 }
-async function updateStudent(studentId, updates) {
-  try {
-    const updatedStudent = await User.findByIdAndUpdate(
-      studentId,
-      { $set: updates },
-      { new: true }
-    );
-    return updatedStudent;
-  } catch (error) {
-    console.error(error);
-    throw new Error("Internal Server Error");
-  }
-}
+
 async function updateStudent2(req,res,admin) {
   try {
     const updatedStudent = await User.findByIdAndUpdate(
@@ -125,7 +115,7 @@ async function updateStudent2(req,res,admin) {
       updatedStudent.profileImage = profileImage
       await updatedStudent.save()
     }
-    // demain 
+
     if (req.files["resume"]) {
   
       const resumeFile = req.files["resume"][0];
@@ -142,6 +132,25 @@ async function updateStudent2(req,res,admin) {
           ResumeBucket.name
         }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
       updatedStudent.resume = resume
+      await updatedStudent.save()
+    }
+
+    if (req.files["carteEtudiant"]) {
+  
+      const carteEtudiantFile = req.files["carteEtudiant"][0];
+        const CarteEtudiantBucket = admin.storage().bucket();
+        const folderName = "student";
+        const fileName = carteEtudiantFile.originalname;
+        const fileFullPath = `${folderName}/${fileName}`;
+
+        const CarteEtudiantFileObject = CarteEtudiantBucket.file(fileFullPath);
+
+        await CarteEtudiantFileObject.createWriteStream().end(carteEtudiantFile.buffer);
+
+        let carteEtudiant = `https://firebasestorage.googleapis.com/v0/b/${
+          CarteEtudiantBucket.name
+        }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
+      updatedStudent.carteEtudiant = carteEtudiant
       await updatedStudent.save()
     }
     return updatedStudent;
@@ -230,7 +239,6 @@ module.exports = {
   getStudentDetails,
   getRequestListe,
   sendMailtoStudent,
-  updateStudent,
   updateStudent2,
   CreateStudent
 };
