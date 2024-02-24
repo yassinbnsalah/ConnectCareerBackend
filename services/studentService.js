@@ -3,6 +3,65 @@ const jwt = require("jsonwebtoken");
 const fs = require('fs');
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
+
+const CreateStudent = async (req, res, admin) => {
+  try {
+    const {
+      firstname,
+      lastname,
+      email,
+      phoneNumber,
+      aboutme,
+      gender,
+      password,
+      uniqueid,
+      institution,
+      diploma,
+ 
+    } = req.body;
+    const role = "Student";
+    let profileImage = "";
+
+    if (req.files["profileImage"]) {
+      const profileImageFile = req.files["profileImage"][0];
+      const imageExtension = profileImageFile.originalname.split(".").pop();
+      const imageName = `${firstname}${lastname}.${imageExtension}`;
+
+      const profileImageBucket = admin.storage().bucket();
+      const profileImageFileObject = profileImageBucket.file(imageName);
+      await profileImageFileObject
+        .createWriteStream()
+        .end(profileImageFile.buffer);
+      profileImage = `https://firebasestorage.googleapis.com/v0/b/${profileImageBucket.name}/o/${profileImageFileObject.name}`;
+    }
+
+
+
+    let Hpassword = await bcrypt.hash(password, 10);
+    const newUser = new User({
+      firstname,
+      lastname,
+      email,
+      phoneNumber,
+      aboutme,
+      gender,
+      uniqueid,
+      institution,
+      password,
+      Hpassword,
+      role,
+      profileImage,
+      isVerify:0,
+      diploma,
+
+    });
+    await newUser.save();
+    sendMailtoStudent(email,firstname+lastname);
+    res.status(201).json({ message: "Utilisateur inscrit avec succès" });
+  } catch (error) {
+    console.error(error);
+  }
+}
 async function getStudentDetails(studentId) {
   try {
     const student = await User.findById(studentId);
@@ -73,6 +132,25 @@ async function updateStudent2(req,res,admin) {
           ResumeBucket.name
         }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
       updatedStudent.resume = resume
+      await updatedStudent.save()
+    }
+
+    if (req.files["carteEtudiant"]) {
+  
+      const carteEtudiantFile = req.files["carteEtudiant"][0];
+        const CarteEtudiantBucket = admin.storage().bucket();
+        const folderName = "student";
+        const fileName = carteEtudiantFile.originalname;
+        const fileFullPath = `${folderName}/${fileName}`;
+
+        const CarteEtudiantFileObject = CarteEtudiantBucket.file(fileFullPath);
+
+        await CarteEtudiantFileObject.createWriteStream().end(carteEtudiantFile.buffer);
+
+        let carteEtudiant = `https://firebasestorage.googleapis.com/v0/b/${
+          CarteEtudiantBucket.name
+        }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
+      updatedStudent.carteEtudiant = carteEtudiant
       await updatedStudent.save()
     }
     return updatedStudent;
@@ -161,5 +239,6 @@ module.exports = {
   getStudentDetails,
   getRequestListe,
   sendMailtoStudent,
-  updateStudent2
+  updateStudent2,
+  CreateStudent
 };

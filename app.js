@@ -1,31 +1,17 @@
 const express = require("express");
-
 const bodyParser = require("body-parser");
-
 const multer = require("multer");
 const admin = require("firebase-admin");
 const serviceAccount = require("./prv.json");
 const User = require("./models/user");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
-const Authentificaiton = require("./routes/authentification");
-const CreateStudent = require("./routes/studentapi/createStudent");
-const CreateExperience = require("./routes/experienceapi/createExperience");
 const CreateAdmin = require("./services/createadmin");
 const AuthentificaitonAdmin = require("./routes/authentificationadmin");
-
 const nodemailer = require('nodemailer');
-const getListOfExperience = require("./routes/experienceapi/experience");
-const deleteExperienceById = require("./routes/experienceapi/deleteExperience");
-const updateExperience = require("./routes/experienceapi/updateExperience");
-const getListOfExperienceById = require("./routes/experienceapi/detailsExperience");
-const CreateEducation = require("./routes/educationapi/createEducation");
-const getListOfEducation = require("./routes/educationapi/education");
-const getListOfEducationById = require("./routes/educationapi/detailsEducation");
-const deleteEducationById = require("./routes/educationapi/deleteEducation");
-const updateEducation = require("./routes/educationapi/updateEducation");
 const app = express();
 const port = 3001;
+
 app.use(cors());
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -47,19 +33,20 @@ const recruiterRoute = require('./routes/recruiters');
 const entrepriseRoute = require('./routes/entreprise');
 const jobRoutes = require('./routes/jobs')
 const postulationRoute = require('./routes/postulation');
-const confirmedExperience = require("./routes/experienceapi/confirmedExperience");
+const authentificationRoute = require('./routes/authentification')
+const educationRoute = require('./routes/education')
+const experienceRoute = require('./routes/experience')
 app.use('/studentapi/', studentRoute);
 app.use('/recruiterapi/', recruiterRoute);
 app.use('/entrepriseapi/' , entrepriseRoute);
 app.use('/jobapi/' , jobRoutes);
 app.use('/postulationapi/' , postulationRoute)
-
+app.use('/authentification/' , authentificationRoute)
+app.use('/educationapi', educationRoute)
+app.use('/experience' , experienceRoute)
 /********************************************* */
 
-app.post("/login", async (req, res) => {
-  await Authentificaiton(req, res);
-});
-
+// TO TEST IT ********************
 app.post("/loginadmin", async (req, res) => {
   await AuthentificaitonAdmin(req, res);
 });
@@ -118,104 +105,6 @@ app.post("/createAdmin", async (req, res) => {
   await CreateAdmin(req, res);
 });
 
-
-app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
-app.use(bodyParser.json({ limit: '50mb' }));
-
-const uploadd = multer({ limits: { fileSize: 50 * 1024 * 1024 } });
-app.post(
-  "/createEducation",
-  uploadd.fields([
-    { name: "attestation", maxCount: 1 }
-  ]),
-  async (req, res) => {
-    try {
-      await CreateEducation(req, res, admin); // Pass admin object here
-      console.log('Received payload size:', req.headers['content-length']);
-    } catch (error) {
-      console.error(error);
-      console.log('Received payload size:', req.headers['content-length']);
-      res.status(500).json({ error: "Internal Server Error" });
-    }
-  }
-);
-app.get("/educations/:userId", async (req, res) => {
-  await getListOfEducation(req, res);
-});
-app.get('/educationsDetail/:Id', async (req, res) => {
-  await getListOfEducationById(req, res);
-});
-app.delete('/educations/:educationId', async (req, res) => {
-  await deleteEducationById(req,res);
-});
-
-app.put(
-  "/educations/:educationId",
-  uploadd.fields([
-    { name: "attestation", maxCount: 1 }
-  ]),
-  async (req, res) => {
-    try {
-      await updateEducation(req, res, admin); // Pass admin object here
-      console.log('Received payload size:', req.headers['content-length']);
-    } catch (error) {
-      console.error(error);
-      console.log('Received payload size:', req.headers['content-length']);
-      res.status(500).json({ error: "Internal Server Error" });
-    }
-  }
-);
-app.put('/confirmedExperience/:experienceId', async (req, res) => {
-  try {
-    
-    await confirmedExperience(req, res, admin);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-});
-app.post(
-  "/createExperience",
-  uploadd.fields([
-    { name: "attestation", maxCount: 1 }
-  ]),
-  async (req, res) => {
-    try {
-      await CreateExperience(req, res, admin); // Pass admin object here
-      console.log('Received payload size:', req.headers['content-length']);
-    } catch (error) {
-      console.error(error);
-      console.log('Received payload size:', req.headers['content-length']);
-      res.status(500).json({ error: "Internal Server Error" });
-    }
-  }
-);
-app.delete('/experiences/:experienceId', async (req, res) => {
-  await deleteExperienceById(req,res);
-});
-
-app.put(
-  "/experiences/:experienceId",
-  uploadd.fields([
-    { name: "attestation", maxCount: 1 }
-  ]),
-  async (req, res) => {
-    try {
-      await updateExperience(req, res, admin);
-      console.log('Received payload size:', req.headers['content-length']);
-    } catch (error) {
-      console.error(error);
-      console.log('Received payload size:', req.headers['content-length']);
-      res.status(500).json({ error: "Internal Server Error" });
-    }
-  }
-);
-app.get('/experiencesDetail/:Id', async (req, res) => {
-  await getListOfExperienceById(req, res);
-});
-app.get("/experiences/:userId", async (req, res) => {
-  await getListOfExperience(req, res);
-});
 app.get('/activate/:token', (req, res) => {
   const token = req.params.token;
 
@@ -260,14 +149,7 @@ app.post(
     await CreateRecruiter(req, res, admin);
   }
 );
-app.post(
-  "/signupStudent",
-  upload.fields([{ name: "profileImage", maxCount: 1 }]),
-  async (req, res) => {
-    await CreateStudent(req, res, admin);
-  }
-  
-);
+
 
 
 //// DONT USE IT
