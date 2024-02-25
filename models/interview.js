@@ -5,6 +5,10 @@ const interviewSchema = new mongoose.Schema({
     type: Schema.Types.ObjectId,
     ref: "User",
   },
+  applicationref :  {
+    type: Schema.Types.ObjectId,
+    ref: "Postulation",
+  },
   inviter: {
     type: Schema.Types.ObjectId,
     ref: "User",
@@ -16,7 +20,8 @@ const interviewSchema = new mongoose.Schema({
   roomID : String, 
   heure : Number , 
   minutes : Number ,
-  description : String
+  description : String,
+
 });
 
 const Interview = mongoose.model("Interview", interviewSchema);

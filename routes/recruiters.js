@@ -17,7 +17,7 @@ router.get("/", async (req, res) => {
   }
 });
 router.put(
-  "/:recruitertId",
+  "/:recruiterId",
   upload.fields([{ name: "profileImage", maxCount: 1 }]),
   async (req, res) => {
     try {

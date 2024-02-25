@@ -156,6 +156,7 @@ async function getRecruiterDetails(recruiterId) {
 }
 async function updateRecruiter(req,res,admin) {
   try {
+    console.log(req.body);
     const updatedRecruiter = await User.findByIdAndUpdate(
       req.params.recruiterId,
       { $set: req.body },
