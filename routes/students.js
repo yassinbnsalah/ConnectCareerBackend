@@ -16,6 +16,32 @@ router.get("/request", async (req, res) => {
   }
 });
 
+router.post(
+  "/signupStudent",
+  upload.fields([{ name: "profileImage", maxCount: 1 }]),
+  async (req, res) => {
+    await StudentService.CreateStudent(req, res, admin);
+  }
+  
+);
+router.put(
+  "/:studentId",
+  upload.fields([{ name: "profileImage", maxCount: 1 },{ name: "resume", maxCount: 1 }]),
+  async (req, res) => {
+    try {
+      const updatedStudent2 = await StudentService.updateStudent2(
+        req,
+        res,
+        admin
+      );
+      res.json(updatedStudent2);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+);
+
 router.get("/:studentId", async (req, res) => {
   try {
     const { studentId } = req.params;
@@ -59,4 +85,7 @@ router.post(
     }
   }
 );
+
+
+
 module.exports = router;
