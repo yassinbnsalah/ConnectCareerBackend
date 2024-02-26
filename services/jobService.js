@@ -27,6 +27,10 @@ async function AddJob(req, res) {
 
       termsAndConditions,
       isActive,
+      duration,
+      yearOfExperience,
+      cible,
+      closeDate,
     } = req.body;
 
     console.log(req.body);
@@ -42,6 +46,10 @@ async function AddJob(req, res) {
       termsAndConditions,
       isActive: true,
       creationDate: new Date(),
+      duration,
+      yearOfExperience,
+      cible,
+      closeDate,
     });
     await newJob.save();
   } catch (error) {
