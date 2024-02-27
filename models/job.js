@@ -12,6 +12,10 @@ const jobSchema = new mongoose.Schema({
   jobType: String,
   salary: String,
   description: String,
+  duration: String, 
+  yearOfExperience: String, 
+  cible: String, 
+  closeDate: Date, 
 
 
 

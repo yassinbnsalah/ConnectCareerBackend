@@ -67,7 +67,10 @@ router.put('/update-job/:jobID', async (req, res) => {
     termsAndConditions: req.body.termsAndConditions,
     isActive: req.body.isActive,
     creationDate: new Date(),
-   
+    duration: req.body.duration, 
+    yearOfExperience: req.body.yearOfExperience, 
+    cible: req.body.cible, 
+    closeDate: req.body.closeDate, 
    
   };
   try {
