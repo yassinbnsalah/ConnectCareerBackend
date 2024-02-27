@@ -3,27 +3,45 @@ const User = require("../models/user");
 const nodemailer = require('nodemailer');
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-
+const speakeasy = require('speakeasy');
 const Authentification = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, tokens } = req.body;
     const user = await User.findOne({ email }).populate("entreprise");
+
     if (!user) {
-      return res.status(401).json({ error: "Invalid credentials" });
+      return res.status(401).json({ error: "User not found" });
     }
+
     const passwordMatch = await bcrypt.compare(password, user.Hpassword);
+
     if (!passwordMatch) {
-      return res.status(401).json({ error: "Invalid credentials" });
+      return res.status(401).json({ error: "Invalid password" });
     }
+
+    // Verify the user's token
+    // const verified = speakeasy.totp.verify({
+    //   secret: user.secret,
+    //   encoding: 'base32',
+    //   //token: tokens, // Corrected property name to 'token'
+    //   window: 1
+    // });
+
+    // if (!verified) {
+    //   return res.status(401).json({ error: 'Invalid token' });
+    // }
+
     const token = jwt.sign({ userId: user._id }, "your-secret-key", {
       expiresIn: "1h",
     });
+
     res.json({ token, user });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error logging in" });
   }
 };
+
 const AuthentificationAdmin = async (req, res) => {
   try {
     const { email, password } = req.body;

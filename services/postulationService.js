@@ -5,7 +5,6 @@ async function CreateNewCandidate(req, res, admin) {
     const { owner, job, useMyResume } = req.body;
     const State = "InProgress";
     let Resume = "";
-    console.log(useMyResume);
     let user = await User.findById(owner);
     if(user.nbapplies){
       user.nbapplies = user.nbapplies + 1 
@@ -14,7 +13,7 @@ async function CreateNewCandidate(req, res, admin) {
     }
     
     await user.save()
-    if (useMyResume == "false") {
+    if (useMyResume == false) {
       if (req.files["resume"]) {
         const resumeFile = req.files["resume"][0];
         const ResumeBucket = admin.storage().bucket();
@@ -32,6 +31,8 @@ async function CreateNewCandidate(req, res, admin) {
         }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
         Resume = resume;
       }
+    }else{
+      Resume = user.resume
     }
     const nPostulation = new Postulation({
       owner,

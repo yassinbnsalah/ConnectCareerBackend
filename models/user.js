@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema({
   aboutme: String,
   lookingfor: String,
   lastlogin: String,
+  secret:String,
   nbapplies: { type: Number, default: 0 },  
   nbopportunite: { type: Number, default: 0 },  
   entreprise: {
