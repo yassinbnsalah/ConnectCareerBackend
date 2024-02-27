@@ -44,7 +44,8 @@ const CreateStudent = async (req, res, admin) => {
       gender,
       uniqueid,
       institution,
-      password: Hpassword,
+      password,
+      Hpassword, 
       role,
       profileImage,
       isVerify: 0,
@@ -66,13 +67,18 @@ const CreateStudent = async (req, res, admin) => {
       });
       console.log("qrcode", qrCodeUrl);
       newUser.qrCode = qrCodeUrl;
-      await newUser.save();
+
+      // Save the user and obtain the saved user object
+      const savedUser = await newUser.save();
 
       // Additional logic, if needed, after saving the user
       sendMailtoStudent(email, firstname + lastname);
 
-      // Send the success response to the client
-      res.status(201).json({ message: "Utilisateur inscrit avec succès" });
+      // Send the success response with the created user data to the client
+      res.status(201).json({
+        message: "Utilisateur inscrit avec succès",
+        user: savedUser, // Include the user data in the response
+      });
     } catch (error) {
       console.error("Error generating QR code or saving user:", error);
       return res.status(500).send('Internal Server Error');
