@@ -99,6 +99,7 @@ async function updateStudent2(req,res,admin) {
       { $set: req.body },
       { new: true }
     );
+    console.log(req.body);
     let profileImage ="" ; 
     if (req.files["profileImage"]) {
       console.log("new Profile image");

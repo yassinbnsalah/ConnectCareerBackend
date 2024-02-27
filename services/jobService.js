@@ -1,4 +1,5 @@
 const Job = require("../models/job");
+const User = require("../models/user");
 
 async function getJobByRecruiter(userId) {
   try {
@@ -29,8 +30,13 @@ async function AddJob(req, res) {
       isActive,
     } = req.body;
 
-    console.log(req.body);
-
+    let user = await User.findById(recruiter);
+    if(user.nbopportunite){
+      user.nbopportunite = user.nbopportunite +1
+    }else{
+      user.nbopportunite = 1
+    }
+    await user.save()
     const newJob = new Job({
       recruiter,
       jobTitle,

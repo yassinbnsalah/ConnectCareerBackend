@@ -1,10 +1,19 @@
 const Postulation = require("../models/postulation");
+const User = require("../models/user");
 async function CreateNewCandidate(req, res, admin) {
   try {
     const { owner, job, useMyResume } = req.body;
     const State = "InProgress";
     let Resume = "";
     console.log(useMyResume);
+    let user = await User.findById(owner);
+    if(user.nbapplies){
+      user.nbapplies = user.nbapplies + 1 
+    }else{
+      user.nbapplies = 1 
+    }
+    
+    await user.save()
     if (useMyResume == "false") {
       if (req.files["resume"]) {
         const resumeFile = req.files["resume"][0];
