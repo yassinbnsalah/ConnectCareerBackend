@@ -26,6 +26,8 @@ const userSchema = new mongoose.Schema({
   lookingfor: String,
   lastlogin: String,
   secret:String,
+  TwoFactorAuthentication:Boolean,
+  qrCode:String,
   nbapplies: { type: Number, default: 0 },  
   nbopportunite: { type: Number, default: 0 },  
   entreprise: {

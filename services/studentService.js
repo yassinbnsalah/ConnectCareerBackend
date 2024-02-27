@@ -12,13 +12,12 @@ const CreateStudent = async (req, res, admin) => {
       lastname,
       email,
       phoneNumber,
-      aboutme,
       gender,
       password,
       uniqueid,
       institution,
       diploma,
- 
+      TwoFactorAuthentication,
     } = req.body;
     const role = "Student";
     let profileImage = "";
@@ -36,50 +35,71 @@ const CreateStudent = async (req, res, admin) => {
       profileImage = `https://firebasestorage.googleapis.com/v0/b/${profileImageBucket.name}/o/${profileImageFileObject.name}`;
     }
 
-
-
     let Hpassword = await bcrypt.hash(password, 10);
-    secret = speakeasy.generateSecret({ length: 20 });
     const newUser = new User({
       firstname,
       lastname,
       email,
       phoneNumber,
-      aboutme,
       gender,
       uniqueid,
       institution,
       password,
-      Hpassword,
+      Hpassword, 
       role,
+      TwoFactorAuthentication,
       profileImage,
-      isVerify:0,
+      isVerify: 0,
       diploma,
-      secret:secret.base32,
     });
-    await newUser.save();
 
-    // Additional logic, if needed, after saving the user
-    sendMailtoStudent(email, firstname + lastname);
+    if (TwoFactorAuthentication==="true") {
+      const secret = speakeasy.generateSecret({ length: 20 });
+      newUser.secret = secret.base32;
 
-    // Send the success response to the client
-   // res.status(201).json({ message: "Utilisateur inscrit avec succès" });
+      let qrCodeUrl;
+
+      try {
+        qrCodeUrl = await new Promise((resolve, reject) => {
+          QRCode.toDataURL(secret.otpauth_url, (err, image_data) => {
+            if (err) {
+              console.error(err);
+              reject(err);
+            } else {
+              resolve(image_data);
+            }
+          });
+        });
+        console.log("qrcode", qrCodeUrl);
+        newUser.qrCode = qrCodeUrl;
+      } catch (error) {
+        console.error("Error generating QR code:", error);
+        return res.status(500).send('Internal Server Error');
+      }
+    }
+
+    try {
+      // Save the user and obtain the saved user object
+      const savedUser = await newUser.save();
+
+      // Additional logic, if needed, after saving the user
+      sendMailtoStudent(email, firstname + lastname);
+
+      // Send the success response with the created user data to the client
+      res.status(201).json({
+        message: "Utilisateur inscrit avec succès",
+        user: savedUser, // Include the user data in the response
+      });
+    } catch (error) {
+      console.error("Error saving user:", error);
+      return res.status(500).send('Internal Server Error');
+    }
   } catch (error) {
     console.error(error);
     return res.status(500).send('Internal Server Error');
   }
+};
 
-  // Generate a QR code for the user to scan
-  
-  QRCode.toDataURL(secret.otpauth_url, (err, image_data) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send('Internal Server Error');
-    }
-    // Send the QR code to the user
-    res.send({ qrCode: image_data });
-  });
-}
 async function getStudentDetails(studentId) {
   try {
     const student = await User.findById(studentId);
@@ -117,8 +137,7 @@ async function updateStudent2(req,res,admin) {
       { $set: req.body },
       { new: true }
     );
-    console.log(req.body);
-    let profileImage ="" ; 
+    let profileImage = "";
     if (req.files["profileImage"]) {
       console.log("new Profile image");
       const profileImageFile = req.files["profileImage"][0];
@@ -136,19 +155,18 @@ async function updateStudent2(req,res,admin) {
     }
 
     if (req.files["resume"]) {
-  
+
       const resumeFile = req.files["resume"][0];
-        const ResumeBucket = admin.storage().bucket();
-        const folderName = "student";
-        const fileName = resumeFile.originalname;
-        const fileFullPath = `${folderName}/${fileName}`;
+      const ResumeBucket = admin.storage().bucket();
+      const folderName = "student";
+      const fileName = resumeFile.originalname;
+      const fileFullPath = `${folderName}/${fileName}`;
 
-        const ResumeFileObject = ResumeBucket.file(fileFullPath);
+      const ResumeFileObject = ResumeBucket.file(fileFullPath);
 
-        await ResumeFileObject.createWriteStream().end(resumeFile.buffer);
+      await ResumeFileObject.createWriteStream().end(resumeFile.buffer);
 
-        let resume = `https://firebasestorage.googleapis.com/v0/b/${
-          ResumeBucket.name
+      let resume = `https://firebasestorage.googleapis.com/v0/b/${ResumeBucket.name
         }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
       updatedStudent.resume = resume
       await updatedStudent.save()
@@ -195,9 +213,8 @@ async function becomeAlumni(studentId, req, res, admin) {
 
       await DiplomaFileObject.createWriteStream().end(DiplomaFile.buffer);
 
-      diploma = `https://firebasestorage.googleapis.com/v0/b/${
-        DiplomaBucket.name
-      }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
+      diploma = `https://firebasestorage.googleapis.com/v0/b/${DiplomaBucket.name
+        }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
     }
 
     const updatedStudent = await User.findByIdAndUpdate(
