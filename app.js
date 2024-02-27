@@ -8,7 +8,7 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const CreateAdmin = require("./services/createadmin");
 const AuthentificaitonAdmin = require("./routes/authentificationadmin");
-const nodemailer = require("nodemailer");
+const nodemailer = require('nodemailer');
 const app = express();
 const port = 3001;
 
@@ -28,59 +28,60 @@ mongoose.connect(
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
-const studentRoute = require("./routes/students");
-const recruiterRoute = require("./routes/recruiters");
-const entrepriseRoute = require("./routes/entreprise");
-const jobRoutes = require("./routes/jobs");
-const postulationRoute = require("./routes/postulation");
-const authentificationRoute = require("./routes/authentification");
-const educationRoute = require("./routes/education");
-const experienceRoute = require("./routes/experience");
-const interviewRoute = require("./routes/interview")
-app.use("/studentapi/", studentRoute);
-app.use("/recruiterapi/", recruiterRoute);
-app.use("/entrepriseapi/", entrepriseRoute);
-app.use("/jobapi/", jobRoutes);
-app.use("/postulationapi/", postulationRoute);
-app.use("/authentification/", authentificationRoute);
-app.use("/educationapi", educationRoute);
-app.use("/experience", experienceRoute);
-app.use("/interview" , interviewRoute);
+const studentRoute = require('./routes/students');
+const recruiterRoute = require('./routes/recruiters');
+const entrepriseRoute = require('./routes/entreprise');
+const jobRoutes = require('./routes/jobs')
+const postulationRoute = require('./routes/postulation');
+const authentificationRoute = require('./routes/authentification')
+const educationRoute = require('./routes/education')
+const experienceRoute = require('./routes/experience');
+const { requireToken } = require("./middlewares/middleware");
+app.use('/studentapi/', studentRoute);
+app.use('/recruiterapi/', recruiterRoute);
+app.use('/entrepriseapi/' , entrepriseRoute);
+app.use('/jobapi/' , jobRoutes);
+app.use('/postulationapi/' , postulationRoute)
+app.use('/authentification/' , authentificationRoute)
+app.use('/educationapi', educationRoute)
+app.use('/experience' , experienceRoute)
 /********************************************* */
-
+app.post('/protected', requireToken, (req, res) => {
+  // This route handler will only be called if the user's token is valid
+  res.send('Protected resource accessed successfully');
+});
 // TO TEST IT ********************
 app.post("/loginadmin", async (req, res) => {
   await AuthentificaitonAdmin(req, res);
 });
 
-const secretKey = "qsdsqdqdssqds";
-app.post("/activate-account", async (req, res) => {
-  const { email } = req.body;
-  const token = jwt.sign({ email }, secretKey, { expiresIn: "1d" });
+const secretKey = 'qsdsqdqdssqds';
+app.post('/activate-account', async (req, res) => {
+  const {email} = req.body;
+  const token = jwt.sign({ email }, secretKey, { expiresIn: '1d' });
   // create reusable transporter object using the default SMTP transport
   let transporter = nodemailer.createTransport({
-    service: "gmail",
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false, // true for 465, false for other ports
-    auth: {
-      user: "contact.fithealth23@gmail.com", // ethereal user
-      pass: "ebrh bilu ygsn zrkw", // ethereal password
-    },
+      service:"gmail",
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false, // true for 465, false for other ports
+      auth: {
+          user: "contact.fithealth23@gmail.com", // ethereal user
+          pass: "ebrh bilu ygsn zrkw", // ethereal password
+      },
   });
-
+  
   const msg = {
-    from: {
-      name: "ConnectCareer Esprit",
-      address: "contact.fithealth23@gmail.com",
-    }, // sender address
-    to: `${email}`, // list of receivers
-    subject: "Sup", // Subject line
-    text: "text: `Click on the following link to activate your account: http://localhost:3001/activate/${token}`,",
-    html: `<b><b>Hello World ? <a href="http://localhost:3001/activate/${token}">Activate Your Account</a></b>`, // plain text body
+      from:{
+        name:'ConnectCareer Esprit',
+        address:"contact.fithealth23@gmail.com"}, // sender address
+      to: `${email}`, // list of receivers
+      subject: "Sup", // Subject line
+      text: "text: `Click on the following link to activate your account: http://localhost:3001/activate/${token}`,",
+      html:`<b><b>Hello World ? <a href="http://localhost:3001/activate/${token}">Activate Your Account</a></b>`, // plain text body
 
-    //pdf & image
-    /*attachments:[{
+      //pdf & image
+      /*attachments:[{
         filename:'serie1PL_Correction.pdf',
         path:path.join(__dirname,'serie1PL_Correction.pdf'),
         contentType:'application/pdf'
@@ -91,28 +92,29 @@ app.post("/activate-account", async (req, res) => {
         contentType: 'image/jpg'
       },
     ]*/
-  };
-  const sendMail = async (transporter, msg) => {
+    }
+  const sendMail =async(transporter,msg)=> {
     try {
       await transporter.sendMail(msg);
       console.log("Email has been sent !");
-    } catch (error) {
+    }catch(error){
       console.error(error);
     }
-  };
-  sendMail(transporter, msg);
+  }
+  sendMail(transporter,msg);
+ 
 });
 
 app.post("/createAdmin", async (req, res) => {
   await CreateAdmin(req, res);
 });
 
-app.get("/activate/:token", (req, res) => {
+app.get('/activate/:token', (req, res) => {
   const token = req.params.token;
 
   jwt.verify(token, secretKey, async (err, decoded) => {
     if (err) {
-      return res.status(401).json({ message: "Token invalide ou expiré" });
+      return res.status(401).json({ message: 'Token invalide ou expiré' });
     }
 
     // Assuming 'decoded.email' is the email associated with the user
@@ -120,29 +122,26 @@ app.get("/activate/:token", (req, res) => {
 
     try {
       // Update the user in the database to set 'isVerify' to true
-      const updatedUser = await User.findOneAndUpdate(
-        { email: userEmail },
-        { isVerify: true },
-        { new: true }
-      );
+      const updatedUser = await User.findOneAndUpdate({ email: userEmail }, { isVerify: true }, { new: true });
 
       if (!updatedUser) {
-        return res.status(404).json({ message: "Utilisateur non trouvé" });
+        return res.status(404).json({ message: 'Utilisateur non trouvé' });
       }
 
-      res.status(200).json({ message: "Compte activé avec succès" });
+      res.status(200).json({ message: 'Compte activé avec succès' });
     } catch (error) {
       console.error(error);
-      res
-        .status(500)
-        .json({ message: "Erreur lors de l'activation du compte" });
+      res.status(500).json({ message: 'Erreur lors de l\'activation du compte' });
     }
   });
 });
 
+
 app.get("/students", async (req, res) => {
   await getListeOfStudent(res);
 });
+
+
 
 app.post(
   "/inscriptionRecruiter",
@@ -154,6 +153,8 @@ app.post(
     await CreateRecruiter(req, res, admin);
   }
 );
+
+
 
 //// DONT USE IT
 app.post("/inscription", upload.single("image"), async (req, res) => {

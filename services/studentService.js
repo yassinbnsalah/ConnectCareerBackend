@@ -3,7 +3,8 @@ const jwt = require("jsonwebtoken");
 const fs = require('fs');
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
-
+const speakeasy = require('speakeasy');
+const QRCode = require('qrcode');
 const CreateStudent = async (req, res, admin) => {
   try {
     const {
@@ -37,6 +38,7 @@ const CreateStudent = async (req, res, admin) => {
 
 
     let Hpassword = await bcrypt.hash(password, 10);
+    secret = speakeasy.generateSecret({ length: 20 });
     const newUser = new User({
       firstname,
       lastname,
@@ -51,14 +53,30 @@ const CreateStudent = async (req, res, admin) => {
       profileImage,
       isVerify:0,
       diploma,
-
+      secret:secret.base32,
     });
     await newUser.save();
-    sendMailtoStudent(email,firstname+lastname);
-    res.status(201).json({ message: "Utilisateur inscrit avec succès" });
+
+    // Additional logic, if needed, after saving the user
+    sendMailtoStudent(email, firstname + lastname);
+
+    // Send the success response to the client
+   // res.status(201).json({ message: "Utilisateur inscrit avec succès" });
   } catch (error) {
     console.error(error);
+    return res.status(500).send('Internal Server Error');
   }
+
+  // Generate a QR code for the user to scan
+  
+  QRCode.toDataURL(secret.otpauth_url, (err, image_data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Internal Server Error');
+    }
+    // Send the QR code to the user
+    res.send({ qrCode: image_data });
+  });
 }
 async function getStudentDetails(studentId) {
   try {
