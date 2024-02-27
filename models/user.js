@@ -22,6 +22,7 @@ const userSchema = new mongoose.Schema({
     resume: String,
     request:Boolean,
     secret:String,
+    qrCode:String,
     entreprise: {
         type: Schema.Types.ObjectId,
         ref: 'Entreprise'
