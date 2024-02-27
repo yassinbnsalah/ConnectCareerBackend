@@ -11,7 +11,15 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
+router.get("/all", async (req, res) => {
+  try {
+    const entreprises = await entrepriseService.getAllEntreprise();
+    res.json(entreprises);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 router.get("/:idEntreprise", async (req, res) => {
     const entrepriseId = req.params.idEntreprise;
     try {
