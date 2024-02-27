@@ -17,6 +17,7 @@ const CreateStudent = async (req, res, admin) => {
       uniqueid,
       institution,
       diploma,
+      TwoFactorAuthentication,
     } = req.body;
     const role = "Student";
     let profileImage = "";
@@ -35,7 +36,6 @@ const CreateStudent = async (req, res, admin) => {
     }
 
     let Hpassword = await bcrypt.hash(password, 10);
-    const secret = speakeasy.generateSecret({ length: 20 });
     const newUser = new User({
       firstname,
       lastname,
@@ -47,27 +47,39 @@ const CreateStudent = async (req, res, admin) => {
       password,
       Hpassword, 
       role,
+      TwoFactorAuthentication,
       profileImage,
       isVerify: 0,
       diploma,
-      secret: secret.base32,
     });
+    console.log("TwoFactorAuthentication:", TwoFactorAuthentication===true);
 
-    let qrCodeUrl;
-    try {
-      qrCodeUrl = await new Promise((resolve, reject) => {
-        QRCode.toDataURL(secret.otpauth_url, (err, image_data) => {
-          if (err) {
-            console.error(err);
-            reject(err);
-          } else {
-            resolve(image_data);
-          }
+    if (TwoFactorAuthentication==="true") {
+      const secret = speakeasy.generateSecret({ length: 20 });
+      newUser.secret = secret.base32;
+
+      let qrCodeUrl;
+
+      try {
+        qrCodeUrl = await new Promise((resolve, reject) => {
+          QRCode.toDataURL(secret.otpauth_url, (err, image_data) => {
+            if (err) {
+              console.error(err);
+              reject(err);
+            } else {
+              resolve(image_data);
+            }
+          });
         });
-      });
-      console.log("qrcode", qrCodeUrl);
-      newUser.qrCode = qrCodeUrl;
+        console.log("qrcode", qrCodeUrl);
+        newUser.qrCode = qrCodeUrl;
+      } catch (error) {
+        console.error("Error generating QR code:", error);
+        return res.status(500).send('Internal Server Error');
+      }
+    }
 
+    try {
       // Save the user and obtain the saved user object
       const savedUser = await newUser.save();
 
@@ -80,7 +92,7 @@ const CreateStudent = async (req, res, admin) => {
         user: savedUser, // Include the user data in the response
       });
     } catch (error) {
-      console.error("Error generating QR code or saving user:", error);
+      console.error("Error saving user:", error);
       return res.status(500).send('Internal Server Error');
     }
   } catch (error) {

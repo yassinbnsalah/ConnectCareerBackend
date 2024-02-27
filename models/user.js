@@ -22,6 +22,7 @@ const userSchema = new mongoose.Schema({
     resume: String,
     request:Boolean,
     secret:String,
+    TwoFactorAuthentication:Boolean,
     qrCode:String,
     entreprise: {
         type: Schema.Types.ObjectId,

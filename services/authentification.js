@@ -19,16 +19,19 @@ const Authentification = async (req, res) => {
       return res.status(401).json({ error: "Invalid password" });
     }
 
-    // Verify the user's token
-    const verified = speakeasy.totp.verify({
-      secret: user.secret,
-      encoding: 'base32',
-      token: tokens, // Corrected property name to 'token'
-      window: 1
-    });
+    // Check if TwoFactorAuthentication is enabled for the user
+    if (user.TwoFactorAuthentication) {
+      // Verify the user's token
+      const verified = speakeasy.totp.verify({
+        secret: user.secret,
+        encoding: 'base32',
+        token: tokens,
+        window: 1
+      });
 
-    if (!verified) {
-      return res.status(401).json({ error: 'Invalid token' });
+      if (!verified) {
+        return res.status(401).json({ error: 'Invalid token' });
+      }
     }
 
     const token = jwt.sign({ userId: user._id }, "your-secret-key", {
@@ -41,6 +44,7 @@ const Authentification = async (req, res) => {
     res.status(500).json({ error: "Error logging in" });
   }
 };
+
 
 const AuthentificationAdmin = async (req, res) => {
   try {
