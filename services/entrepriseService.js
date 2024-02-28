@@ -12,6 +12,15 @@ async function getListeEntreprise() {
     throw new Error("Internal Server Error");
   }
 }
+async function getAllEntreprise() {
+  try {
+    const entreprises = await Entreprise.find()
+    return entreprises ;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Internal Server Error");
+  }
+}
 async function getEntrepriseDetails(entrepriseId) {
     try {
         // Find the entreprise by its ID
@@ -29,5 +38,6 @@ async function getEntrepriseDetails(entrepriseId) {
   }
 module.exports = {
   getListeEntreprise,
-  getEntrepriseDetails
+  getEntrepriseDetails,
+  getAllEntreprise
 };
