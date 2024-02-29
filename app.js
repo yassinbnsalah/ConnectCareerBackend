@@ -210,35 +210,51 @@ app.post("/inscription", upload.single("image"), async (req, res) => {
 const existingUniqueIds = new Set();
 
 // Endpoint to check the uniqueness of uniqueid
-app.post("/checkUniqueid", (req, res) => {
+app.post("/checkUniqueid", async (req, res) => {
   const { uniqueid } = req.body;
 
-  // Check if uniqueid is already in use
-  if (existingUniqueIds.has(uniqueid)) {
-    return res.status(200).json({ isUnique: false });
+  try {
+    // Check if uniqueid already exists in the database
+    const existingUser = await User.findOne({ uniqueid: uniqueid });
+
+    if (existingUser) {
+      // uniqueid already exists
+      return res.status(200).json({ isUnique: false });
+    } else {
+      // uniqueid is unique, add it to the in-memory store (simulating database)
+      existingUniqueIds.add(uniqueid);
+
+      return res.status(200).json({ isUnique: true });
+    }
+  } catch (error) {
+    // Handle any error that occurred during database query
+    console.error(error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
-
-  // If uniqueid is unique, add it to the in-memory store (simulating database)
-  existingUniqueIds.add(uniqueid);
-
-  return res.status(200).json({ isUnique: true });
 });
 
-const existingEmails = new Set();
-
 // Endpoint to check the uniqueness of email
-app.post("/checkEmail", (req, res) => {
+app.post("/checkEmail", async (req, res) => {
   const { email } = req.body;
 
-  // Check if email is already in use
-  if (existingEmails.has(email)) {
-    return res.status(200).json({ isUnique: false });
+  try {
+    // Check if email already exists in the database
+    const existingEmails = await User.find({ email: email });
+
+    if (existingEmails.length > 0) {
+      // Email already exists
+      return res.status(200).json({ isUnique: false });
+    } else {
+      // Email is unique, add it to the database
+     
+
+      return res.status(200).json({ isUnique: true });
+    }
+  } catch (error) {
+    // Handle any error that occurred during database query or creation
+    console.error(error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
-
-  // If email is unique, add it to the in-memory store (simulating database)
-  existingEmails.add(email);
-
-  return res.status(200).json({ isUnique: true });
 });
 app.get("/", (req, res) => {
   res.send("Hello, Express!");
