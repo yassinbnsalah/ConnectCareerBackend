@@ -37,7 +37,7 @@ const authentificationRoute = require('./routes/authentification')
 const educationRoute = require('./routes/education')
 const experienceRoute = require('./routes/experience');
 const { requireToken } = require("./middlewares/middleware");
-
+const skillRoute = require("./routes/skills")
 const interviewRoute = require("./routes/interview")
 app.use('/studentapi/', studentRoute);
 app.use('/recruiterapi/', recruiterRoute);
@@ -48,6 +48,7 @@ app.use('/authentification/' , authentificationRoute)
 app.use('/educationapi', educationRoute)
 app.use('/experience' , experienceRoute)
 app.use("/interview" , interviewRoute);
+app.use("/skills" , skillRoute)
 /********************************************* */
 app.post('/protected', requireToken, (req, res) => {
   // This route handler will only be called if the user's token is valid
