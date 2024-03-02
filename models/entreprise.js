@@ -8,6 +8,7 @@ const entrepriseSchema = new mongoose.Schema({
     matriculeFiscale : String , 
     CompanyLogo : String , 
     description : String , 
+    companyType : String
 });
 
 const Entreprise = mongoose.model('Entreprise', entrepriseSchema);
