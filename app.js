@@ -49,6 +49,7 @@ app.use('/educationapi', educationRoute)
 app.use('/experience' , experienceRoute)
 app.use("/interview" , interviewRoute);
 app.use("/skills" , skillRoute)
+
 /********************************************* */
 app.post('/protected', requireToken, (req, res) => {
   // This route handler will only be called if the user's token is valid
