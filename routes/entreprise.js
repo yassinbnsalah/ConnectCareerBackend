@@ -4,6 +4,7 @@ const router = express.Router();
 
 const admin = require("firebase-admin");
 const multer = require("multer");
+
 const bodyParser = require("body-parser");
 router.use(bodyParser.urlencoded({ extended: true }));
 const upload = multer();
@@ -17,10 +18,10 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/create",
+router.post("/create",
 upload.fields([{ name: "CompanyLogo", maxCount: 1 }]), async (req, res) => {
   try {
-    const entreprise = await entrepriseService.CreateEntreprise();
+    const entreprise = await entrepriseService.CreateEntreprise(req, res , admin);
     res.json(entreprise);
   } catch (error) {
     console.error(error);
