@@ -4,6 +4,15 @@ const nodemailer = require('nodemailer');
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const speakeasy = require('speakeasy');
+const getUserByEmail = async (email) => {
+  try {
+    const user = await User.findOne({ email: email });
+    return user;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Internal Server Error");
+  }
+}
 const Authentification = async (req, res) => {
   try {
     const { email, password, tokens } = req.body;
@@ -139,9 +148,30 @@ const ReceiveToken = async(req, res) =>{
       }
     });
 }
+const UpdatePassword = async(req, res) =>{
+  const email = req.params.email;
+    try {
+      const {newPassword} = req.body;
+      let Hpassword = await bcrypt.hash(newPassword, 10);
+      const updatedUser = await User.findOneAndUpdate({ email: email }, 
+        { password: newPassword  ,Hpassword : Hpassword}, 
+        { new: true });
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'Utilisateur non trouvé' });
+      }
+
+      console.log('Password reset successful for user:', email);
+      res.status(200).json({ message: 'Mot de passe réinitialisé avec succès' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Erreur lors de la réinitialisation du mot de passe' });
+    }
+  };
 module.exports = {
+  getUserByEmail,
   Authentification,
   AuthentificationAdmin,
   ForgetPassword,
+  UpdatePassword,
   ReceiveToken
 };

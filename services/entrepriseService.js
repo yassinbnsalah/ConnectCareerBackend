@@ -6,7 +6,7 @@ async function getListeEntreprise() {
     const recruiters = await User.find({ role: "Recruiter" }).populate(
       "entreprise"
     );
-    return recruiters ;
+    return recruiters;
   } catch (error) {
     console.error(error);
     throw new Error("Internal Server Error");
@@ -14,30 +14,59 @@ async function getListeEntreprise() {
 }
 async function getAllEntreprise() {
   try {
-    const entreprises = await Entreprise.find()
-    return entreprises ;
+    const entreprises = await Entreprise.find();
+    return entreprises;
   } catch (error) {
     console.error(error);
     throw new Error("Internal Server Error");
   }
 }
 async function getEntrepriseDetails(entrepriseId) {
-    try {
-        // Find the entreprise by its ID
-        const entreprise = await Entreprise.findById(entrepriseId);
-    
-        if (!entreprise) {
-          return res.status(404).json({ message: 'Entreprise not found' });
-        }
-    
-        return entreprise;
-      } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server Error' });
-      }
+  try {
+    // Find the entreprise by its ID
+    const entreprise = await Entreprise.findById(entrepriseId);
+
+    if (!entreprise) {
+      return res.status(404).json({ message: "Entreprise not found" });
+    }
+
+    return entreprise;
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
   }
+}
+
+async function CreateEntreprise(req, res, admin) {
+  const { CompanyName, CompanyAdress, CompanyType, description } = req.body;
+  try {
+    if (req.files["CompanyLogo"]) {
+      const CompanyLogoFile = req.files["CompanyLogo"][0];
+      const CompanyLogoBucket = admin.storage().bucket();
+      const CompanyLogoFileObject = CompanyLogoBucket.file(
+        CompanyLogoFile.originalname
+      );
+      await CompanyLogoFileObject.createWriteStream().end(
+        CompanyLogoFile.buffer
+      );
+      CompanyLogo = `https://firebasestorage.googleapis.com/v0/b/${CompanyLogoBucket.name}/o/${CompanyLogoFileObject.name}`;
+    }
+    const entreprise = new Entreprise({
+      CompanyName,
+      CompanyAdress,
+      CompanyType,
+      description,
+      CompanyLogo,
+    });
+    await entreprise.save();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+}
 module.exports = {
   getListeEntreprise,
   getEntrepriseDetails,
-  getAllEntreprise
+  getAllEntreprise,
+  CreateEntreprise
 };

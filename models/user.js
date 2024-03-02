@@ -28,6 +28,12 @@ const userSchema = new mongoose.Schema({
   secret:String,
   TwoFactorAuthentication:Boolean,
   qrCode:String,
+  skills: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Skills"
+    }
+  ],
   nbapplies: { type: Number, default: 0 },  
   nbopportunite: { type: Number, default: 0 },  
   entreprise: {
