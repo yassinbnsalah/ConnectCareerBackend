@@ -24,18 +24,18 @@ const userSchema = new mongoose.Schema({
   carteEtudiant: String,
   aboutme: String,
   lookingfor: String,
-  lastlogin: String,
-  secret:String,
-  TwoFactorAuthentication:Boolean,
-  qrCode:String,
+  secret: String,
+  TwoFactorAuthentication: Boolean,
+  qrCode: String,
+  lastlogin: { type: Date, default: null },
   skills: [
     {
       type: Schema.Types.ObjectId,
-      ref: "Skills"
-    }
+      ref: "Skills",
+    },
   ],
-  nbapplies: { type: Number, default: 0 },  
-  nbopportunite: { type: Number, default: 0 },  
+  nbapplies: { type: Number, default: 0 },
+  nbopportunite: { type: Number, default: 0 },
   entreprise: {
     type: Schema.Types.ObjectId,
     ref: "Entreprise",

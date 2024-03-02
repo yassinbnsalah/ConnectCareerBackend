@@ -132,6 +132,8 @@ async function getRequestListe() {
 
 async function updateStudent2(req,res,admin) {
   try {
+    console.log("*******");
+    console.log( req.body);
     const updatedStudent = await User.findByIdAndUpdate(
       req.params.studentId,
       { $set: req.body },
