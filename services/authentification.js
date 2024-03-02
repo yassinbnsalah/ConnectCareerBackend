@@ -4,6 +4,7 @@ const nodemailer = require('nodemailer');
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const speakeasy = require('speakeasy');
+const QRCode = require('qrcode');
 const getUserByEmail = async (email) => {
   try {
     const user = await User.findOne({ email: email });
@@ -167,7 +168,46 @@ const UpdatePassword = async(req, res) =>{
       res.status(500).json({ message: 'Erreur lors de la réinitialisation du mot de passe' });
     }
   };
+  const Ajouter2FA = async(req, res) =>{
+    const email = req.params.email;
+  
+      try {
+  
+        const secret = speakeasy.generateSecret({ length: 20 });
+        try {
+          qrCodeUrl = await new Promise((resolve, reject) => {
+            QRCode.toDataURL(secret.otpauth_url, (err, image_data) => {
+              if (err) {
+                console.error(err);
+                reject(err);
+              } else {
+                resolve(image_data);
+              }
+            });
+          });
+          console.log("qrcode", qrCodeUrl);
+  
+        } catch (error) {
+          console.error("Error generating QR code:", error);
+          return res.status(500).send('Internal Server Error');
+        }
+     
+        const updatedUser = await User.findOneAndUpdate({ email: email }, 
+          { TwoFactorAuthentication: true  ,secret : secret.base32, qrCode :qrCodeUrl}, 
+          { new: true });
+        if (!updatedUser) {
+          return res.status(404).json({ message: 'Utilisateur non trouvé' });
+        }
+  
+        console.log('Password reset successful for user:', email);
+        res.status(200).json({ message: 'Mot de passe réinitialisé avec succès' });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Erreur lors de la réinitialisation du mot de passe' });
+      }
+    };
 module.exports = {
+  Ajouter2FA,
   getUserByEmail,
   Authentification,
   AuthentificationAdmin,
