@@ -88,7 +88,7 @@ async function createRecruiter(req, res, admin) {
       isVerify: false,
     });
     await newUser.save();
-    sendMailtorecruiter(email,firstname+lastname);
+   // sendMailtorecruiter(email,firstname+lastname);
   } catch (error) {
     console.error(error);
   }
