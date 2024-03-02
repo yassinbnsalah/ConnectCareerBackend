@@ -1,4 +1,4 @@
-// models/book.js
+
 const mongoose = require('mongoose');
 
 const entrepriseSchema = new mongoose.Schema({
