@@ -10,6 +10,7 @@ const {
   ReceiveToken,
   getUserByEmail,
   UpdatePassword,
+  Ajouter2FA,
 } = require("../services/authentification");
 router.post("/login", async (req, res) => {
   await Authentification(req, res);
@@ -30,6 +31,9 @@ router.post("/loginadmin", async (req, res) => {
 
 router.post("/UpdatePassword/:email", async (req, res) => {
   await UpdatePassword(req, res);
+});
+router.post("/Ajouter2FA/:email", async (req, res) => {
+  await Ajouter2FA(req, res);
 });
 
 router.post("/forgetpassword", async (req, res) => {

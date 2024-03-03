@@ -18,16 +18,19 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/create",
-upload.fields([{ name: "CompanyLogo", maxCount: 1 }]), async (req, res) => {
-  try {
-    const entreprise = await entrepriseService.CreateEntreprise(req, res , admin);
-    res.json(entreprise);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+router.post(
+  "/create",
+  upload.fields([{ name: "CompanyLogo", maxCount: 1 }]),
+  async (req, res) => {
+    try {
+      const entreprise = await entrepriseService.CreateEntreprise(req, res , admin);
+      res.json(entreprise);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
   }
-});
+);
 router.get("/all", async (req, res) => {
   try {
     const entreprises = await entrepriseService.getAllEntreprise();
@@ -38,14 +41,16 @@ router.get("/all", async (req, res) => {
   }
 });
 router.get("/:idEntreprise", async (req, res) => {
-    const entrepriseId = req.params.idEntreprise;
-    try {
-      const entreprises = await entrepriseService.getEntrepriseDetails(entrepriseId);
-      res.json(entreprises);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Internal Server Error" });
-    }
-  });
+  const entrepriseId = req.params.idEntreprise;
+  try {
+    const entreprises = await entrepriseService.getEntrepriseDetails(
+      entrepriseId
+    );
+    res.json(entreprises);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 module.exports = router;
