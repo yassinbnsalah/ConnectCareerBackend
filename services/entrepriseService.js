@@ -38,7 +38,7 @@ async function getEntrepriseDetails(entrepriseId) {
 }
 
 async function CreateEntreprise(req, res, admin) {
-  const { CompanyName, CompanyAdress, CompanyType, description , CompanyCity } = req.body;
+  const { CompanyName, CompanyAdress, CompanyType, description,CompanyCity } = req.body;
   try {
     if (req.files["CompanyLogo"]) {
       const CompanyLogoFile = req.files["CompanyLogo"][0];
@@ -57,7 +57,7 @@ async function CreateEntreprise(req, res, admin) {
       CompanyType,
       description,
       CompanyLogo,
-      CompanyCity
+      CompanyCity,
     });
     await entreprise.save();
   } catch (error) {
