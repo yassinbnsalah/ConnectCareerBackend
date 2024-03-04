@@ -18,7 +18,10 @@ const jobSchema = new mongoose.Schema({
   closeDate: Date, 
   nbapplies : { type: Number, default: 0 },
 
-
+  Relatedentreprise : {
+    type: Schema.Types.ObjectId,
+    ref: "Entreprise",
+  }, 
   termsAndConditions: Boolean,
   isActive: Boolean,
   creationDate: {

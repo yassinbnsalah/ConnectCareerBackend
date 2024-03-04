@@ -16,6 +16,7 @@ const getUserByEmail = async (email) => {
 }
 const Authentification = async (req, res) => {
   try {
+    console.log("************************************************");
     const { email, password, tokens } = req.body;
     const user = await User.findOne({ email }).populate("entreprise");
 
@@ -47,7 +48,7 @@ const Authentification = async (req, res) => {
     const token = jwt.sign({ userId: user._id }, "your-secret-key", {
       expiresIn: "1h",
     });
-    CheckProgress(user)
+   CheckProgress(user)
     res.json({ token, user });
   } catch (error) {
     console.error(error);

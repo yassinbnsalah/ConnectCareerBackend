@@ -1,3 +1,4 @@
+const Entreprise = require("../models/entreprise");
 const Job = require("../models/job");
 const User = require("../models/user");
 
@@ -19,7 +20,7 @@ async function AddJob(req, res) {
     const {
       recruiter,
       jobTitle,
-     
+      entrepriseID,
       location,
       typeofworkplace,
       jobType,
@@ -35,12 +36,12 @@ async function AddJob(req, res) {
     } = req.body;
 
     let user = await User.findById(recruiter);
-    if(user.nbopportunite){
-      user.nbopportunite = user.nbopportunite +1
-    }else{
-      user.nbopportunite = 1
+    if (user.nbopportunite) {
+      user.nbopportunite = user.nbopportunite + 1;
+    } else {
+      user.nbopportunite = 1;
     }
-    await user.save()
+    await user.save();
     const newJob = new Job({
       recruiter,
       jobTitle,
@@ -57,6 +58,10 @@ async function AddJob(req, res) {
       cible,
       closeDate,
     });
+    if (entrepriseID) {
+      let entreprise = await Entreprise.findById(entrepriseID);
+      newJob.Relatedentreprise = entreprise;
+    }
     await newJob.save();
   } catch (error) {
     console.error(error);
@@ -103,13 +108,16 @@ async function getAllJob() {
         $unwind: "$entreprise",
       },
     ]);
+
+    // Populating RelatedEntreprise for each job
+    await Job.populate(jobs, { path: "Relatedentreprise" });
     if (!jobs || jobs.length === 0) {
-      return { status: 404, message: "No jobs found" }; // Return a status code and message
+      return { status: 404, message: "No jobs found" };
     }
-    return { status: 200, data: jobs }; // Return a status code and the jobs data
+    return { status: 200, data: jobs };
   } catch (error) {
     console.error(error);
-    return { status: 500, message: "Server Error" }; // Return a status code and error message
+    return { status: 500, message: "Server Error" };
   }
 }
 
