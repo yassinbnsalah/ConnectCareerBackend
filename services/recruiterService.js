@@ -162,7 +162,6 @@ async function updateRecruiter(req,res,admin) {
       { $set: req.body },
       { new: true }
     );
- 
     let profileImage ="" ; 
     if (req.files["profileImage"]) {
       console.log("new Profile image");
