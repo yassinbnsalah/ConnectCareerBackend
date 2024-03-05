@@ -24,6 +24,12 @@ const jobSchema = new mongoose.Schema({
   }, 
   termsAndConditions: Boolean,
   isActive: Boolean,
+  skills: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Skills",
+    },
+  ],
   creationDate: {
     type: Date,
     default: Date.now, 

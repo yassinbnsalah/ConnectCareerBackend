@@ -1,5 +1,6 @@
 const Entreprise = require("../models/entreprise");
 const Job = require("../models/job");
+const Skills = require("../models/skills");
 const User = require("../models/user");
 
 async function getJobByRecruiter(userId) {
@@ -26,7 +27,7 @@ async function AddJob(req, res) {
       jobType,
       salary,
       description,
-
+      skills,
       termsAndConditions,
       isActive,
       duration,
@@ -34,7 +35,7 @@ async function AddJob(req, res) {
       cible,
       closeDate,
     } = req.body;
-
+    
     let user = await User.findById(recruiter);
     if (user.nbopportunite) {
       user.nbopportunite = user.nbopportunite + 1;
@@ -42,6 +43,25 @@ async function AddJob(req, res) {
       user.nbopportunite = 1;
     }
     await user.save();
+    let skillsJob = [];
+    let SKillTab = JSON.parse(skills);
+    
+    for (const element of SKillTab) {
+      try {
+        let skill = await Skills.findOne({ skillname: element });
+    
+        if (!skill) {
+          skill = new Skills({ skillname: element });
+          await skill.save();
+        }
+    
+        skillsJob.push(skill._id);
+      } catch (error) {
+        // Handle any errors that occur during the operations
+        console.error("Error occurred:", error);
+      }
+    }
+    console.log(skillsJob);
     const newJob = new Job({
       recruiter,
       jobTitle,
@@ -56,6 +76,7 @@ async function AddJob(req, res) {
       duration,
       yearOfExperience,
       cible,
+      skills : skillsJob , 
       closeDate,
     });
     if (entrepriseID) {
@@ -70,7 +91,7 @@ async function AddJob(req, res) {
 
 async function getJobDetails(jobID) {
   try {
-    const job = await Job.findById(jobID).populate("recruiter");
+    const job = await Job.findById(jobID).populate("recruiter").populate("skills","skillname");
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
     }
