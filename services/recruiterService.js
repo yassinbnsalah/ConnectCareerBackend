@@ -147,7 +147,7 @@ async function sendMailtorecruiter(email,fullname) {
 }
 async function getRecruiterDetails(recruiterId) {
   try {
-    const recruiter = await User.findById(recruiterId);
+    const recruiter = await User.findById(recruiterId).populate("entreprise");
     return recruiter;
   } catch (error) {
     console.error(error);
