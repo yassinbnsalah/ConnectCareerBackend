@@ -35,7 +35,7 @@ async function AddJob(req, res) {
       cible,
       closeDate,
     } = req.body;
-    
+
     let user = await User.findById(recruiter);
     if (user.nbopportunite) {
       user.nbopportunite = user.nbopportunite + 1;
@@ -45,16 +45,16 @@ async function AddJob(req, res) {
     await user.save();
     let skillsJob = [];
     let SKillTab = JSON.parse(skills);
-    
+
     for (const element of SKillTab) {
       try {
         let skill = await Skills.findOne({ skillname: element });
-    
+
         if (!skill) {
           skill = new Skills({ skillname: element });
           await skill.save();
         }
-    
+
         skillsJob.push(skill._id);
       } catch (error) {
         // Handle any errors that occur during the operations
@@ -76,7 +76,7 @@ async function AddJob(req, res) {
       duration,
       yearOfExperience,
       cible,
-      skills : skillsJob , 
+      skills: skillsJob,
       closeDate,
     });
     if (entrepriseID) {
@@ -89,14 +89,44 @@ async function AddJob(req, res) {
   }
 }
 
+
 async function getJobDetails(jobID) {
   try {
-    const job = await Job.findById(jobID).populate("recruiter").populate("skills","skillname");
+    const job = await Job.findById(jobID)
+      .populate("recruiter")
+      .populate("skills", "skillname");
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
     }
-
     return job;
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+}
+
+
+async function getJobUpdateDetails(jobID) {
+  try {
+    const job = await Job.findById(jobID)
+      .populate("recruiter")
+      .populate("skills", "skillname")
+      .populate("Relatedentreprise");
+    if (!job) {
+      return res.status(404).json({ message: "Job not found" });
+    }
+    let entreprise
+    if (job.Relatedentreprise){
+       entreprise = job.Relatedentreprise 
+
+    }else{
+      const entrepriseData = await Entreprise.findById(job.recruiter?.entreprise)
+       entreprise = entrepriseData
+    }
+    const jobReturned = await Job.findById(jobID)
+      .populate("recruiter")
+      .populate("skills", "skillname");
+    return {jobReturned , entreprise};
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
@@ -144,6 +174,7 @@ async function getAllJob() {
 
 module.exports = {
   getJobByRecruiter,
+  getJobUpdateDetails,
   getJobDetails,
   AddJob,
   getAllJob,
