@@ -39,6 +39,7 @@ const experienceRoute = require('./routes/experience');
 const { requireToken } = require("./middlewares/middleware");
 const skillRoute = require("./routes/skills")
 const interviewRoute = require("./routes/interview")
+const teacherRoute = require("./routes/teacher")
 app.use('/studentapi/', studentRoute);
 app.use('/recruiterapi/', recruiterRoute);
 app.use('/entrepriseapi/' , entrepriseRoute);
@@ -48,7 +49,8 @@ app.use('/authentification/' , authentificationRoute)
 app.use('/educationapi', educationRoute)
 app.use('/experience' , experienceRoute)
 app.use("/interview" , interviewRoute);
-app.use("/skills" , skillRoute)
+app.use("/skills" , skillRoute);
+app.use("/teachers" , teacherRoute)
 
 /********************************************* */
 app.post('/protected', requireToken, (req, res) => {

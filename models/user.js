@@ -27,7 +27,9 @@ const userSchema = new mongoose.Schema({
   secret: String,
   TwoFactorAuthentication: Boolean,
   qrCode: String,
-  lastlogin: { type: Date, default: null },
+  groupeRecherche:String ,
+  unites : String, 
+  lastlogin: { type: String, default: null },
   skills: [
     {
       type: Schema.Types.ObjectId,
@@ -40,6 +42,9 @@ const userSchema = new mongoose.Schema({
     type: Schema.Types.ObjectId,
     ref: "Entreprise",
   },
+  hasEducation: { type: Boolean, default: false },
+  hasExperience: { type: Boolean, default: false },
+  profileProgress: { type: Number, default: 0 },
 });
 
 const User = mongoose.model("User", userSchema);

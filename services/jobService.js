@@ -1,4 +1,6 @@
+const Entreprise = require("../models/entreprise");
 const Job = require("../models/job");
+const Skills = require("../models/skills");
 const User = require("../models/user");
 
 async function getJobByRecruiter(userId) {
@@ -19,13 +21,13 @@ async function AddJob(req, res) {
     const {
       recruiter,
       jobTitle,
-     
+      entrepriseID,
       location,
       typeofworkplace,
       jobType,
       salary,
       description,
-
+      skills,
       termsAndConditions,
       isActive,
       duration,
@@ -35,12 +37,31 @@ async function AddJob(req, res) {
     } = req.body;
 
     let user = await User.findById(recruiter);
-    if(user.nbopportunite){
-      user.nbopportunite = user.nbopportunite +1
-    }else{
-      user.nbopportunite = 1
+    if (user.nbopportunite) {
+      user.nbopportunite = user.nbopportunite + 1;
+    } else {
+      user.nbopportunite = 1;
     }
-    await user.save()
+    await user.save();
+    let skillsJob = [];
+    let SKillTab = JSON.parse(skills);
+
+    for (const element of SKillTab) {
+      try {
+        let skill = await Skills.findOne({ skillname: element });
+
+        if (!skill) {
+          skill = new Skills({ skillname: element });
+          await skill.save();
+        }
+
+        skillsJob.push(skill._id);
+      } catch (error) {
+        // Handle any errors that occur during the operations
+        console.error("Error occurred:", error);
+      }
+    }
+    console.log(skillsJob);
     const newJob = new Job({
       recruiter,
       jobTitle,
@@ -55,22 +76,57 @@ async function AddJob(req, res) {
       duration,
       yearOfExperience,
       cible,
+      skills: skillsJob,
       closeDate,
     });
+    if (entrepriseID) {
+      let entreprise = await Entreprise.findById(entrepriseID);
+      newJob.Relatedentreprise = entreprise;
+    }
     await newJob.save();
   } catch (error) {
     console.error(error);
   }
 }
 
+
 async function getJobDetails(jobID) {
   try {
-    const job = await Job.findById(jobID).populate("recruiter");
+    const job = await Job.findById(jobID)
+      .populate("recruiter")
+      .populate("skills", "skillname");
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
     }
-
     return job;
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+}
+
+
+async function getJobUpdateDetails(jobID) {
+  try {
+    const job = await Job.findById(jobID)
+      .populate("recruiter")
+      .populate("skills", "skillname")
+      .populate("Relatedentreprise");
+    if (!job) {
+      return res.status(404).json({ message: "Job not found" });
+    }
+    let entreprise
+    if (job.Relatedentreprise){
+       entreprise = job.Relatedentreprise 
+
+    }else{
+      const entrepriseData = await Entreprise.findById(job.recruiter?.entreprise)
+       entreprise = entrepriseData
+    }
+    const jobReturned = await Job.findById(jobID)
+      .populate("recruiter")
+      .populate("skills", "skillname");
+    return {jobReturned , entreprise};
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
@@ -103,18 +159,22 @@ async function getAllJob() {
         $unwind: "$entreprise",
       },
     ]);
+
+    // Populating RelatedEntreprise for each job
+    await Job.populate(jobs, { path: "Relatedentreprise" });
     if (!jobs || jobs.length === 0) {
-      return { status: 404, message: "No jobs found" }; // Return a status code and message
+      return { status: 404, message: "No jobs found" };
     }
-    return { status: 200, data: jobs }; // Return a status code and the jobs data
+    return { status: 200, data: jobs };
   } catch (error) {
     console.error(error);
-    return { status: 500, message: "Server Error" }; // Return a status code and error message
+    return { status: 500, message: "Server Error" };
   }
 }
 
 module.exports = {
   getJobByRecruiter,
+  getJobUpdateDetails,
   getJobDetails,
   AddJob,
   getAllJob,

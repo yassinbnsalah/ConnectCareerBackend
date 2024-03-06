@@ -37,8 +37,45 @@ async function getEntrepriseDetails(entrepriseId) {
   }
 }
 
+async function UpdateEntreprise(req, res, admin) {
+  // const {
+  //   CompanyName,
+  //   CompanyAdress,
+  //   CompanyType,
+  //   description,
+  //   CompanyCity,
+  //   CompanyWebsite,
+  // } = req.body;
+  try {
+    let entreprise = await Entreprise.findById(req.params.CompanyID);
+    if (req.files["CompanyLogo"]) {
+      const CompanyLogoFile = req.files["CompanyLogo"][0];
+      const CompanyLogoBucket = admin.storage().bucket();
+      const CompanyLogoFileObject = CompanyLogoBucket.file(
+        CompanyLogoFile.originalname
+      );
+      await CompanyLogoFileObject.createWriteStream().end(
+        CompanyLogoFile.buffer
+      );
+      CompanyLogo = `https://firebasestorage.googleapis.com/v0/b/${CompanyLogoBucket.name}/o/${CompanyLogoFileObject.name}`;
+      entreprise.CompanyLogo = CompanyLogo;
+      await entreprise.save();
+    }
+    const updateEntreprise = await Entreprise.findByIdAndUpdate(
+      req.params.CompanyID,
+      { $set: req.body },
+      { new: true }
+    );
+    return updateEntreprise;
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+}
+
 async function CreateEntreprise(req, res, admin) {
-  const { CompanyName, CompanyAdress, CompanyType, description , CompanyCity } = req.body;
+  const { CompanyName, CompanyAdress, CompanyType, description, CompanyCity } =
+    req.body;
   try {
     if (req.files["CompanyLogo"]) {
       const CompanyLogoFile = req.files["CompanyLogo"][0];
@@ -57,7 +94,7 @@ async function CreateEntreprise(req, res, admin) {
       CompanyType,
       description,
       CompanyLogo,
-      CompanyCity
+      CompanyCity,
     });
     await entreprise.save();
   } catch (error) {
@@ -65,9 +102,11 @@ async function CreateEntreprise(req, res, admin) {
     res.status(500).json({ message: "Server Error" });
   }
 }
+
 module.exports = {
   getListeEntreprise,
   getEntrepriseDetails,
   getAllEntreprise,
-  CreateEntreprise
+  UpdateEntreprise,
+  CreateEntreprise,
 };

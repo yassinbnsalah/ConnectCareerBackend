@@ -31,6 +31,19 @@ router.post(
     }
   }
 );
+router.put(
+  "/update/:CompanyID",
+  upload.fields([{ name: "CompanyLogo", maxCount: 1 }]),
+  async (req, res) => {
+    try {
+      const entreprise = await entrepriseService.UpdateEntreprise(req, res , admin);
+      res.json(entreprise);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+);
 router.get("/all", async (req, res) => {
   try {
     const entreprises = await entrepriseService.getAllEntreprise();

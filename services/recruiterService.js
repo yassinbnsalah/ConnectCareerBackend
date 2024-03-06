@@ -147,7 +147,7 @@ async function sendMailtorecruiter(email,fullname) {
 }
 async function getRecruiterDetails(recruiterId) {
   try {
-    const recruiter = await User.findById(recruiterId);
+    const recruiter = await User.findById(recruiterId).populate("entreprise");
     return recruiter;
   } catch (error) {
     console.error(error);
@@ -162,7 +162,6 @@ async function updateRecruiter(req,res,admin) {
       { $set: req.body },
       { new: true }
     );
- 
     let profileImage ="" ; 
     if (req.files["profileImage"]) {
       console.log("new Profile image");

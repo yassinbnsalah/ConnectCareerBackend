@@ -16,6 +16,7 @@ const getUserByEmail = async (email) => {
 }
 const Authentification = async (req, res) => {
   try {
+    console.log("************************************************");
     const { email, password, tokens } = req.body;
     const user = await User.findOne({ email }).populate("entreprise");
 
@@ -47,7 +48,7 @@ const Authentification = async (req, res) => {
     const token = jwt.sign({ userId: user._id }, "your-secret-key", {
       expiresIn: "1h",
     });
-
+   CheckProgress(user)
     res.json({ token, user });
   } catch (error) {
     console.error(error);
@@ -55,6 +56,28 @@ const Authentification = async (req, res) => {
   }
 };
 
+const CheckProgress = async(user) =>{
+  let progress  = 0
+  if(user.firstname && user.firstname){
+    progress = progress + 10 
+  }if(user.phoneNumber){
+    progress = progress + 5 
+  }if(user.isVerify){
+    progress = progress + 10 
+  }  if(user.aboutme){
+    progress = progress + 10
+  }if(user.TwoFactorAuthentication){
+    progress = progress + 30
+  }if(user.skills.length > 0){
+    progress = progress + 10
+  }if(user.hasEducation){
+    progress = progress + 20
+  }if(user.hasExperience){
+    progress = progress + 20
+  }
+  user.profileProgress = progress
+  await user.save(); 
+}
 
 const AuthentificationAdmin = async (req, res) => {
   try {
@@ -207,6 +230,7 @@ const UpdatePassword = async(req, res) =>{
       }
     };
 module.exports = {
+  CheckProgress,
   Ajouter2FA,
   getUserByEmail,
   Authentification,

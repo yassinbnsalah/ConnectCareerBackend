@@ -1,4 +1,5 @@
 const Education = require("../models/education");
+const User = require("../models/user");
 
 const CreateEducation = async (req, res, admin) => {
   try {
@@ -20,6 +21,9 @@ const CreateEducation = async (req, res, admin) => {
       }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
       Attestation = attestation;
     }
+    const user =  await User.findOne({ _id:student })
+    user.hasEducation=  true 
+    await user.save(); 
     const newEducation = new Education({
       student,
       uni_name,

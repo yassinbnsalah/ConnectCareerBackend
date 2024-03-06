@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 router.use(bodyParser.urlencoded({ extended: true }));
 const multer = require("multer");
 const Job = require('../models/job'); 
+const Skills = require("../models/skills");
 
 // Set up multer to handle multipart/form-data
 const upload = multer();
@@ -46,8 +47,22 @@ router.get("/:userId", async (req, res) => {
 router.get("/details/:jobID", async (req, res) => {
   const jobID = req.params.jobID;
   try {
-    const jobs = await jobService.getJobDetails(jobID);
-    res.json(jobs);
+    const data = await jobService.getJobDetails(jobID);
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+router.get("/detailstoupdate/:jobID", async (req, res) => {
+  const jobID = req.params.jobID;
+  try {
+    const data = await jobService.getJobUpdateDetails(jobID);
+    console.log("***********entreprise**************")
+    console.log(data.entreprise)
+    res.json(data);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -74,13 +89,35 @@ router.put('/update-job/:jobID', async (req, res) => {
    
   };
   try {
+    console.log("skills ");
+    console.log(JSON.parse(req.body.skillers));
+    const JobToUpdate= await Job.findById(jobID)
+    let skillsJob = [];
+    const SKillTab = JSON.parse(req.body.skillers)
+    for (const element of SKillTab) {
+      try {
+        let skill = await Skills.findOne({ skillname: element });
+
+        if (!skill) {
+          skill = new Skills({ skillname: element });
+          await skill.save();
+        }
+
+        skillsJob.push(skill._id);
+      } catch (error) {
+        // Handle any errors that occur during the operations
+        console.error("Error occurred:", error);
+      }
+    }
+    JobToUpdate.skills = skillsJob
+    await JobToUpdate.save()
     const updatedJob = await Job.findByIdAndUpdate(
       jobID,
       updatedFields,
       { new: true }
     );
 
-    res.json({ message: 'Job updated successfully', updatedJob });
+    res.json({ message: 'Job updated successfully',updatedJob });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error updating job' });
