@@ -1,3 +1,4 @@
+const Job = require("../models/job");
 const Postulation = require("../models/postulation");
 const User = require("../models/user");
 async function CreateNewCandidate(req, res, admin) {
@@ -11,7 +12,9 @@ async function CreateNewCandidate(req, res, admin) {
     } else {
       user.nbapplies = 1;
     }
-
+    let jobD = await Job.findById(job);
+    jobD.nbapplies = jobD.nbapplies+1
+    await jobD.save();
     await user.save();
     if (useMyResume == "false") {
       if (req.files["resume"]) {

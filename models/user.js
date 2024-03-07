@@ -24,22 +24,27 @@ const userSchema = new mongoose.Schema({
   carteEtudiant: String,
   aboutme: String,
   lookingfor: String,
-  lastlogin: String,
-  secret:String,
-  TwoFactorAuthentication:Boolean,
-  qrCode:String,
+  secret: String,
+  TwoFactorAuthentication: Boolean,
+  qrCode: String,
+  groupeRecherche:String ,
+  unites : String, 
+  lastlogin: { type: String, default: null },
   skills: [
     {
       type: Schema.Types.ObjectId,
-      ref: "Skills"
-    }
+      ref: "Skills",
+    },
   ],
-  nbapplies: { type: Number, default: 0 },  
-  nbopportunite: { type: Number, default: 0 },  
+  nbapplies: { type: Number, default: 0 },
+  nbopportunite: { type: Number, default: 0 },
   entreprise: {
     type: Schema.Types.ObjectId,
     ref: "Entreprise",
   },
+  hasEducation: { type: Boolean, default: false },
+  hasExperience: { type: Boolean, default: false },
+  profileProgress: { type: Number, default: 0 },
 });
 
 const User = mongoose.model("User", userSchema);

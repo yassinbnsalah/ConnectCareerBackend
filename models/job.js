@@ -16,11 +16,20 @@ const jobSchema = new mongoose.Schema({
   yearOfExperience: String, 
   cible: String, 
   closeDate: Date, 
+  nbapplies : { type: Number, default: 0 },
 
-
-
+  Relatedentreprise : {
+    type: Schema.Types.ObjectId,
+    ref: "Entreprise",
+  }, 
   termsAndConditions: Boolean,
   isActive: Boolean,
+  skills: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Skills",
+    },
+  ],
   creationDate: {
     type: Date,
     default: Date.now, 

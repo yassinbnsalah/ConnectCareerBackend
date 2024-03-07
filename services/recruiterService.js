@@ -88,7 +88,7 @@ async function createRecruiter(req, res, admin) {
       isVerify: false,
     });
     await newUser.save();
-    sendMailtorecruiter(email,firstname+lastname);
+   // sendMailtorecruiter(email,firstname+lastname);
   } catch (error) {
     console.error(error);
   }
@@ -162,7 +162,6 @@ async function updateRecruiter(req,res,admin) {
       { $set: req.body },
       { new: true }
     );
- 
     let profileImage ="" ; 
     if (req.files["profileImage"]) {
       console.log("new Profile image");
