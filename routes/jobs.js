@@ -7,7 +7,6 @@ const multer = require("multer");
 const Job = require('../models/job'); 
 const Skills = require("../models/skills");
 
-// Set up multer to handle multipart/form-data
 const upload = multer();
 router.post("/add",upload.none(), async (req, res) => {
   try {
@@ -42,6 +41,18 @@ router.get("/:userId", async (req, res) => {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
   }
+});
+
+router.get("/entreprise/:entrepriseId/jobs", async (req, res) => {
+  const entrepriseId = req.params.entrepriseId;
+  const result = await jobService.getJobsByEntrepriseId(entrepriseId);
+
+  if (result.status === 404) {
+    return res.status(404).json({ message: result.message });
+  } else if (result.status === 500) {
+    return res.status(500).json({ message: result.message });
+  }
+  res.status(200).json(result.data);
 });
 
 router.get("/details/:jobID", async (req, res) => {
@@ -105,7 +116,7 @@ router.put('/update-job/:jobID', async (req, res) => {
 
         skillsJob.push(skill._id);
       } catch (error) {
-        // Handle any errors that occur during the operations
+ 
         console.error("Error occurred:", error);
       }
     }
