@@ -23,7 +23,7 @@ async function getAllEntreprise() {
 }
 async function getEntrepriseDetails(entrepriseId) {
   try {
-    // Find the entreprise by its ID
+
     const entreprise = await Entreprise.findById(entrepriseId);
 
     if (!entreprise) {
