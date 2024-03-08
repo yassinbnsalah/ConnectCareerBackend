@@ -27,8 +27,8 @@ const userSchema = new mongoose.Schema({
   secret: String,
   TwoFactorAuthentication: Boolean,
   qrCode: String,
-  groupeRecherche:String ,
-  unites : String, 
+  groupeRecherche: String,
+  unites: String,
   lastlogin: { type: String, default: null },
   skills: [
     {
