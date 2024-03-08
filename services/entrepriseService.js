@@ -37,6 +37,24 @@ async function getEntrepriseDetails(entrepriseId) {
   }
 }
 
+
+async function getEntrepriseTech() {
+  try {
+    // Find the entreprise by its ID
+    const entreprise = await Entreprise.findOne({OwnedbyAdmin:true});
+
+    if (!entreprise) {
+      return res.status(404).json({ message: "Entreprise not found" });
+    }
+
+    return entreprise;
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+}
+
+
 async function UpdateEntreprise(req, res, admin) {
   // const {
   //   CompanyName,
@@ -48,6 +66,7 @@ async function UpdateEntreprise(req, res, admin) {
   // } = req.body;
   try {
     let entreprise = await Entreprise.findById(req.params.CompanyID);
+    console.log("updating "+entreprise.CompanyName);
     if (req.files["CompanyLogo"]) {
       const CompanyLogoFile = req.files["CompanyLogo"][0];
       const CompanyLogoBucket = admin.storage().bucket();
@@ -95,7 +114,7 @@ async function CreateEntreprise(req, res, admin) {
       description,
       CompanyLogo,
       CompanyCity,
-    });
+    });s
     await entreprise.save();
   } catch (error) {
     console.error(error);
@@ -105,6 +124,7 @@ async function CreateEntreprise(req, res, admin) {
 
 module.exports = {
   getListeEntreprise,
+  getEntrepriseTech,
   getEntrepriseDetails,
   getAllEntreprise,
   UpdateEntreprise,
