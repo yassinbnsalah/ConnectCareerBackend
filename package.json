@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "test": "mocha ./tests/*.spec.js",
     "start": "nodemon app.js"
   },
   "keywords": [],
@@ -25,5 +26,9 @@
     "peer": "^1.0.2",
     "qrcode": "^1.5.3",
     "speakeasy": "^2.0.0"
+  },
+  "devDependencies": {
+    "chai": "^5.1.0",
+    "mocha": "^10.3.0"
   }
 }
