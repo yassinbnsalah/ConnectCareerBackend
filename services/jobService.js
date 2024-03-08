@@ -5,7 +5,7 @@ const User = require("../models/user");
 
 async function getJobByRecruiter(userId) {
   try {
-    const jobs = await Job.find({ recruiter: userId });
+    const jobs = await Job.find({ recruiter: userId }).populate("recruiter");
     if (!jobs) {
       return res.status(404).json({ message: "No jobs found for this user" });
     }
