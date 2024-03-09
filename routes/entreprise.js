@@ -36,6 +36,7 @@ router.put(
   upload.fields([{ name: "CompanyLogo", maxCount: 1 }]),
   async (req, res) => {
     try {
+      console.log("updatesd");
       const entreprise = await entrepriseService.UpdateEntreprise(req, res , admin);
       res.json(entreprise);
     } catch (error) {
@@ -48,6 +49,15 @@ router.get("/all", async (req, res) => {
   try {
     const entreprises = await entrepriseService.getAllEntreprise();
     res.json(entreprises);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+router.get("/esprittech", async (req, res) => {
+  try {
+    const entreprise = await entrepriseService.getEntrepriseTech();
+    res.json(entreprise);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
