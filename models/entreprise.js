@@ -9,6 +9,7 @@ const entrepriseSchema = new mongoose.Schema({
     CompanyLogo: String,
     description: String,
     CompanyType: String,
+    CompanyEmail: String, 
     CompanyWebsite: String,
     OwnedbyAdmin: {
         type: Boolean,

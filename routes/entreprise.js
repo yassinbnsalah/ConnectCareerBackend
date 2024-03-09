@@ -66,10 +66,10 @@ router.get("/esprittech", async (req, res) => {
 router.get("/:idEntreprise", async (req, res) => {
   const entrepriseId = req.params.idEntreprise;
   try {
-    const entreprises = await entrepriseService.getEntrepriseDetails(
+    const data = await entrepriseService.getEntrepriseDetails(
       entrepriseId
     );
-    res.json(entreprises);
+    res.json(data);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });

@@ -1,4 +1,5 @@
 const Entreprise = require("../models/entreprise");
+const Job = require("../models/job");
 const User = require("../models/user");
 
 async function getListeEntreprise() {
@@ -30,18 +31,26 @@ async function getEntrepriseDetails(entrepriseId) {
       return res.status(404).json({ message: "Entreprise not found" });
     }
 
-    return entreprise;
+    let ownerEntreprise = await User.findOne({ entreprise: entrepriseId });
+    let jobs;
+    if (!ownerEntreprise) {
+      jobs = await Job.find({ Relatedentreprise: entrepriseId });
+     
+    } else {
+      jobs = await Job.find({ recruiter: ownerEntreprise._id });
+    }
+
+    return { entreprise, ownerEntreprise, jobs };
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
   }
 }
 
-
 async function getEntrepriseTech() {
   try {
     // Find the entreprise by its ID
-    const entreprise = await Entreprise.findOne({OwnedbyAdmin:true});
+    const entreprise = await Entreprise.findOne({ OwnedbyAdmin: true });
 
     if (!entreprise) {
       return res.status(404).json({ message: "Entreprise not found" });
@@ -54,7 +63,6 @@ async function getEntrepriseTech() {
   }
 }
 
-
 async function UpdateEntreprise(req, res, admin) {
   // const {
   //   CompanyName,
@@ -66,8 +74,9 @@ async function UpdateEntreprise(req, res, admin) {
   // } = req.body;
   try {
     let entreprise = await Entreprise.findById(req.params.CompanyID);
-    console.log("updating "+entreprise.CompanyName);
+    console.log("updating " + entreprise.CompanyName);
     if (req.files["CompanyLogo"]) {
+      console.log("Company Logo Updated");
       const CompanyLogoFile = req.files["CompanyLogo"][0];
       const CompanyLogoBucket = admin.storage().bucket();
       const CompanyLogoFileObject = CompanyLogoBucket.file(
@@ -80,6 +89,7 @@ async function UpdateEntreprise(req, res, admin) {
       entreprise.CompanyLogo = CompanyLogo;
       await entreprise.save();
     }
+    console.log("Company Logo Updated SS");
     const updateEntreprise = await Entreprise.findByIdAndUpdate(
       req.params.CompanyID,
       { $set: req.body },
@@ -114,7 +124,8 @@ async function CreateEntreprise(req, res, admin) {
       description,
       CompanyLogo,
       CompanyCity,
-    });s
+    });
+    s;
     await entreprise.save();
   } catch (error) {
     console.error(error);
