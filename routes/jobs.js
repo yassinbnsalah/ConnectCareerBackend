@@ -36,7 +36,7 @@ router.get("/all", async (req, res) => {
 router.get("/:userId", async (req, res) => {
   const userId = req.params.userId;
   try {
-    const jobs = await jobService.getJobByRecruiter(userId);
+    const jobs = await jobService.getJobByRecruiter(userId,res);
     res.json(jobs);
   } catch (error) {
     console.error(error);

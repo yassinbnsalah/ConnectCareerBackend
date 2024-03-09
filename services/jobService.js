@@ -3,7 +3,7 @@ const Job = require("../models/job");
 const Skills = require("../models/skills");
 const User = require("../models/user");
 
-async function getJobByRecruiter(userId) {
+async function getJobByRecruiter(userId , res) {
   try {
     const jobs = await Job.find({ recruiter: userId });
     if (!jobs) {
