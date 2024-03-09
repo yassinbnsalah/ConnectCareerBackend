@@ -1,5 +1,6 @@
 const User = require("../../models/user");
-const bcrypt = require("bcrypt");
+const bcrypt = require('bcryptjs');
+
 const { sendMailtoStudent } = require("../../services/studentService");
 
 const CreateStudent = async (req, res, admin) => {
