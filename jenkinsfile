@@ -15,17 +15,17 @@ pipeline{
                 }
             }
         }
-        stage("MVN SONARQUBE"){
+       stage('SonarQube Analysis') {
             steps{
-                script{
-                    try{
-                        sh "mvn sonar:sonar -Dsonar.login=admin -Dsonar.password=esprit"
-                    }catch(Exception e){
-                        error "Failed to run SonarQube analysis: ${e.message}"
-                    }
-                }
-            }
-        }
+                script { 
+                    def scannerHome = tool 'scanner'
+                        withSonarQubeEnv {
+                            sh "${scannerHome}/bin/sonar-scanner"
+                        }
+                    } 
+                } 
+            }   
+
         stage('Build application') {
             steps{
                 script {
