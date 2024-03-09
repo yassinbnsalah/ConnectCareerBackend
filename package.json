@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npm nodemon app.js",
+    "build-dev": "npm nodemon app.js",
     "test": "mocha ./tests/*.spec.js",
     "start": "nodemon app.js"
   },
