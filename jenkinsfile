@@ -15,10 +15,21 @@ pipeline{
                 }
             }
         }
+        stage("MVN SONARQUBE"){
+            steps{
+                script{
+                    try{
+                        sh "mvn sonar:sonar -Dsonar.login=admin -Dsonar.password=esprit"
+                    }catch(Exception e){
+                        error "Failed to run SonarQube analysis: ${e.message}"
+                    }
+                }
+            }
+        }
         stage('Build application') {
             steps{
                 script {
-                    sh('npm run build-dev')
+                    sh('npm run build-dev  ')
                 }
             }
         }
