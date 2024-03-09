@@ -36,6 +36,7 @@ router.put(
   upload.fields([{ name: "CompanyLogo", maxCount: 1 }]),
   async (req, res) => {
     try {
+      console.log("updatesd");
       const entreprise = await entrepriseService.UpdateEntreprise(req, res , admin);
       res.json(entreprise);
     } catch (error) {
