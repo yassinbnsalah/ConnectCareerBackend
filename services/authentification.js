@@ -111,7 +111,16 @@ const secretKey = 'qsdsqdqdssqds';
 const ForgetPassword = async (req, res) => {
   console.log("Received request to reset password:", req.body.email);
   const { email } = req.body;
+
+  // Check if the email exists in the database
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return res.status(404).send("Email not found");
+  }
+
   const token = jwt.sign({ email }, secretKey, { expiresIn: "1d" });
+
   // create reusable transporter object using the default SMTP transport
   let transporter = nodemailer.createTransport({
     service: "gmail",
@@ -130,21 +139,25 @@ const ForgetPassword = async (req, res) => {
       address: "contact.fithealth23@gmail.com",
     },
     to: `${email}`,
-    subject: "ResetPassword",
-    text: "text: `Click on the following link to reset your password: http://localhost:3000/resetpassword/${token}`,",
-    html: `<b><b>Hello World ? <a href="http://localhost:3000/resetpassword/${token}">reset Your password</a></b>`,
+    subject: "Reset Password",
+    text: `Click on the following link to reset your password: http://localhost:3000/resetpassword/${token}`,
+    html: `<b>Hello World ? <a href="http://localhost:3000/resetpassword/${token}">Reset Your Password</a></b>`,
   };
+
   const sendMail = async (transporter, msg) => {
     try {
       await transporter.sendMail(msg);
-      res.send("Email has been sent ! ");
-      console.log("Email has been sent !");
+      res.send("Email has been sent!");
+      console.log("Email has been sent!");
     } catch (error) {
       console.error(error);
+      res.status(500).send("Internal Server Error");
     }
   };
+
   sendMail(transporter, msg);
 };
+
 const ReceiveToken = async(req, res) =>{
     const token = req.params.token;
 
