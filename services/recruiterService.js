@@ -3,7 +3,8 @@ const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const fs = require('fs');
 const nodemailer = require("nodemailer");
-const bcrypt = require("bcrypt");
+const bcrypt = require('bcryptjs');
+
 async function getListeRecruiter() {
   try {
     const recruiters = await User.find({ role: "Recruiter" }).populate(

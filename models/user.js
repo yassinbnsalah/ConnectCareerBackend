@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
   gender: String,
   uniqueid: String,
   institution: String,
+  adress: String,
   password: String,
   Hpassword: String,
   jobTitle: String,

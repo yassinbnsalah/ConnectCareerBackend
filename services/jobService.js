@@ -2,6 +2,26 @@ const Entreprise = require("../models/entreprise");
 const Job = require("../models/job");
 const Skills = require("../models/skills");
 const User = require("../models/user");
+async function getJobsByEntrepriseId(entrepriseId) {
+  try {
+    
+    const jobs = await Job.find({
+      $or: [
+          { Relatedentreprise: entrepriseId }, 
+          { "recruiter.entreprise": entrepriseId } 
+      ]
+  })
+  .populate('skills', 'skillname')
+  .populate('recruiter', 'name');
+    if (!jobs || jobs.length === 0) {
+      return { status: 404, message: "No jobs found for this entreprise" };
+    }
+    return { status: 200, data: jobs };
+  } catch (error) {
+    console.error("Error fetching jobs by entreprise ID:", error);
+    return { status: 500, message: "Server Error" };
+  }
+}
 
 async function getJobByRecruiter(userId , res) {
   try {
@@ -178,4 +198,5 @@ module.exports = {
   getJobDetails,
   AddJob,
   getAllJob,
+  getJobsByEntrepriseId,
 };

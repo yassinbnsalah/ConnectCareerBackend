@@ -2,9 +2,10 @@ const User = require("../models/user");
 const fs = require("fs");
 const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
-const speakeasy = require("speakeasy");
-const QRCode = require("qrcode");
+const bcrypt = require('bcryptjs');
+
+const speakeasy = require('speakeasy');
+const QRCode = require('qrcode');
 const getUserByEmail = async (email) => {
   try {
     const user = await User.findOne({ email: email });
