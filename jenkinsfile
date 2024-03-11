@@ -18,11 +18,11 @@ pipeline{
        stage('SonarQube Analysis') {
             steps{
                 script { 
-                def scannerHome = tool 'scanner'
+                 def scannerHome = tool 'scanner'
             sh "${scannerHome}/bin/sonar-scanner \
                 -Dsonar.projectKey=twinerzBackend \
                 -Dsonar.sources=. \
-                -Dsonar.host.url=http://192.168.50.14:9000/ \
+                -Dsonar.host.url=http://192.168.50.14:9000 \
                 -Dsonar.login=3bcc2e54047dd2e2c89ca544cab2d31d6456c296"
         } 
     } 
