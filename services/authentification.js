@@ -133,6 +133,7 @@ const ForgetPassword = async (req, res) => {
 };
 async function sendMailtoResetPassword(email, fullname) {
   const token = jwt.sign({ email }, secretKey, { expiresIn: "1d" });
+
   // create reusable transporter object using the default SMTP transport
   const htmlTemplate = fs.readFileSync(
     "services/templateemails/resetpassword.html",
@@ -160,16 +161,21 @@ async function sendMailtoResetPassword(email, fullname) {
       .replace("{{username}}", fullname)
       .replace("{{token}}", token),
   };
+
   const sendMail = async (transporter, msg) => {
     try {
       await transporter.sendMail(msg);
       console.log("Email has been sent !");
     } catch (error) {
       console.error(error);
+      res.status(500).send("Internal Server Error");
     }
   };
+
   sendMail(transporter, msg);
-}
+};
+
+
 
 const ReceiveToken = async (req, res) => {
   const token = req.params.token;

@@ -25,7 +25,7 @@ async function getJobsByEntrepriseId(entrepriseId) {
 
 async function getJobByRecruiter(userId , res) {
   try {
-    const jobs = await Job.find({ recruiter: userId });
+    const jobs = await Job.find({ recruiter: userId }).populate("recruiter");
     if (!jobs) {
       return res.status(404).json({ message: "No jobs found for this user" });
     }
