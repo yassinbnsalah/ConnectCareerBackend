@@ -27,10 +27,11 @@ pipeline{
                 } 
             }   
 
-        stage('Build application') {
+
+        stage('Building images (node and mongo)') {
             steps{
                 script {
-                    sh('npm run build-dev  ')
+                    sh('docker-compose build')
                 }
             }
         }
