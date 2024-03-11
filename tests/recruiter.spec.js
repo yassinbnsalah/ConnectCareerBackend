@@ -10,8 +10,8 @@ describe("getRecruiterDetails function", () => {
     const recruiterData = { _id: recruiterId, firstname: "ramla" };
     User.findById = async (id) => {
       return recruiterData;
-    };
-
+    }; 
+ 
     const recruiterDetails = await getRecruiterDetails(recruiterId);
 
     assert.deepStrictEqual(recruiterDetails, recruiterData);
