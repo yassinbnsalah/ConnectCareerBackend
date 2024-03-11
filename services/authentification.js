@@ -8,7 +8,7 @@ const speakeasy = require('speakeasy');
 const QRCode = require('qrcode');
 const getUserByEmail = async (email) => {
   try {
-    const user = await User.findOne({ email: email });
+    const user =  User.findOne({ email: email });
     return user;
   } catch (error) {
     console.error(error);
@@ -19,7 +19,7 @@ const Authentification = async (req, res) => {
   try {
     console.log("************************************************");
     const { email, password, tokens } = req.body;
-    const user = await User.findOne({ email }).populate("entreprise");
+    const user =  User.findOne({ email }).populate("entreprise");
 
     if (!user) {
       return res.status(401).json({ error: "User not found" });
@@ -59,7 +59,7 @@ const Authentification = async (req, res) => {
 
 const CheckProgress = async (user) => {
   let progress = 0;
-  if (user.firstname && user.firstname) {
+  if (user.firstname && user.lastname) {
     progress = progress + 10;
   }
   if (user.phoneNumber) {
@@ -92,7 +92,7 @@ const AuthentificationAdmin = async (req, res) => {
     const { email, password } = req.body;
     const role = "Admin";
     // Find the user by username
-    const user = await User.findOne({ email, role });
+    const user =  User.findOne({ email, role });
     if (!user) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
@@ -120,7 +120,7 @@ const ForgetPassword = async (req, res) => {
   try {
     console.log("Received request to reset password:", req.body.email);
     const { email } = req.body;
-    const user = await User.findOne({ email: email });
+    const user =  User.findOne({ email: email });
     if (!user) {
       return res.status(404).send("User not found");
     }
@@ -189,7 +189,7 @@ const ReceiveToken = async (req, res) => {
     try {
       const newPassword = req.body.newPassword;
       let Hpassword = await bcrypt.hash(newPassword, 10);
-      const updatedUser = await User.findOneAndUpdate(
+      const updatedUser =  User.findOneAndUpdate(
         { email: userEmail },
         { password: newPassword, Hpassword: Hpassword },
         { new: true }
@@ -217,7 +217,7 @@ const UpdatePassword = async (req, res) => {
   try {
     const { newPassword } = req.body;
     let Hpassword = await bcrypt.hash(newPassword, 10);
-    const updatedUser = await User.findOneAndUpdate(
+    const updatedUser =  User.findOneAndUpdate(
       { email: email },
       { password: newPassword, Hpassword: Hpassword },
       { new: true }
@@ -241,7 +241,7 @@ const Ajouter2FA = async (req, res) => {
   try {
     const secret = speakeasy.generateSecret({ length: 20 });
     try {
-      qrCodeUrl = await new Promise((resolve, reject) => {
+      let qrCodeUrl = await new Promise((resolve, reject) => {
         QRCode.toDataURL(secret.otpauth_url, (err, image_data) => {
           if (err) {
             console.error(err);
@@ -257,7 +257,7 @@ const Ajouter2FA = async (req, res) => {
       return res.status(500).send("Internal Server Error");
     }
 
-    const updatedUser = await User.findOneAndUpdate(
+    const updatedUser =  User.findOneAndUpdate(
       { email: email },
       {
         TwoFactorAuthentication: true,
