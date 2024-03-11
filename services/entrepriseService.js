@@ -125,7 +125,7 @@ async function CreateEntreprise(req, res, admin) {
       CompanyLogo,
       CompanyCity,
     });
-    s;
+    
     await entreprise.save();
   } catch (error) {
     console.error(error);
