@@ -8,7 +8,7 @@ const speakeasy = require('speakeasy');
 const QRCode = require('qrcode');
 const getUserByEmail = async (email) => {
   try {
-    const user =  User.findOne({ email: email });
+    const user = await User.findOne({ email: email });
     return user;
   } catch (error) {
     console.error(error);
@@ -19,7 +19,7 @@ const Authentification = async (req, res) => {
   try {
     console.log("************************************************");
     const { email, password, tokens } = req.body;
-    const user =  User.findOne({ email }).populate("entreprise");
+    const user = await User.findOne({ email }).populate("entreprise");
 
     if (!user) {
       return res.status(401).json({ error: "User not found" });
@@ -55,7 +55,7 @@ const Authentification = async (req, res) => {
     console.error(error);
     res.status(500).json({ error: "Error logging in" });
   }
-};
+};s
 
 const CheckProgress = async (user) => {
   let progress = 0;
@@ -92,7 +92,7 @@ const AuthentificationAdmin = async (req, res) => {
     const { email, password } = req.body;
     const role = "Admin";
     // Find the user by username
-    const user =  User.findOne({ email, role });
+    const user =  await User.findOne({ email, role });
     if (!user) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
@@ -120,7 +120,7 @@ const ForgetPassword = async (req, res) => {
   try {
     console.log("Received request to reset password:", req.body.email);
     const { email } = req.body;
-    const user =  User.findOne({ email: email });
+    const user = await User.findOne({ email: email });
     if (!user) {
       return res.status(404).send("User not found");
     }
@@ -189,7 +189,7 @@ const ReceiveToken = async (req, res) => {
     try {
       const newPassword = req.body.newPassword;
       let Hpassword = await bcrypt.hash(newPassword, 10);
-      const updatedUser =  User.findOneAndUpdate(
+      const updatedUser =  await User.findOneAndUpdate(
         { email: userEmail },
         { password: newPassword, Hpassword: Hpassword },
         { new: true }
@@ -217,7 +217,7 @@ const UpdatePassword = async (req, res) => {
   try {
     const { newPassword } = req.body;
     let Hpassword = await bcrypt.hash(newPassword, 10);
-    const updatedUser =  User.findOneAndUpdate(
+    const updatedUser = await User.findOneAndUpdate(
       { email: email },
       { password: newPassword, Hpassword: Hpassword },
       { new: true }
@@ -257,7 +257,7 @@ const Ajouter2FA = async (req, res) => {
       return res.status(500).send("Internal Server Error");
     }
 
-    const updatedUser =  User.findOneAndUpdate(
+    const updatedUser = await User.findOneAndUpdate(
       { email: email },
       {
         TwoFactorAuthentication: true,
