@@ -15,17 +15,13 @@ pipeline{
                 }
             }
         }
-       stage('SonarQube Analysis') {
-            steps{
-                script { 
-                    def scannerHome = tool 'scanner'
-                        withSonarQubeEnv {
-                            sh "${scannerHome}/bin/sonar-scanner \
-                                -Dsonar.projectKey=twinerzBackend"
+          stage("MVN SONARQUBE"){
+                    steps{
+                        withSonarQubeEnv(installationName: 'scanner') {
+                        sh "mvn sonar:sonar"
                         }
-                    } 
+                    }
                 } 
-            }   
 
         stage('Build application') {
             steps{
