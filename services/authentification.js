@@ -55,7 +55,7 @@ const Authentification = async (req, res) => {
     console.error(error);
     res.status(500).json({ error: "Error logging in" });
   }
-};s
+};
 
 const CheckProgress = async (user) => {
   let progress = 0;
