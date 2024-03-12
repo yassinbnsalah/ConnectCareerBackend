@@ -91,70 +91,52 @@ const deleteEducationById = async (req, res) => {
 const updateEducation = async (req, res, admin) => {
   try {
     const { uni_name, diplome, startedOn, endAt } = req.body;
+    const educationId = req.params.educationId;
 
-    let Attestation = ""; // Default value is an empty string
+    let attestationURL = ""; // Initialize an empty string for the attestation URL
 
-    // Check if attestation file is provided in the request
+    // Check if an attestation file is provided in the request
     if (req.files && req.files["attestation"] && req.files["attestation"][0]) {
       const attestationFile = req.files["attestation"][0];
       const AttestationBucket = admin.storage().bucket();
-      // Define the path where you want to store the resume files
-      const folderName = "attestation";
-      const fileName = attestationFile.originalname;
-      const fileFullPath = `${folderName}/${fileName}`;
+      const fileFullPath = `attestation/${attestationFile.originalname}`;
 
-      const AttestationFileObject = AttestationBucket.file(fileFullPath);
+      // Upload the file to Firebase Storage
+      const uploadStream = AttestationBucket.file(fileFullPath).createWriteStream();
+      uploadStream.end(attestationFile.buffer);
 
-      await AttestationFileObject.createWriteStream().end(
-        attestationFile.buffer
-      );
+      // Await the 'finish' event of the upload stream to ensure the file is uploaded
+      await new Promise((resolve, reject) => {
+        uploadStream.on('finish', resolve);
+        uploadStream.on('error', reject);
+      });
 
-      // Update attestation only if a new file is provided
-      Attestation = `https://firebasestorage.googleapis.com/v0/b/${
-        AttestationBucket.name
-      }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
+      // Construct the URL for the uploaded attestation
+      attestationURL = `https://firebasestorage.googleapis.com/v0/b/${AttestationBucket.name}/o/${encodeURIComponent(fileFullPath)}?alt=media`;
     }
 
-    // Assuming you have an identifier for the education, like an ID
-    const educationId = req.params.educationId;
+    // Update the education document
+    const update = {
+      ...(uni_name && { uni_name }),
+      ...(diplome && { diplome }),
+      ...(startedOn && { startedOn }),
+      ...(endAt && { endAt }),
+      ...(attestationURL && { Attestation: attestationURL }), // Ensure this matches your schema field names
+    };
 
-    // Find the education by ID
-    const existingEducation = await Education.findById(educationId);
+    const updatedEducation = await Education.findByIdAndUpdate(educationId, update, { new: true });
 
-    if (!existingEducation) {
+    if (!updatedEducation) {
       return res.status(404).json({ message: "Education not found" });
     }
 
-    // Update education fields if provided
-    if (uni_name) {
-      existingEducation.uni_name = uni_name;
-    }
-    if (diplome) {
-      existingEducation.diplome = diplome;
-    }
-    if (startedOn) {
-      existingEducation.startedOn = startedOn;
-    }
-    if (endAt) {
-      existingEducation.endAt = endAt;
-    }
-
-    // Update attestation only if a new file is provided
-    if (Attestation) {
-      existingEducation.Attestation = Attestation;
-    }
-
-    // Save the updated Education
-    await existingEducation.save();
-
-    res.status(200).json({ message: "Education updated successfully" });
+    res.status(200).json({ message: "Education updated successfully", education: updatedEducation });
   } catch (error) {
     console.error("Error updating education:", error);
-    res
-      .status(500)
-      .json({ message: "An error occurred while updating the Education" });
+    res.status(500).json({ message: "An error occurred while updating the Education" });
   }
 };
+
 module.exports = {
   CreateEducation,
   getListOfEducation,
