@@ -1,24 +1,32 @@
 const path = require('path');
 
 module.exports = {
-  entry: './app.js', // Entry point of your application
+  entry: './app.js', // Point d'entrée de votre application
   output: {
-    path: path.resolve(__dirname, 'dist'), // Output directory
-    filename: 'bundle.js' // Output bundle name
+    path: path.resolve(__dirname, 'dist'), // Répertoire de sortie
+    filename: 'bundle.js' // Nom du bundle de sortie
   },
   module: {
     rules: [
       {
-        test: /\.js$/, // Apply this rule to .js files
-        exclude: /node_modules/, // Exclude node_modules directory
+        test: /\.js$/, // Appliquer cette règle aux fichiers .js
+        exclude: /node_modules/, // Exclure le répertoire node_modules
         use: {
-          loader: 'babel-loader', // Use babel-loader for transpilation
+          loader: 'babel-loader', // Utiliser babel-loader pour la transpilation
           options: {
-            presets: ['@babel/preset-env'] // Use @babel/preset-env for ES6+ to ES5 conversion
+            presets: ['@babel/preset-env'] // Utiliser @babel/preset-env pour la conversion de ES6+ en ES5
           }
         }
       }
     ]
+  },
+  resolve: {
+    fallback: {
+      "crypto": require.resolve("crypto-browserify"),
+      "stream": require.resolve("stream-browserify"),
+      "path": require.resolve("path-browserify"),
+      "fs": false,
+      "util": require.resolve("util/") // Ajout de fallback pour 'util'
+    }
   }
-  
 };
