@@ -15,6 +15,13 @@ pipeline{
                 }
             }
         }
+        stage('Jacoco Reorts')
+        {
+            steps{
+                jacoco()
+                echo "Publishing jacoco code coverage reports"
+            }
+        }
        stage('SonarQube Analysis') {
             steps{
                 script { 
