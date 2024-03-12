@@ -148,8 +148,8 @@ async function sendMailtorecruiter(email,fullname) {
 }
 async function getRecruiterDetails(recruiterId) {
   try {
-    const recruiter = await User.findById(recruiterId).populate("entreprise");
-    return recruiter;
+   return await User.findById(recruiterId).populate("entreprise");
+
   } catch (error) {
     console.error(error);
     throw new Error("Internal Server Error");

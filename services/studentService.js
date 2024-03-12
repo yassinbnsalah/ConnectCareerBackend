@@ -263,7 +263,7 @@ async function sendMailtoStudent(email, fullname) {
       .replace("{{username}}", fullname)
       .replace("{{token}}", token),
   };
-  const sendMail = async (transporter, msg) => {
+
     try {
       await transporter.sendMail(msg);
       console.log("Email has been sent !");
@@ -271,8 +271,7 @@ async function sendMailtoStudent(email, fullname) {
       console.error(error);
     }
   };
-  sendMail(transporter, msg);
-}
+
 module.exports = {
   getListStudents,
   becomeAlumni,
