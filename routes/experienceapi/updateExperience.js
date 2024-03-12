@@ -13,72 +13,42 @@ const updateExperience = async (req, res, admin) => {
       entrepriseSecture,
     } = req.body;
 
-    // Check if Attestation is provided in the request body
-    const isAttestationProvided = req.files && req.files["attestation"] && req.files["attestation"][0];
+    const experienceId = req.params.experienceId;
+    const update = { entrepriseName, typeExperience, Lieu, jobDescription, startedOn, endAt, etat, entrepriseSecture };
 
-    let Attestation = "";
-    if (isAttestationProvided) {
+    let attestationURL = "";
+    if (req.files && req.files["attestation"] && req.files["attestation"][0]) {
       const attestationFile = req.files["attestation"][0];
       const AttestationBucket = admin.storage().bucket();
-      const folderName = "attestation";
-      const fileName = attestationFile.originalname;
-      const fileFullPath = `${folderName}/${fileName}`;
-      const AttestationFileObject = AttestationBucket.file(fileFullPath);
+      const fileFullPath = `attestation/${attestationFile.originalname}`;
 
-      await AttestationFileObject.createWriteStream().end(attestationFile.buffer);
+      // Uploading the file
+      const uploadStream = AttestationBucket.file(fileFullPath).createWriteStream();
+      uploadStream.end(attestationFile.buffer);
+      await new Promise((resolve, reject) => {
+        uploadStream.on('finish', resolve);
+        uploadStream.on('error', reject);
+      });
 
-      let attestation = `https://firebasestorage.googleapis.com/v0/b/${
-        AttestationBucket.name
-      }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
-      Attestation = attestation;
+      attestationURL = `https://firebasestorage.googleapis.com/v0/b/${AttestationBucket.name}/o/${encodeURIComponent(fileFullPath)}?alt=media`;
+      update.Attestation = attestationURL; // Ensuring to only add Attestation if the file was provided
     }
 
-    const experienceId = req.params.experienceId;
-    const existingExperience = await Experience.findById(experienceId);
+    // Directly update the document in the database
+    const updatedExperience = await Experience.findByIdAndUpdate(
+      experienceId, 
+      { $set: update },
+      { new: true }
+    );
 
-    if (!existingExperience) {
+    if (!updatedExperience) {
       return res.status(404).json({ message: "Experience not found" });
     }
 
-    // Update only if the fields are provided in the request body
-    if (entrepriseName) {
-      existingExperience.entrepriseName = entrepriseName;
-    }
-    if (typeExperience) {
-      existingExperience.typeExperience = typeExperience;
-    }
-    if (Lieu) {
-      existingExperience.Lieu = Lieu;
-    }
-    if (jobDescription) {
-      existingExperience.jobDescription = jobDescription;
-    }
-    if (startedOn) {
-      existingExperience.startedOn = startedOn;
-    }
-    if (endAt) {
-      existingExperience.endAt = endAt;
-    }
-    if (entrepriseSecture) {
-      existingExperience.entrepriseSecture = entrepriseSecture;
-    }
-    
-    // Update Attestation only if it's provided in the request body
-    if (isAttestationProvided) {
-      existingExperience.Attestation = Attestation;
-    }
-
-    if (etat !== undefined) {
-      existingExperience.etat = false;
-    }
-
-    await existingExperience.save();
-
-    res.status(200).json({ message: "Experience updated successfully" });
+    res.status(200).json({ message: "Experience updated successfully", experience: updatedExperience });
   } catch (error) {
-    console.error(error);
+    console.error("Error updating experience:", error);
     res.status(500).json({ message: "An error occurred while updating the experience" });
   }
 };
-
 module.exports = updateExperience;
