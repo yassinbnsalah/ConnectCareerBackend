@@ -236,9 +236,10 @@ async function sendMailtoStudent(email, fullname) {
     },
     to: `${email}`,
     subject: "CONNECTCAREER Account Confirmation",
-    html: htmlTemplate.replace("{{username}}", fullname).replace("{{token}}", token),
+    html: htmlTemplate
+      .replace("{{username}}", fullname)
+      .replace("{{token}}", token),
   };
-  
   try {
     await transporter.sendMail(msg);
     console.log("Email has been sent !");
