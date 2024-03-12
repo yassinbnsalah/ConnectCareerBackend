@@ -33,7 +33,7 @@ pipeline {
                     ]) {
                         sh '''
                             echo $REGISTRY_USERNAME
-                            docker login -u $REGISTRY_USERNAME --password-stdin $registry <<< "$REGISTRY_PASSWORD"
+                            docker login -u $REGISTRY_USERNAME --password-stdin $registry <<< $REGISTRY_PASSWORD
                             docker push $registry/nodemongoapp:5.0
                         '''
                     }
