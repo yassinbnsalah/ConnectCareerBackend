@@ -15,23 +15,29 @@ pipeline {
                 }
             }
         }
-        stage('SonarQube Analysis') {
+        stage('Jacoco Reports') {
             steps {
-                script { 
-                    def scannerHome = tool 'SonarQubeScanner'
-                    sh "${scannerHome}/bin/sonar-scanner \
-                        -Dsonar.projectKey=twinerzBackend \
-                        -Dsonar.sources=. \
-                        -Dsonar.host.url=http://192.168.50.14:9000 \
-                        -Dsonar.login=3bcc2e54047dd2e2c89ca544cab2d31d6456c296 \
-                        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info"
-                }
+                jacoco(execPattern: '**/build/reports/jacoco/test/*.xml')
+                echo "Publishing Jacoco code coverage reports"
             }
         }
+     stage('SonarQube Analysis') {
+    steps {
+        script { 
+            def scannerHome = tool 'scanner'
+            sh "${scannerHome}/bin/sonar-scanner \
+                -Dsonar.projectKey=twinerzBackend \
+                -Dsonar.sources=. \
+                -Dsonar.host.url=http://192.168.50.14:9000 \
+                -Dsonar.login=3bcc2e54047dd2e2c89ca544cab2d31d6456c296 \
+                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info"
+        } 
+    } 
+}
         stage('Fix Coverage Report Style') {
             steps {
                 script {
-                    sh "if [ -f coverage/lcov-report/base.css ]; then sed -i 's/font-family: Helvetica Neue, Helvetica, Arial;/font-family: Helvetica Neue, Helvetica, Arial, sans-serif;/g' coverage/lcov-report/base.css; fi"
+                    sh "sed -i 's/font-family: Helvetica Neue, Helvetica, Arial;/font-family: Helvetica Neue, Helvetica, Arial, sans-serif;/g' coverage/lcov-report/base.css"
                 }
             }
         }
