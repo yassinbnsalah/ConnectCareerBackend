@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         registryCredentials = 'nexus'
-        registry = '172.16.5.241:8081'
+        registry = '172.16.5.241:8083'
     }
 
     stages {
@@ -24,19 +24,19 @@ pipeline {
                 sh 'docker compose build'
             }
         }
-stage('Deploy to Nexus') {
-    steps {
-        script {
-            withCredentials([
-                usernamePassword(credentialsId: registryCredentials, passwordVariable: 'REGISTRY_PASSWORD', usernameVariable: 'REGISTRY_USERNAME')
-            ]) {
-                sh '''
-                    echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin $registry
-                    docker push $registry/nodemongoapp:5.0
-                '''
+        stage('Deploy to Nexus') {
+            steps {
+                script {
+                    withCredentials([
+                        usernamePassword(credentialsId: registryCredentials, passwordVariable: 'REGISTRY_PASSWORD', usernameVariable: 'REGISTRY_USERNAME')
+                    ]) {
+                        sh '''
+                            echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin $registry
+                            docker push $registry/nodemongoapp:5.0
+                        '''
+                    }
+                }
             }
         }
-    }
-}
     }
 }
