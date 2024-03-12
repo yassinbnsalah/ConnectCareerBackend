@@ -35,6 +35,15 @@ pipeline {
                 sh 'docker compose build'
             }
         }
+        stage('Deploy to Nexus') {
+            steps{ 
+                script {
+                    docker.withRegistry("http://${register}/", registryCredentials ) {
+                    sh('docker push $registry/nodemongoapp:5.0 ')
+                    }
+                }
+            }
+        }
 
     }
 }
