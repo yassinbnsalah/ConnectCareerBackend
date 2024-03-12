@@ -42,8 +42,12 @@ pipeline{
         stage('Deploy to Nexus') {
             steps{ 
                 script {
+                       withCredentials([
+                usernamePassword(credentialsId: 'nexus', passwordVariable: 'esprit', usernameVariable: 'admin')
+            ])
                     docker.withRegistry("http://"+registry,
-                    registryCredentials ) {
+                    , 'docker-credentials' ) {
+                        sh("docker login -u admin -p esprit 172.16.5.241:8081")
                         sh('docker push $registry/nodemongoapp:5.0 ')
                         }
                     }
