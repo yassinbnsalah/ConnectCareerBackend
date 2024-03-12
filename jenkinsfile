@@ -1,37 +1,43 @@
-pipeline{
+pipeline {
     agent any
     stages {
         stage('Install dependencies') {
-            steps{
+            steps {
                 script {
                     sh('npm install')
                 }
             }
         }
         stage('Unit Test') {
-            steps{
+            steps {
                 script {
                     sh('npm test')
                 }
             }
         }
-       stage('SonarQube Analysis') {
-            steps{
+        stage('Jacoco Reports') {
+            steps {
+                jacoco(execPattern: '**/build/reports/jacoco/test/*.xml')
+                echo "Publishing Jacoco code coverage reports"
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
                 script { 
-                 def scannerHome = tool 'scanner'
-            sh "${scannerHome}/bin/sonar-scanner \
-                -Dsonar.projectKey=twinerzBackend \
-                -Dsonar.sources=. \
-                -Dsonar.host.url=http://192.168.50.14:9000 \
-                -Dsonar.login=3bcc2e54047dd2e2c89ca544cab2d31d6456c296"
-        } 
-    } 
-}
-
+                    def scannerHome = tool 'scanner'
+                    sh "${scannerHome}/bin/sonar-scanner \
+                        -Dsonar.projectKey=twinerzBackend \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=http://192.168.50.14:9000 \
+                        -Dsonar.login=3bcc2e54047dd2e2c89ca544cab2d31d6456c296 \
+                        -Dsonar.jacoco.reportPaths=**/build/reports/jacoco/test/*.xml"
+                } 
+            } 
+        }
         stage('Build application') {
-            steps{
+            steps {
                 script {
-                    sh('npm run build-dev  ')
+                    sh('npm run build-dev')
                 }
             }
         }
