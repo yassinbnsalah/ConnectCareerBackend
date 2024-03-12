@@ -29,7 +29,7 @@ pipeline {
             steps {
                 script {
                     withCredentials([
-                        usernamePassword(credentialsId: 'nexus-credentials', passwordVariable: 'REGISTRY_PASSWORD', usernameVariable: 'REGISTRY_USERNAME')
+                        usernamePassword(credentialsId:registryCredentials, passwordVariable: 'REGISTRY_PASSWORD', usernameVariable: 'REGISTRY_USERNAME')
                     ]) {
                         sh '''
                             docker login -u $REGISTRY_USERNAME --password-stdin $registry <<< "$REGISTRY_PASSWORD"
