@@ -26,7 +26,23 @@ pipeline{
                     } 
                 } 
             }   
-
+        stage('Build') {
+            steps {
+                script {
+                    docker.build("backend-connctcareer", "-f Dockerfile .")
+                }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                script {
+                    docker.withRegistry('http://192.168.33.10:8083', 'docker-credentials') {
+                        docker.image("backend-connctcareer").push()
+                    }
+                    sh('docker-compose up -d')
+                }
+            }
+        }
 
         stage('Building images (node and mongo)') {
             steps{
