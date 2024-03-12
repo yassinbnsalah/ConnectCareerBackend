@@ -102,8 +102,8 @@ const CreateStudent = async (req, res, admin) => {
 
 async function getStudentDetails(studentId) {
   try {
-    const student = await User.findById(studentId);
-    return student;
+  return await User.findById(studentId);
+
   } catch (error) {
     console.error(error);
     throw new Error("Internal Server Error");
@@ -111,8 +111,8 @@ async function getStudentDetails(studentId) {
 }
 async function getListStudents() {
   try {
-    const students = await User.find({ role: "Student" });
-    return students;
+return await User.find({ role: "Student" });
+
   } catch (error) {
     console.error(error);
     throw new Error("Internal Server Error");
@@ -221,13 +221,12 @@ async function becomeAlumni(studentId, req, res, admin) {
       }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
     }
 
-    const updatedStudent = await User.findByIdAndUpdate(
+    return await User.findByIdAndUpdate(
       studentId,
       { $set: { diploma, state, request: true } },
       { new: true }
     );
 
-    return updatedStudent;
   } catch (error) {
     console.error(error);
     throw new Error("Internal Server Error");
