@@ -13,7 +13,7 @@ services:
       - ./data/dump:/dump
   app:
     build: .
-    image: 172.16.5.241:8085/nodemongoapp:5.0
+    image: 172.16.5.241:8083/nodemongoapp:5.0
     restart: always
     container_name: back
     ports:
