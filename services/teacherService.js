@@ -2,7 +2,7 @@ const User = require("../models/user");
 
 async function getListTeachers() {
     try {
-      return await User.find({ role: "Teacher" });
+      return  User.find({ role: "Teacher" });
 
     } catch (error) {
       console.error(error);
