@@ -25,14 +25,16 @@ pipeline {
             }
         }
 
-        stage('Deploy to Nexus') {
+       stage('Deploy to Nexus') {
             steps {
                 script {
                     withCredentials([
-                        usernamePassword(credentialsId: registryCredentials, passwordVariable: 'REGISTRY_PASSWORD', usernameVariable: 'REGISTRY_USERNAME')
+                        usernamePassword(credentialsId: 'nexus-credentials', passwordVariable: 'REGISTRY_PASSWORD', usernameVariable: 'REGISTRY_USERNAME')
                     ]) {
-                        sh "echo $REGISTRY_PASSWORD | docker login -u $REGISTRY_USERNAME --password-stdin $registry"
-                        sh "docker push $registry/nodemongoapp:5.0"
+                        sh '''
+                            docker login -u $REGISTRY_USERNAME --password-stdin $registry <<< "$REGISTRY_PASSWORD"
+                            docker push $registry/nodemongoapp:5.0
+                        '''
                     }
                 }
             }
