@@ -18,7 +18,8 @@ pipeline {
         stage('Jacoco Reports') {
             steps {
                 jacoco(execPattern: '**/build/reports/jacoco/test/*.xml')
-                echo "Publishing Jacoco code coverage reports"
+                echo "body { font-family: Helvetica Neue, Helvetica, Arial, sans-serif; }" >> coverage/lcov-report/base.css
+
             }
         }
      stage('SonarQube Analysis') {
