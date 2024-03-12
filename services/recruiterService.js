@@ -1,19 +1,19 @@
-const Entreprise = require("../models/entreprise");
-const User = require("../models/user");
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 const fs = require('fs');
-const nodemailer = require("nodemailer");
+const nodemailer = require('nodemailer');
 const bcrypt = require('bcryptjs');
+const User = require('../models/user');
+const Entreprise = require('../models/entreprise');
 
 async function getListeRecruiter() {
   try {
-    const recruiters = await User.find({ role: "Recruiter" }).populate(
-      "entreprise"
+    const recruiters = await User.find({ role: 'Recruiter' }).populate(
+      'entreprise',
     );
     return recruiters;
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: 'Internal Server Error' });
     return res;
   }
 }
@@ -36,12 +36,12 @@ async function createRecruiter(req, res, admin) {
       matriculeFiscale,
       description,
     } = req.body;
-    const role = "Recruiter";
-    let profileImage = "";
-    let CompanyLogo = "";
-    if (req.files["profileImage"]) {
-      const profileImageFile = req.files["profileImage"][0];
-      const imageExtension = profileImageFile.originalname.split(".").pop();
+    const role = 'Recruiter';
+    let profileImage = '';
+    let CompanyLogo = '';
+    if (req.files.profileImage) {
+      const profileImageFile = req.files.profileImage[0];
+      const imageExtension = profileImageFile.originalname.split('.').pop();
       const imageName = `${firstname}${lastname}.${imageExtension}`;
 
       const profileImageBucket = admin.storage().bucket();
@@ -51,14 +51,14 @@ async function createRecruiter(req, res, admin) {
         .end(profileImageFile.buffer);
       profileImage = `https://firebasestorage.googleapis.com/v0/b/${profileImageBucket.name}/o/${profileImageFileObject.name}`;
     }
-    if (req.files["CompanyLogo"]) {
-      const CompanyLogoFile = req.files["CompanyLogo"][0];
+    if (req.files.CompanyLogo) {
+      const CompanyLogoFile = req.files.CompanyLogo[0];
       const CompanyLogoBucket = admin.storage().bucket();
       const CompanyLogoFileObject = CompanyLogoBucket.file(
-        CompanyLogoFile.originalname
+        CompanyLogoFile.originalname,
       );
       await CompanyLogoFileObject.createWriteStream().end(
-        CompanyLogoFile.buffer
+        CompanyLogoFile.buffer,
       );
       CompanyLogo = `https://firebasestorage.googleapis.com/v0/b/${CompanyLogoBucket.name}/o/${CompanyLogoFileObject.name}`;
     }
@@ -72,7 +72,7 @@ async function createRecruiter(req, res, admin) {
       CompanyLogo,
     });
     await entreprise.save();
-    let Hpassword = await bcrypt.hash(password, 10);
+    const Hpassword = await bcrypt.hash(password, 10);
     const newUser = new User({
       firstname,
       lastname,
@@ -89,7 +89,7 @@ async function createRecruiter(req, res, admin) {
       isVerify: false,
     });
     await newUser.save();
-   // sendMailtorecruiter(email,firstname+lastname);
+    // sendMailtorecruiter(email,firstname+lastname);
   } catch (error) {
     console.error(error);
   }
@@ -97,49 +97,48 @@ async function createRecruiter(req, res, admin) {
 
 async function verifyrecruiter(email) {
   try {
-    const recruiter = await User.find({ email: email });
+    const recruiter = await User.find({ email });
     console.log(recruiter);
     if (recruiter.length != 0) {
       return true;
-    } else {
-      return false;
     }
+    return false;
   } catch (error) {
     console.error(error);
   }
 }
-const secretKey = "qsdsqdqdssqds";
-async function sendMailtorecruiter(email,fullname) {
-  const token = jwt.sign({ email }, secretKey, { expiresIn: "1d" });
+const secretKey = 'qsdsqdqdssqds';
+async function sendMailtorecruiter(email, fullname) {
+  const token = jwt.sign({ email }, secretKey, { expiresIn: '1d' });
   // create reusable transporter object using the default SMTP transport
   const htmlTemplate = fs.readFileSync(
-    "services/templateemails/confirmeMail.html",
-    "utf8"
+    'services/templateemails/confirmeMail.html',
+    'utf8',
   );
-  let transporter = nodemailer.createTransport({
-    service: "gmail",
-    host: "smtp.gmail.com",
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    host: 'smtp.gmail.com',
     port: 587,
     secure: false, // true for 465, false for other ports
     auth: {
-      user: "contact.fithealth23@gmail.com", // ethereal user
-      pass: "ebrh bilu ygsn zrkw", // ethereal password
+      user: 'contact.fithealth23@gmail.com', // ethereal user
+      pass: 'ebrh bilu ygsn zrkw', // ethereal password
     },
   });
 
   const msg = {
     from: {
-      name: "ConnectCareer Esprit",
-      address: "contact.fithealth23@gmail.com",
+      name: 'ConnectCareer Esprit',
+      address: 'contact.fithealth23@gmail.com',
     },
     to: `${email}`,
-    subject: "CONNECTCAREER Account Confirmation",
+    subject: 'CONNECTCAREER Account Confirmation',
     html: htmlTemplate.replace('{{username}}', fullname).replace('{{token}}', token),
   };
   const sendMail = async (transporter, msg) => {
     try {
       await transporter.sendMail(msg);
-      console.log("Email has been sent !");
+      console.log('Email has been sent !');
     } catch (error) {
       console.error(error);
     }
@@ -148,26 +147,26 @@ async function sendMailtorecruiter(email,fullname) {
 }
 async function getRecruiterDetails(recruiterId) {
   try {
-    const recruiter = await User.findById(recruiterId).populate("entreprise");
+    const recruiter = await User.findById(recruiterId).populate('entreprise');
     return recruiter;
   } catch (error) {
     console.error(error);
-    throw new Error("Internal Server Error");
+    throw new Error('Internal Server Error');
   }
 }
-async function updateRecruiter(req,res,admin) {
+async function updateRecruiter(req, res, admin) {
   try {
     console.log(req.body);
     const updatedRecruiter = await User.findByIdAndUpdate(
       req.params.recruiterId,
       { $set: req.body },
-      { new: true }
+      { new: true },
     );
-    let profileImage ="" ; 
-    if (req.files["profileImage"]) {
-      console.log("new Profile image");
-      const profileImageFile = req.files["profileImage"][0];
-      const imageExtension = profileImageFile.originalname.split(".").pop();
+    let profileImage = '';
+    if (req.files.profileImage) {
+      console.log('new Profile image');
+      const profileImageFile = req.files.profileImage[0];
+      const imageExtension = profileImageFile.originalname.split('.').pop();
       const imageName = `${req.body.email}.${imageExtension}`;
 
       const profileImageBucket = admin.storage().bucket();
@@ -176,15 +175,14 @@ async function updateRecruiter(req,res,admin) {
         .createWriteStream()
         .end(profileImageFile.buffer);
       profileImage = `https://firebasestorage.googleapis.com/v0/b/${profileImageBucket.name}/o/${profileImageFileObject.name}`;
-      updatedRecruiter.profileImage = profileImage
-      await updatedRecruiter.save()
+      updatedRecruiter.profileImage = profileImage;
+      await updatedRecruiter.save();
     }
-   
- 
+
     return updatedRecruiter;
   } catch (error) {
     console.error(error);
-    throw new Error("Internal Server Error");
+    throw new Error('Internal Server Error');
   }
 }
 module.exports = {

@@ -1,17 +1,17 @@
-const Experience = require("../models/experience");
+const Experience = require('../models/experience');
 
 const confirmedExperience = async (req, res, admin) => {
   try {
     const { etat } = req.body;
 
     // Assuming you have an identifier for the experience, like an ID
-    const experienceId = req.params.experienceId;
+    const { experienceId } = req.params;
 
     // Find the experience by ID
     const existingExperience = await Experience.findById(experienceId);
 
     if (!existingExperience) {
-      return res.status(404).json({ message: "Experience not found" });
+      return res.status(404).json({ message: 'Experience not found' });
     }
 
     // Update only the 'etat' property if it is provided in the request body
@@ -22,12 +22,12 @@ const confirmedExperience = async (req, res, admin) => {
     // Save the updated experience
     await existingExperience.save();
 
-    res.status(200).json({ message: "Experience updated successfully" });
+    res.status(200).json({ message: 'Experience updated successfully' });
   } catch (error) {
     console.error(error);
     res
       .status(500)
-      .json({ message: "An error occurred while updating the experience" });
+      .json({ message: 'An error occurred while updating the experience' });
   }
 };
 
@@ -49,22 +49,22 @@ const CreateExperience = async (req, res, admin) => {
 
     let Attestation = null; // Initialize Attestation to null
 
-    if (req.files && req.files["attestation"] && req.files["attestation"][0]) {
-      const attestationFile = req.files["attestation"][0];
+    if (req.files && req.files.attestation && req.files.attestation[0]) {
+      const attestationFile = req.files.attestation[0];
       const AttestationBucket = admin.storage().bucket();
 
       // Define the path where you want to store the resume files
-      const folderName = "attestation";
+      const folderName = 'attestation';
       const fileName = attestationFile.originalname;
       const fileFullPath = `${folderName}/${fileName}`;
 
       const AttestationFileObject = AttestationBucket.file(fileFullPath);
 
       await AttestationFileObject.createWriteStream().end(
-        attestationFile.buffer
+        attestationFile.buffer,
       );
 
-      let attestation = `https://firebasestorage.googleapis.com/v0/b/${
+      const attestation = `https://firebasestorage.googleapis.com/v0/b/${
         AttestationBucket.name
       }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
       Attestation = attestation;
@@ -80,12 +80,12 @@ const CreateExperience = async (req, res, admin) => {
       endAt: endAt || null,
       etat: false,
       entrepriseSecture,
-      Attestation: Attestation, 
+      Attestation,
     });
 
     await newExperience.save();
 
-    res.status(201).json({ message: "Experience créée avec succès" });
+    res.status(201).json({ message: 'Experience créée avec succès' });
   } catch (error) {
     console.error(error);
     res
@@ -98,19 +98,19 @@ const CreateExperience = async (req, res, admin) => {
 };
 
 const deleteExperienceById = async (req, res) => {
-  const experienceId = req.params.experienceId;
+  const { experienceId } = req.params;
 
   try {
     const deletedExperience = await Experience.findByIdAndDelete(experienceId);
 
     if (!deletedExperience) {
-      return res.status(404).json({ error: "Experience not found" });
+      return res.status(404).json({ error: 'Experience not found' });
     }
 
-    res.json({ message: "Experience deleted successfully", deletedExperience });
+    res.json({ message: 'Experience deleted successfully', deletedExperience });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -128,33 +128,32 @@ const updateExperience = async (req, res, admin) => {
     } = req.body;
 
     // Check if Attestation is provided in the request body
-    const isAttestationProvided =
-      req.files && req.files["attestation"] && req.files["attestation"][0];
+    const isAttestationProvided = req.files && req.files.attestation && req.files.attestation[0];
 
-    let Attestation = "";
+    let Attestation = '';
     if (isAttestationProvided) {
-      const attestationFile = req.files["attestation"][0];
+      const attestationFile = req.files.attestation[0];
       const AttestationBucket = admin.storage().bucket();
-      const folderName = "attestation";
+      const folderName = 'attestation';
       const fileName = attestationFile.originalname;
       const fileFullPath = `${folderName}/${fileName}`;
       const AttestationFileObject = AttestationBucket.file(fileFullPath);
 
       await AttestationFileObject.createWriteStream().end(
-        attestationFile.buffer
+        attestationFile.buffer,
       );
 
-      let attestation = `https://firebasestorage.googleapis.com/v0/b/${
+      const attestation = `https://firebasestorage.googleapis.com/v0/b/${
         AttestationBucket.name
       }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
       Attestation = attestation;
     }
 
-    const experienceId = req.params.experienceId;
+    const { experienceId } = req.params;
     const existingExperience = await Experience.findById(experienceId);
 
     if (!existingExperience) {
-      return res.status(404).json({ message: "Experience not found" });
+      return res.status(404).json({ message: 'Experience not found' });
     }
 
     // Update only if the fields are provided in the request body
@@ -189,45 +188,45 @@ const updateExperience = async (req, res, admin) => {
 
     await existingExperience.save();
 
-    res.status(200).json({ message: "Experience updated successfully" });
+    res.status(200).json({ message: 'Experience updated successfully' });
   } catch (error) {
     console.error(error);
     res
       .status(500)
-      .json({ message: "An error occurred while updating the experience" });
+      .json({ message: 'An error occurred while updating the experience' });
   }
 };
 const getListOfExperience = async (req, res) => {
-  const userId = req.params.userId;
+  const { userId } = req.params;
   try {
     const experiences = await Experience.find({ student: userId }).sort({ startedOn: -1 });
 
     res.json(experiences);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 const getListOfExperienceById = async (req, res) => {
-  const Id = req.params.Id;
-try {
-  const experiences = await Experience.findById( Id );
+  const { Id } = req.params;
+  try {
+    const experiences = await Experience.findById(Id);
 
-  if (!experiences || experiences.length === 0) {
-    return res.status(404).json({ error: 'Experiences not found' });
+    if (!experiences || experiences.length === 0) {
+      return res.status(404).json({ error: 'Experiences not found' });
+    }
+
+    res.json(experiences);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
-
-  res.json(experiences);
-} catch (error) {
-  console.error(error);
-  res.status(500).json({ error: 'Internal Server Error' });
-}
-}
+};
 module.exports = {
   confirmedExperience,
   CreateExperience,
   deleteExperienceById,
   updateExperience,
   getListOfExperience,
-  getListOfExperienceById
+  getListOfExperienceById,
 };

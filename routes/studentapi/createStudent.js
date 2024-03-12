@@ -1,7 +1,7 @@
-const User = require("../../models/user");
 const bcrypt = require('bcryptjs');
+const User = require('../../models/user');
 
-const { sendMailtoStudent } = require("../../services/studentService");
+const { sendMailtoStudent } = require('../../services/studentService');
 
 const CreateStudent = async (req, res, admin) => {
   try {
@@ -15,14 +15,14 @@ const CreateStudent = async (req, res, admin) => {
       uniqueid,
       institution,
       diploma,
- 
-    } = req.body;
-    const role = "Student";
-    let profileImage = "";
 
-    if (req.files["profileImage"]) {
-      const profileImageFile = req.files["profileImage"][0];
-      const imageExtension = profileImageFile.originalname.split(".").pop();
+    } = req.body;
+    const role = 'Student';
+    let profileImage = '';
+
+    if (req.files.profileImage) {
+      const profileImageFile = req.files.profileImage[0];
+      const imageExtension = profileImageFile.originalname.split('.').pop();
       const imageName = `${firstname}${lastname}.${imageExtension}`;
 
       const profileImageBucket = admin.storage().bucket();
@@ -33,9 +33,7 @@ const CreateStudent = async (req, res, admin) => {
       profileImage = `https://firebasestorage.googleapis.com/v0/b/${profileImageBucket.name}/o/${profileImageFileObject.name}`;
     }
 
-
-
-    let Hpassword = await bcrypt.hash(password, 10);
+    const Hpassword = await bcrypt.hash(password, 10);
     const newUser = new User({
       firstname,
       lastname,
@@ -48,16 +46,16 @@ const CreateStudent = async (req, res, admin) => {
       Hpassword,
       role,
       profileImage,
-      isVerify:0,
+      isVerify: 0,
       diploma,
 
     });
     await newUser.save();
-    sendMailtoStudent(email,firstname+lastname);
-    res.status(201).json({ message: "Utilisateur inscrit avec succès" });
+    sendMailtoStudent(email, firstname + lastname);
+    res.status(201).json({ message: 'Utilisateur inscrit avec succès' });
   } catch (error) {
     console.error(error);
   }
-}
+};
 
 module.exports = CreateStudent;

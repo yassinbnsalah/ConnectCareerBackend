@@ -1,6 +1,7 @@
 // models/User.js
-const mongoose = require("mongoose");
-const Entreprise = require("./entreprise");
+const mongoose = require('mongoose');
+const Entreprise = require('./entreprise');
+
 const { Schema } = mongoose;
 const userSchema = new mongoose.Schema({
   firstname: String,
@@ -34,20 +35,20 @@ const userSchema = new mongoose.Schema({
   skills: [
     {
       type: Schema.Types.ObjectId,
-      ref: "Skills",
+      ref: 'Skills',
     },
   ],
   nbapplies: { type: Number, default: 0 },
   nbopportunite: { type: Number, default: 0 },
   entreprise: {
     type: Schema.Types.ObjectId,
-    ref: "Entreprise",
+    ref: 'Entreprise',
   },
   hasEducation: { type: Boolean, default: false },
   hasExperience: { type: Boolean, default: false },
   profileProgress: { type: Number, default: 0 },
 });
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model('User', userSchema);
 
 module.exports = User;

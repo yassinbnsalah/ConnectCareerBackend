@@ -1,13 +1,16 @@
 const bcrypt = require('bcryptjs');
 
-const User = require("../models/user");
+const User = require('../models/user');
+
 const CreateAdmin = async (req, res) => {
   try {
-    const { firstname, lastname, email, password } = req.body;
+    const {
+      firstname, lastname, email, password,
+    } = req.body;
 
-    const role = "Admin";
+    const role = 'Admin';
     console.log(req.body);
-    let hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({
       firstname,
@@ -19,10 +22,10 @@ const CreateAdmin = async (req, res) => {
     });
 
     await newUser.save();
-    res.status(201).json({ message: "ADMIN inscrit avec succès" });
+    res.status(201).json({ message: 'ADMIN inscrit avec succès' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 

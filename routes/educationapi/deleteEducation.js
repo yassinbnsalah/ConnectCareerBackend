@@ -1,7 +1,7 @@
-const Education = require("../../models/education");
+const Education = require('../../models/education');
 
 const deleteEducationById = async (req, res) => {
-  const educationId = req.params.educationId;
+  const { educationId } = req.params;
 
   try {
     const deletedEducation = await Education.findByIdAndDelete(educationId);
@@ -15,6 +15,6 @@ const deleteEducationById = async (req, res) => {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
-}
+};
 
 module.exports = deleteEducationById;

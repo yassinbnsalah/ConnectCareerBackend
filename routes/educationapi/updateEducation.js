@@ -1,4 +1,4 @@
-const Education = require("../../models/education");
+const Education = require('../../models/education');
 
 const updateEducation = async (req, res, admin) => {
   try {
@@ -9,21 +9,21 @@ const updateEducation = async (req, res, admin) => {
       endAt,
     } = req.body;
 
-    let Attestation = ""; // Default value is an empty string
+    let Attestation = ''; // Default value is an empty string
 
     // Check if attestation file is provided in the request
-    if (req.files && req.files["attestation"] && req.files["attestation"][0]) {
-      const attestationFile = req.files["attestation"][0];
+    if (req.files && req.files.attestation && req.files.attestation[0]) {
+      const attestationFile = req.files.attestation[0];
       const AttestationBucket = admin.storage().bucket();
       // Define the path where you want to store the resume files
-      const folderName = "attestation";
+      const folderName = 'attestation';
       const fileName = attestationFile.originalname;
       const fileFullPath = `${folderName}/${fileName}`;
 
       const AttestationFileObject = AttestationBucket.file(fileFullPath);
 
       await AttestationFileObject.createWriteStream().end(
-        attestationFile.buffer
+        attestationFile.buffer,
       );
 
       // Update attestation only if a new file is provided
@@ -33,13 +33,13 @@ const updateEducation = async (req, res, admin) => {
     }
 
     // Assuming you have an identifier for the education, like an ID
-    const educationId = req.params.educationId;
+    const { educationId } = req.params;
 
     // Find the education by ID
     const existingEducation = await Education.findById(educationId);
 
     if (!existingEducation) {
-      return res.status(404).json({ message: "Education not found" });
+      return res.status(404).json({ message: 'Education not found' });
     }
 
     // Update education fields if provided
@@ -64,10 +64,10 @@ const updateEducation = async (req, res, admin) => {
     // Save the updated Education
     await existingEducation.save();
 
-    res.status(200).json({ message: "Education updated successfully" });
+    res.status(200).json({ message: 'Education updated successfully' });
   } catch (error) {
-    console.error("Error updating education:", error);
-    res.status(500).json({ message: "An error occurred while updating the Education" });
+    console.error('Error updating education:', error);
+    res.status(500).json({ message: 'An error occurred while updating the Education' });
   }
 };
 
