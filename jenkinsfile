@@ -40,8 +40,8 @@ pipeline {
                     registryCredentials ) {
                     sh('docker push $registry/nodemongoapp:5.0 ')
                     }
+                }
             }
-
         }
     }
 }
