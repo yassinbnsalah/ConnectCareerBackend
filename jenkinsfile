@@ -28,10 +28,14 @@ pipeline{
     } 
 }
 
-        stage('Build application') {
-            steps{
+      stage('Build application') {
+            steps {
                 script {
-                    sh('npm run build-dev  ')
+                    // Change to project directory
+                    dir('C:\Users\fedi0\OneDrive\Bureau\PI DEV TWINERZ\TWINERZ-ConnectCareerBackend') {
+                        // Execute npm build command
+                        sh 'npm run build-dev'
+                    }
                 }
             }
         }
