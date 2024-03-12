@@ -33,41 +33,23 @@ const confirmedExperience = async (req, res, admin) => {
 
 const CreateExperience = async (req, res, admin) => {
   try {
-    const {
-      student,
-      entrepriseName,
-      typeExperience,
-      Lieu,
-      jobDescription,
-      startedOn,
-      endAt,
-      etat,
-      entrepriseSecture,
-    } = req.body;
-
-    console.log(req.body);
-
-    let Attestation = null; // Initialize Attestation to null
+    const { student, entrepriseName, typeExperience, Lieu, jobDescription, startedOn, endAt, etat, entrepriseSecture } = req.body;
+    let attestationURL = "";
 
     if (req.files && req.files["attestation"] && req.files["attestation"][0]) {
       const attestationFile = req.files["attestation"][0];
       const AttestationBucket = admin.storage().bucket();
+      const fileFullPath = `attestation/${attestationFile.originalname}`;
 
-      // Define the path where you want to store the resume files
-      const folderName = "attestation";
-      const fileName = attestationFile.originalname;
-      const fileFullPath = `${folderName}/${fileName}`;
+      const uploadStream = AttestationBucket.file(fileFullPath).createWriteStream();
+      uploadStream.end(attestationFile.buffer);
 
-      const AttestationFileObject = AttestationBucket.file(fileFullPath);
+      await new Promise((resolve, reject) => {
+        uploadStream.on('finish', resolve);
+        uploadStream.on('error', reject);
+      });
 
-      await AttestationFileObject.createWriteStream().end(
-        attestationFile.buffer
-      );
-
-      let attestation = `https://firebasestorage.googleapis.com/v0/b/${
-        AttestationBucket.name
-      }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
-      Attestation = attestation;
+      attestationURL = `https://firebasestorage.googleapis.com/v0/b/${AttestationBucket.name}/o/${encodeURIComponent(fileFullPath)}?alt=media`;
     }
 
     const newExperience = new Experience({
@@ -78,22 +60,16 @@ const CreateExperience = async (req, res, admin) => {
       jobDescription,
       startedOn,
       endAt: endAt || null,
-      etat: false,
+      etat: etat || false,
       entrepriseSecture,
-      Attestation: Attestation, 
+      Attestation: attestationURL, // Corrected field name to match the schema
     });
 
     await newExperience.save();
-
-    res.status(201).json({ message: "Experience créée avec succès" });
+    res.status(201).json({ message: "Experience created successfully" });
   } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({
-        message:
-          "Une erreur s'est produite lors de la création de l'expérience",
-      });
+    console.error("Error creating experience:", error);
+    res.status(500).json({ message: "An error occurred while creating the experience" });
   }
 };
 
@@ -210,19 +186,17 @@ const getListOfExperience = async (req, res) => {
 };
 const getListOfExperienceById = async (req, res) => {
   const Id = req.params.Id;
-try {
-  const experiences = await Experience.findById( Id );
-
-  if (!experiences || experiences.length === 0) {
-    return res.status(404).json({ error: 'Experiences not found' });
+  try {
+    const experience = await Experience.findById(Id);
+    if (!experience) {
+      return res.status(404).json({ error: 'Experience not found' });
+    }
+    res.json(experience);
+  } catch (error) {
+    console.error("Error fetching experience by ID:", error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
-
-  res.json(experiences);
-} catch (error) {
-  console.error(error);
-  res.status(500).json({ error: 'Internal Server Error' });
-}
-}
+};
 module.exports = {
   confirmedExperience,
   CreateExperience,
