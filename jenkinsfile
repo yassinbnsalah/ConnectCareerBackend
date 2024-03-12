@@ -25,19 +25,19 @@ pipeline {
             }
         }
 
-       stage('Deploy to Nexus') {
-            steps {
-                script {
-                    withCredentials([
-                        usernamePassword(credentialsId:registryCredentials, passwordVariable: 'REGISTRY_PASSWORD', usernameVariable: 'REGISTRY_USERNAME')
-                    ]) {
-                        sh '''
-                            docker login -u $REGISTRY_USERNAME --password-stdin $registry <<< "$REGISTRY_PASSWORD"
-                            docker push $registry/nodemongoapp:5.0
-                        '''
-                    }
-                }
+stage('Deploy to Nexus') {
+    steps {
+        withCredentials([
+            usernamePassword(credentialsId: registryCredentials, passwordVariable: 'REGISTRY_PASSWORD', usernameVariable: 'REGISTRY_USERNAME')
+        ]) {
+            withEnv(["REGISTRY_PASSWORD=${MASKED}"]) {
+                sh '''
+                    docker login -u $REGISTRY_USERNAME --password-stdin $registry <<< "$REGISTRY_PASSWORD"
+                    docker push $registry/nodemongoapp:5.0
+                '''
             }
         }
+    }
+}
     }
 }
