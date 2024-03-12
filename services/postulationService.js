@@ -69,10 +69,10 @@ async function CreateNewCandidate(req, res, admin) {
 
 async function getApplications(owner) {
   try {
-    const postulations = await Postulation.find({ owner: owner }).populate(
+    return await Postulation.find({ owner: owner }).populate(
       "job"
     );
-    return postulations;
+
   } catch (error) {
     console.error("Error fetching postulations by owner:", error);
     throw error;
@@ -81,8 +81,8 @@ async function getApplications(owner) {
 
 async function verifyIfApplicatedOnOpportunite(owner, job) {
   try {
-    const postula = await Postulation.find({ owner: owner, job: job });
-    return postula;
+    return await Postulation.find({ owner: owner, job: job });
+ 
   } catch (error) {
     console.error("Erroo");
     throw error;
@@ -91,8 +91,8 @@ async function verifyIfApplicatedOnOpportunite(owner, job) {
 
 async function getApplicationbyJobID(job) {
   try {
-    const applications = await Postulation.find({ job: job }).populate("owner");
-    return applications;
+    return await Postulation.find({ job: job }).populate("owner");
+
   } catch (error) {
     console.error("Erroo");
     throw error;
@@ -100,10 +100,10 @@ async function getApplicationbyJobID(job) {
 }
 async function getApplicationDetails(applicationID) {
   try {
-    const application = await Postulation.findById(applicationID).populate(
+    return await Postulation.findById(applicationID).populate(
       "owner"
     );
-    return application;
+
   } catch (error) {
     console.error(error);
     throw error;

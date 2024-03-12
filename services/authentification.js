@@ -8,8 +8,8 @@ const speakeasy = require('speakeasy');
 const QRCode = require('qrcode');
 const getUserByEmail = async (email) => {
   try {
-    const user = await User.findOne({ email: email });
-    return user;
+    return await User.findOne({ email: email });
+ 
   } catch (error) {
     console.error(error);
     throw new Error("Internal Server Error");
@@ -170,7 +170,7 @@ async function sendMailtoResetPassword(email, fullname) {
       console.error(error);
       res.status(500).send("Internal Server Error");
     }
-  };
+  }
 
   sendMail(transporter, msg);
 };

@@ -16,6 +16,7 @@ const jobSchema = new mongoose.Schema({
   yearOfExperience: String, 
   cible: String, 
   closeDate: Date, 
+  isActive: Boolean,
   nbapplies : { type: Number, default: 0 },
 
   Relatedentreprise : {

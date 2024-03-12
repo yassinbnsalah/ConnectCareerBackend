@@ -7,10 +7,10 @@ const bcrypt = require('bcryptjs');
 
 async function getListeRecruiter() {
   try {
-    const recruiters = await User.find({ role: "Recruiter" }).populate(
+    return await User.find({ role: "Recruiter" }).populate(
       "entreprise"
     );
-    return recruiters;
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -89,7 +89,7 @@ async function createRecruiter(req, res, admin) {
       isVerify: false,
     });
     await newUser.save();
-   // sendMailtorecruiter(email,firstname+lastname);
+
   } catch (error) {
     console.error(error);
   }

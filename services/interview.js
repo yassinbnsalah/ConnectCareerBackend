@@ -7,8 +7,8 @@ const nodemailer = require("nodemailer");
 
 async function getInterviewByRecruiter(userID) {
   try {
-    const interviews = await Interview.find({ recruiter: userID }).populate("inviter");
-    return interviews;
+    return await Interview.find({ recruiter: userID }).populate("inviter");
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "ServerError" });
@@ -18,8 +18,8 @@ async function getInterviewByRecruiter(userID) {
 async function getInterviewsByApplicationandUser(applicationID , userID ){
     try {
         console.log("");
-        const interviews = await Interview.find({ inviter: userID , applicationref : applicationID });
-        return interviews;
+        return await Interview.find({ inviter: userID , applicationref : applicationID });
+
       } catch (error) {
         console.error(error);
         res.status(500).json({ message: "ServerError" });
@@ -105,22 +105,17 @@ async function sendMailToStudent(email,fullname , date , roomID,entreprisename, 
 async function VerifyInterview(roomID, idUser){
   const interview = await Interview.find({ roomID: roomID });
   console.log(interview);
-  if(interview.length > 0){
+  if (interviews.length === 0) {
+    console.log("No interview exists");
+    return false;
+  }
+
     console.log("interview Existe");
     const interviewPre = await Interview.find({
       roomID: roomID,
       $or: [{ inviter: idUser }, { recruiter: idUser }]
     });
-    if (interviewPre.length > 0){
-      return true
-    }else{
-      return false
-    }
-    
-  }else{
-    console.log("no interview Existe");
-    return false 
-  }
+    return !!interviewPre; 
 }
 
 async function deleteInterview(id){

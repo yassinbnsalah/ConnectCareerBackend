@@ -17,8 +17,8 @@ router.post("/createSkill" , async (req,res) =>{
 
 router.get("/allSkills" , async (req,res) =>{
     try{
-        const skills = await SkilllService.getAllSkills(req,res)
-        return skills
+       return await SkilllService.getAllSkills(req,res)
+     
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
@@ -28,8 +28,8 @@ router.get("/allSkills" , async (req,res) =>{
 
 router.post("/affecteSkill/:userID" , async (req,res)=>{
     try{
-        const response = await SkilllService.AffectSkillToUser(req,res)
-        return response
+       return await SkilllService.AffectSkillToUser(req,res)
+     
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
@@ -38,8 +38,8 @@ router.post("/affecteSkill/:userID" , async (req,res)=>{
 
 router.get("/getSkills/:userID" , async (req,res) =>{
     try{
-        const response = await SkilllService.SkilsByUserid(req,res)
-        return response
+        return await SkilllService.SkilsByUserid(req,res)
+  
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
@@ -49,8 +49,8 @@ router.get("/getSkills/:userID" , async (req,res) =>{
 
 router.put("/removemyskill/:userID", async (req,res) =>{
     try{
-        const response = await SkilllService.RemoveSkillFromUser(req,res)
-        return response
+        return await SkilllService.RemoveSkillFromUser(req,res)
+   
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
