@@ -1,4 +1,4 @@
-pipeline{
+pipeline {
     agent any
     stages {
         stage('Install dependencies') {
@@ -15,34 +15,31 @@ pipeline{
                 }
             }
         }
-       
-       stage('SonarQube Analysis') {
+        stage('SonarQube Analysis') {
             steps{
                 script { 
-                 def scannerHome = tool 'scanner'
-            sh "${scannerHome}/bin/sonar-scanner \
-                -Dsonar.projectKey=twinerzBackend \
-                -Dsonar.sources=. \
-                -Dsonar.host.url=http://192.168.50.14:9000 \
-                -Dsonar.login=3bcc2e54047dd2e2c89ca544cab2d31d6456c296"
-        } 
-    } 
-}
-jacocoTestReport {
-    reports {
-        xml.required = true
+                    def scannerHome = tool 'scanner'
+                    sh "${scannerHome}/bin/sonar-scanner \
+                        -Dsonar.projectKey=twinerzBackend \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=http://192.168.50.14:9000 \
+                        -Dsonar.login=3bcc2e54047dd2e2c89ca544cab2d31d6456c296"
+                } 
+            }
+        }
+      
     }
-}
-test.finalizedBy jacocoTestReport
-tasks.named('sonarqube').configure {
-    dependsOn test
-}
-        stage('Build application') {
-            steps{
-                script {
-                    sh('npm run build-dev  ')
+    post {
+        always {
+            jacocoTestReport {
+                reports {
+                    xml.required = true
                 }
             }
         }
     }
+}
+
+tasks.named('sonarqube').configure {
+    dependsOn test
 }
