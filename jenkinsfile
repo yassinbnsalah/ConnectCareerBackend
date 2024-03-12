@@ -15,15 +15,13 @@ pipeline {
                 }
             }
         }
-        stage('Adjust Coverage Report Style') {
+        stage('Jacoco Reports') {
             steps {
-                script {
-                    // Assurez-vous que le dossier et le fichier existent avant de tenter de les modifier
-                    sh "if [ -f coverage/lcov-report/base.css ]; then echo 'body { font-family: Helvetica Neue, Helvetica, Arial, sans-serif; }' >> coverage/lcov-report/base.css; fi"
-                }
+                jacoco(execPattern: '**/build/reports/jacoco/test/*.xml')
+                echo "Publishing Jacoco code coverage reports"
             }
         }
-         stage('SonarQube Analysis') {
+     stage('SonarQube Analysis') {
     steps {
         script { 
             def scannerHome = tool 'scanner'
@@ -36,23 +34,13 @@ pipeline {
         } 
     } 
 }
+
         stage('Build application') {
             steps {
                 script {
                     sh('npm run build-dev')
                 }
             }
-        }
-    }
-    post {
-        always {
-            echo 'This will always run'
-        }
-        success {
-            echo 'This will run only if successful'
-        }
-        failure {
-            echo 'This will run only if failed'
         }
     }
 }

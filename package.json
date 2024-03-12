@@ -4,15 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build-dev": "webpack --config webpack.config.js ",
-    "test": "nyc mocha ./tests/*.spec.js",
+    "build-dev": "webpack --config webpack.config.js",
+    "test": "mocha ./tests/*.spec.js",
     "start": "nodemon app.js"
   },
   "nyc": {
     "reporter": ["lcov", "text-summary"],
     "exclude": ["tests/**/*.js"]
   },
-  
   "keywords": [],
   "author": "",
   "license": "ISC",
