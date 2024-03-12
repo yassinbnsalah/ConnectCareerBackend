@@ -3,7 +3,7 @@ const Education = require("../../models/education");
 const getListOfEducation = async (req, res) => {
   const userId = req.params.userId;
   try {
-    const educations = await Education.find({ student: userId }).sort({ startedOn: -1 });
+    const educations = await Education.find({ student: userId }).sort({ startedOn: -1 });;
 
 
     res.json(educations);
