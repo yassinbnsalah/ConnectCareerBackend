@@ -19,13 +19,17 @@ module.exports = {
         }
       }
     ]
-  }, 
+  },
   resolve: {
     fallback: {
       "crypto": require.resolve("crypto-browserify"),
       "stream": require.resolve("stream-browserify"),
       "path": require.resolve("path-browserify"),
-      "fs": false
+      "fs": false,
+      "util": require.resolve("util/"), // Ajout de fallback pour 'util'
+      "zlib": require.resolve("browserify-zlib"), // Ajout de fallback pour 'zlib'
+      "http": require.resolve("stream-http"), // Ajout de fallback pour 'http'
+      "https": require.resolve("https-browserify") // Ajout de fallback pour 'https'
     }
   }
 };
