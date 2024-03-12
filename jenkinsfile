@@ -28,9 +28,10 @@ pipeline {
         stage('Deploy to Nexus') {
             steps {
                 script {
-                   
+                    docker.withRegistry("http://$registry", 'docker') {
+                        sh 'docker login -u admin -p esprit'
                         sh 'docker push ${registry}/nodemongoapp:5.0'
-                   
+                    }
                 }
             }
         }
