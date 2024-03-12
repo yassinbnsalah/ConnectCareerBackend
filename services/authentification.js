@@ -8,23 +8,12 @@ const speakeasy = require('speakeasy');
 const QRCode = require('qrcode');
 const getUserByEmail = async (email) => {
   try {
-    return await User.findOne({ email: email });
- 
+    const user = await User.findOne({ email: email });
+    return user;
   } catch (error) {
     console.error(error);
     throw new Error("Internal Server Error");
   }
-};
-const authenticateUser = async (email, password, role) => {
-  const user = await User.findOne({ email, ...(role && { role }) }).populate("entreprise");
-  if (!user) {
-    throw new Error("User not found");
-  }
-  const passwordMatch = await bcrypt.compare(password, user.Hpassword);
-  if (!passwordMatch) {
-    throw new Error("Invalid credentials");
-  }
-  return user;
 };
 const Authentification = async (req, res) => {
   try {
@@ -70,7 +59,7 @@ const Authentification = async (req, res) => {
 
 const CheckProgress = async (user) => {
   let progress = 0;
-  if (user.firstname && user.firstname) {
+  if (user.firstname) {
     progress = progress + 10;
   }
   if (user.phoneNumber) {
@@ -101,8 +90,13 @@ const CheckProgress = async (user) => {
 const AuthentificationAdmin = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await authenticateUser(email, password, "Admin");
-    
+    const role = "Admin";
+    // Find the user by username
+    const user = await User.findOne({ email, role });
+    if (!user) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
     // Check if the provided password matches the stored hashed password
     const passwordMatch = await bcrypt.compare(password, user.Hpassword);
 
@@ -176,10 +170,10 @@ async function sendMailtoResetPassword(email, fullname) {
       console.error(error);
       res.status(500).send("Internal Server Error");
     }
-  }
+  };
 
   sendMail(transporter, msg);
-};
+}
 
 
 
