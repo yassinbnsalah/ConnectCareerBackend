@@ -47,7 +47,8 @@ router.get("/verify/:roomID/:idUser" , async(req,res)=>{
 
 router.post("/createInterview", async (req, res) => {
   try {
-    const result = await interviewService.createInterview(req, res);
+    await interviewService.createInterview(req, res);
+
     res.status(200).json({ message: "Interview Created Succefully !!!" });
   } catch (error) {
     console.error(error);

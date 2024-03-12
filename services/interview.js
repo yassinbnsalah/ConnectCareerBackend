@@ -92,15 +92,14 @@ async function sendMailToStudent(email,fullname , date , roomID,entreprisename, 
     .replace('{{roomID}}' , roomID)
     .replace('{{jobtitle}}' ,jobTitle )
   };
-  const sendMail = async (transporter, msg) => {
+  
     try {
       await transporter.sendMail(msg);
       console.log("Email has been sent !");
     } catch (error) {
       console.error(error);
     }
-  };
-  sendMail(transporter, msg);
+
 }
 async function VerifyInterview(roomID, idUser){
   const interview = await Interview.find({ roomID: roomID });

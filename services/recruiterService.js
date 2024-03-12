@@ -136,15 +136,14 @@ async function sendMailtorecruiter(email,fullname) {
     subject: "CONNECTCAREER Account Confirmation",
     html: htmlTemplate.replace('{{username}}', fullname).replace('{{token}}', token),
   };
-  const sendMail = async (transporter, msg) => {
+  
     try {
       await transporter.sendMail(msg);
       console.log("Email has been sent !");
     } catch (error) {
       console.error(error);
     }
-  };
-  sendMail(transporter, msg);
+  
 }
 async function getRecruiterDetails(recruiterId) {
   try {

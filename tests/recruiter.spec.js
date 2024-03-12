@@ -28,8 +28,8 @@ describe("getRecruiterDetails function", () => {
     // Checking if the function throws the appropriate error
     try {
       await getRecruiterDetails(recruiterId);
-    } catch (error) {
-      assert.strictEqual(error.message, "Internal Server Error");
+    } catch (err) {
+      assert.strictEqual(err.message, "Internal Server Error");
     }
   });
 });

@@ -65,7 +65,7 @@ router.post(
     ]),
     async (req, res) => {
       try {
-        const recruiters = await recruiterService.createRecruiter(req, res, admin);
+       await recruiterService.createRecruiter(req, res, admin);
         return res.status(200).json({ message: "Utilisateur inscrit avec succès" });
       } catch (error) {
         console.error(error);

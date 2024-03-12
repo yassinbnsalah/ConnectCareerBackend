@@ -49,7 +49,7 @@ async function AddJob(req, res) {
       description,
       skills,
       termsAndConditions,
-      isActive,
+
       duration,
       yearOfExperience,
       cible,

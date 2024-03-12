@@ -270,7 +270,7 @@ async function sendMailtoStudent(email, fullname) {
     } catch (error) {
       console.error(error);
     }
-  };
+  }
 
 module.exports = {
   getListStudents,

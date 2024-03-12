@@ -41,7 +41,7 @@ const CreateExperience = async (req, res, admin) => {
       jobDescription,
       startedOn,
       endAt,
-      etat,
+
       entrepriseSecture,
     } = req.body;
 
