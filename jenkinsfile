@@ -20,11 +20,14 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('scanner') {
-                    sh 'sonar-scanner -Dsonar.projectKey=twinerzBackend'
-                }
-            }
+            steps{
+                script { 
+                    def scannerHome = tool 'scanner'
+                    withSonarQubeEnv {
+                        sh "${scannerHome}/bin/sonar-scanner"
+                    }
+                } 
+            } 
         }
 
         stage('Building images (node and mongo)') {
