@@ -15,6 +15,17 @@ const getUserByEmail = async (email) => {
     throw new Error("Internal Server Error");
   }
 };
+const authenticateUser = async (email, password, role) => {
+  const user = await User.findOne({ email, ...(role && { role }) }).populate("entreprise");
+  if (!user) {
+    throw new Error("User not found");
+  }
+  const passwordMatch = await bcrypt.compare(password, user.Hpassword);
+  if (!passwordMatch) {
+    throw new Error("Invalid credentials");
+  }
+  return user;
+};
 const Authentification = async (req, res) => {
   try {
     console.log("************************************************");
@@ -90,13 +101,8 @@ const CheckProgress = async (user) => {
 const AuthentificationAdmin = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const role = "Admin";
-    // Find the user by username
-    const user = await User.findOne({ email, role });
-    if (!user) {
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
-
+    const user = await authenticateUser(email, password, "Admin");
+    
     // Check if the provided password matches the stored hashed password
     const passwordMatch = await bcrypt.compare(password, user.Hpassword);
 
