@@ -1,28 +1,18 @@
 const Experience = require("../../models/experience");
 
-const confirmedExperience = async (req, res, admin) => {
+const confirmedExperience = async (req, res) => {
   try {
     const { etat } = req.body;
-
-    // Assuming you have an identifier for the experience, like an ID
     const experienceId = req.params.experienceId;
 
-    // Find the experience by ID
-    const existingExperience = await Experience.findById(experienceId);
+    // Directly update the document in the database
+    const updatedExperience = await Experience.findByIdAndUpdate(experienceId, { $set: { etat: etat } }, { new: true, runValidators: true });
 
-    if (!existingExperience) {
+    if (!updatedExperience) {
       return res.status(404).json({ message: "Experience not found" });
     }
 
-    // Update only the 'etat' property if it is provided in the request body
-    if (etat !== undefined) {
-      existingExperience.etat = etat;
-    }
-
-    // Save the updated experience
-    await existingExperience.save();
-
-    res.status(200).json({ message: "Experience updated successfully" });
+    res.status(200).json({ message: "Experience updated successfully", experience: updatedExperience });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "An error occurred while updating the experience" });

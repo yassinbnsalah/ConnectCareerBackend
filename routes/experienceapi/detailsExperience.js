@@ -1,19 +1,18 @@
 const Experience = require("../../models/experience");
 
 const getListOfExperienceById = async (req, res) => {
-    const Id = req.params.Id;
+  const Id = req.params.Id;
   try {
-    const experiences = await Experience.findById( Id );
-
-    if (!experiences || experiences.length === 0) {
-      return res.status(404).json({ error: 'Experiences not found' });
+    const experience = await Experience.findById(Id);
+    if (!experience) {
+      return res.status(404).json({ error: 'Experience not found' });
     }
-
-    res.json(experiences);
+    res.json(experience);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 }
+
 
 module.exports = getListOfExperienceById;
