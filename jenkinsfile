@@ -15,6 +15,13 @@ pipeline {
                 }
             }
         }
+        stage('Fix Coverage Report Style') {
+            steps {
+                script {
+                    sh "sed -i 's/font-family: Helvetica Neue, Helvetica, Arial;/font-family: Helvetica Neue, Helvetica, Arial, sans-serif;/g' coverage/lcov-report/base.css"
+                }
+            }
+        }
         stage('Jacoco Reports') {
             steps {
                 jacoco(execPattern: '**/build/reports/jacoco/test/*.xml')
@@ -34,13 +41,7 @@ pipeline {
         } 
     } 
 }
-        stage('Fix Coverage Report Style') {
-            steps {
-                script {
-                    sh "sed -i 's/font-family: Helvetica Neue, Helvetica, Arial;/font-family: Helvetica Neue, Helvetica, Arial, sans-serif;/g' coverage/lcov-report/base.css"
-                }
-            }
-        }
+   
         stage('Build application') {
             steps {
                 script {
