@@ -19,15 +19,20 @@ pipeline {
             }
         }
 
-       
+
         stage('Run application ') {
             steps{ 
                 script {
-                    docker.withRegistry("http://"+registry, registryCredentials 
-                        ) {
-                        sh('docker pull $registry/nodemongoapp:5.0 ')
-                        sh('docker-compose up -d ')
-                        }
+                      withCredentials([
+                        usernamePassword(credentialsId: registryCredentials, passwordVariable: 'REGISTRY_PASSWORD', usernameVariable: 'REGISTRY_USERNAME')
+                    ]) {
+                        sh '''
+                            echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin $registry
+                            docker pull $registry/nodemongoapp:5.0 
+                            docker-compose up -d 
+                        '''
+                    }
+                  
                     }
                 }
             }
