@@ -16,20 +16,6 @@ const Job = {
   populate: async () => {}
 };
 
-// Mock de User
-const User = {
-  findById: async () => {}
-};
-
-// Mock de Entreprise
-const Entreprise = {
-  findById: async () => {}
-};
-
-// Mock de Skills
-const Skills = {
-  findOne: async () => {}
-};
 
 describe('Job Functions', () => {
   describe('getJobByRecruiter', () => {
