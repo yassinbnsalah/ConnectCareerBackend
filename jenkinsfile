@@ -20,33 +20,33 @@ pipeline{
                 }
             }
         }
-//            stage('SonarQube Analysis') {
-//             steps{
-//                 script { 
-//                 def scannerHome = tool 'scanner'
-//             sh "${scannerHome}/bin/sonar-scanner \
-//                 -Dsonar.projectKey=twinerzBackend \
-//                 -Dsonar.sources=. \
-//                 -Dsonar.host.url=http://172.16.5.155:9000/ \
-//                 -Dsonar.login=b1a89361febd6ba0fd1345b93efe579d3e0e9b4d"
-//         } 
-//     } 
-// }
+           stage('SonarQube Analysis') {
+            steps{
+                script { 
+                def scannerHome = tool 'scanner'
+            sh "${scannerHome}/bin/sonar-scanner \
+                -Dsonar.projectKey=twinerzBackend \
+                -Dsonar.sources=. \
+                -Dsonar.host.url=http://172.16.5.155:9000/ \
+                -Dsonar.login=b1a89361febd6ba0fd1345b93efe579d3e0e9b4d"
+        } 
+    } 
+}
 
-        // stage('Build application') {
-        //     steps{
-        //         script {
-        //             sh('npm run build-dev  ')
-        //         }
-        //     }
-        // }
-        // stage('Building images (node and mongo)') {
-        //     steps{
-        //         script {
-        //             sh('docker compose build')
-        //         }
-        //     }
-        // }
+        stage('Build application') {
+            steps{
+                script {
+                    sh('npm run build-dev  ')
+                }
+            }
+        }
+        stage('Building images (node and mongo)') {
+            steps{
+                script {
+                    sh('docker compose build')
+                }
+            }
+        }
         stage('Deploy to Nexus') {
             steps{
                 script {
