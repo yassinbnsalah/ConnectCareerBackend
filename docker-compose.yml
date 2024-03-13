@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  db:
+    image: mongo:4.2
+    container_name: db
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: yessinebensalah
+      MONGO_INITDB_ROOT_PASSWORD: 14501578
+    ports:
+      - 27017:27017
+    volumes:
+      - ./data/dump:/dump
+  app:
+    build: .
+    image: 172.16.5.155:8083/nodemongoapp:6.0
+    restart: always
+    container_name: back
+    ports:
+      - '5000:5000'
+    depends_on:
+      - db
+volumes:
+  mongo-data:
