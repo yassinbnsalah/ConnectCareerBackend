@@ -44,27 +44,5 @@ describe('Candidate Service', () => {
     });
   });
 
-  describe('verifyIfApplicatedOnOpportunite', () => {
-    it('should verify if the owner applied on the opportunity', async () => {
-      // Test case for verifyIfApplicatedOnOpportunite function
-    });
-  });
-
-  describe('getApplicationbyJobID', () => {
-    it('should return applications for a given job', async () => {
-      // Test case for getApplicationbyJobID function
-    });
-  });
-
-  describe('getApplicationDetails', () => {
-    it('should return application details for a given application ID', async () => {
-      // Test case for getApplicationDetails function
-    });
-  });
-
-  describe('UpdateApplicationState', () => {
-    it('should update the state of a given application', async () => {
-      // Test case for UpdateApplicationState function
-    });
-  });
+ 
 });
