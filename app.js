@@ -12,8 +12,8 @@ const nodemailer = require('nodemailer');
 const app = express();
 const port = 3001;
 const webpack = require('webpack');
-const compiler = webpack(webpackConfig);
 const webpackConfig = require('./webpack.config.js');
+const compiler = webpack(webpackConfig);
 app.use(cors());
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
