@@ -67,12 +67,12 @@ pipeline{
             }
         stage('Prometheus Setup') {
             steps {
-                sh 'docker-compose up -d prometheus'
+                sh 'docker compose up -d prometheus'
             }
         }
         stage('Grafana Setup') {
             steps {
-                sh 'docker-compose up -d grafana'
+                sh 'docker compose up -d grafana'
             }
         }
     }
