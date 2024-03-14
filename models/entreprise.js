@@ -10,6 +10,14 @@ const entrepriseSchema = new mongoose.Schema({
   CompanyType: String,
   CompanyEmail: String,
   CompanyWebsite: String,
+  nbOpportunitees   :{
+    type: Number,
+    default: 0,
+  },
+  Rate : {
+    type: Number,
+    default: 0,
+  },
   OwnedbyAdmin: {
     type: Boolean,
     default: false,

@@ -81,7 +81,6 @@ async function AddJob(req, res) {
         console.error('Error occurred:', error);
       }
     }
-    console.log(skillsJob);
     const newJob = new Job({
       recruiter,
       jobTitle,
@@ -99,8 +98,16 @@ async function AddJob(req, res) {
       skills: skillsJob,
       closeDate,
     });
+    console.log(user);
     if (entrepriseID) {
-      const entreprise = await Entreprise.findById(entrepriseID);
+      let entreprise = await Entreprise.findById(entrepriseID);
+      entreprise.nbOpportunitees =  entreprise.nbOpportunitees +1
+      await entreprise.save();
+      newJob.Relatedentreprise = entreprise;
+    }else{
+      let entreprise = await Entreprise.findById(user.entreprise)
+      entreprise.nbOpportunitees =  entreprise.nbOpportunitees +1
+      await entreprise.save();
       newJob.Relatedentreprise = entreprise;
     }
     await newJob.save();
@@ -113,6 +120,7 @@ async function getJobDetails(jobID) {
   try {
     const job = await Job.findById(jobID)
       .populate('recruiter')
+      .populate('Relatedentreprise')
       .populate('skills', 'skillname');
     if (!job) {
       return res.status(404).json({ message: 'Job not found' });
