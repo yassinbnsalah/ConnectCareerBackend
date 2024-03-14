@@ -20,7 +20,7 @@ pipeline{
                 }
             }
         }
-           stage('SonarQube Analysis') {
+        stage('SonarQube Analysis') {
             steps{
                 script { 
                 def scannerHome = tool 'scanner'
@@ -29,10 +29,9 @@ pipeline{
                 -Dsonar.sources=. \
                 -Dsonar.host.url=http://172.16.5.155:9000/ \
                 -Dsonar.login=b1a89361febd6ba0fd1345b93efe579d3e0e9b4d"
-        } 
-    } 
-}
-
+                        } 
+                } 
+        }
         stage('Build application') {
             steps{
                 script {
@@ -66,5 +65,15 @@ pipeline{
                         }
                 }
             }
+        stage('Prometheus Setup') {
+            steps {
+                sh 'docker-compose up -d prometheus'
+            }
+        }
+        stage('Grafana Setup') {
+            steps {
+                sh 'docker-compose up -d grafana'
+            }
+        }
     }
 }
