@@ -1,5 +1,4 @@
 version: '3.8'
-
 services:
   db:
     image: mongo:4.2
@@ -12,7 +11,6 @@ services:
       - 27017:27017
     volumes:
       - ./data/dump:/dump
-
   app:
     build: .
     image: 172.16.5.155:8083/nodemongoapp:6.0
@@ -28,8 +26,8 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml  
+      
   grafana:
     image: grafana/grafana
     ports:
@@ -37,8 +35,7 @@ services:
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=esprit
     volumes:
-      - grafana_data:/var/lib/grafana
-
+      - grafana_data:/var/lib/grafana    
 volumes:
   mongo-data:
   grafana_data:
