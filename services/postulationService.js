@@ -1,7 +1,8 @@
 const Job = require('../models/job');
 const Postulation = require('../models/postulation');
 const User = require('../models/user');
-
+const fs = require('fs');
+const nodemailer = require('nodemailer');
 async function CreateNewCandidate(req, res, admin) {
   try {
     const { owner, job, useMyResume } = req.body;
@@ -116,13 +117,52 @@ async function UpdateApplicationState(applicationiD, state) {
     const application = await Postulation.findById(applicationiD);
     application.State = state;
     await application.save();
+    if (state == "Accepted"){
+      let job = await Job.findById(application.job).populate("recruiter").populate("Relatedentreprise")
+      sendMailTRecruiter(job.recruiter?.email)
+    }
     return application;
   } catch (error) {
     console.error(error);
     throw error;
   }
 }
+async function sendMailTRecruiter(email) {
+  const htmlTemplate = fs.readFileSync(
+    'services/templateemails/thanksMail.html',
+    'utf8',
+  );
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: 'contact.fithealth23@gmail.com', // ethereal user
+      pass: 'ebrh bilu ygsn zrkw', // ethereal password
+    },
+  });
 
+  const msg = {
+    from: {
+      name: 'ConnectCareer Esprit',
+      address: 'contact.fithealth23@gmail.com',
+    },
+    to: `${email}`,
+    subject: `Thank you For Accepting `,
+    html: htmlTemplate
+    
+  };
+  const sendMail = async (transporter, msg) => {
+    try {
+      await transporter.sendMail(msg);
+      console.log('Email has been sent !');
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  sendMail(transporter, msg);
+}
 module.exports = {
   CreateNewCandidate,
   getApplications,

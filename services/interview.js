@@ -51,13 +51,13 @@ async function createInterview(req, res) {
     const user = await User.findById(inviter);
     const recruiterRealName = await User.findById(recruiter).populate('entreprise');
     console.log(applicationref);
-    const job = await Job.findById(applicationref);
+    const job = await Job.findById(applicationref).populate("Relatedentreprise");
     sendMailToStudent(
       user.email,
       user.firstname + user.lastname,
       `${dateInterview.split('T')[0]} ${heure}:${minutes}`,
       roomID,
-      recruiterRealName.entreprise.CompanyName,
+      job.Relatedentreprise.CompanyName,
       job.jobTitle,
     );
     await newInterview.save();

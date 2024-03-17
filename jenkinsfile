@@ -1,9 +1,8 @@
 pipeline {
     agent any
-
     environment {
-        registryCredentials = 'nexus'
-        registry = '172.16.5.241:8083'
+        registryCredentials = "nexus"
+        registry = "172.16.5.155:8083"
     }
 
     stages {
@@ -12,20 +11,27 @@ pipeline {
                 sh 'npm install'
             }
         }
-
         stage('Unit Test') {
-            steps {
-                sh 'npm test'
+            steps{
+                script {
+                    sh('npm test')
+                }
             }
         }
-
-        stage('Building images (node and mongo)') {
-            steps {
-                sh 'docker compose build'
-            }
+        stage('SonarQube Analysis') {
+            steps{
+                script { 
+                def scannerHome = tool 'scanner'
+            sh "${scannerHome}/bin/sonar-scanner \
+                -Dsonar.projectKey=twinerzBackend \
+                -Dsonar.sources=. \
+                -Dsonar.host.url=http://172.16.5.155:9000/ \
+                -Dsonar.login=b1a89361febd6ba0fd1345b93efe579d3e0e9b4d"
+                        } 
+                } 
         }
-        stage('Deploy to Nexus') {
-            steps {
+        stage('Build application') {
+            steps{
                 script {
                     withCredentials([
                         usernamePassword(credentialsId: registryCredentials, passwordVariable: 'REGISTRY_PASSWORD', usernameVariable: 'REGISTRY_USERNAME')
@@ -38,22 +44,41 @@ pipeline {
                 }
             }
         }
-        stage('Run application ') {
-            steps{ 
+        stage('Building images (node and mongo)') {
+            steps{
                 script {
-                      withCredentials([
-                        usernamePassword(credentialsId: registryCredentials, passwordVariable: 'REGISTRY_PASSWORD', usernameVariable: 'REGISTRY_USERNAME')
-                    ]) {
-                        sh '''
-                            echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin $registry
-                            docker pull $registry/nodemongoapp:5.0 
-                            docker-compose up -d 
-                        '''
-                    }
-                  
-                    }
+                    sh('docker compose build')
                 }
             }
-
+        }
+        stage('Deploy to Nexus') {
+            steps{
+                script {
+                 docker.withRegistry("http://"+registry,registryCredentials ) {
+                    sh('docker push $registry/nodemongoapp:6.0 ')
+                             }
+                        }
+                }
+        }
+        stage('Run application ') {
+            steps{
+                script {
+                    docker.withRegistry("http://"+registry, registryCredentials) {
+                     sh('docker pull $registry/nodemongoapp:6.0 ')
+                     sh('docker compose up -d ')
+                           }
+                        }
+                }
+            }
+        stage('Prometheus Setup') {
+            steps {
+                sh 'docker compose up -d prometheus'
+            }
+        }
+        stage('Grafana Setup') {
+            steps {
+                sh 'docker compose up -d grafana'
+            }
+        }
     }
 }
