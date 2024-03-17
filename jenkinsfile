@@ -1,53 +1,59 @@
 pipeline {
     agent any
+
+    environment {
+        registryCredentials = 'nexus'
+        registry = '172.16.5.241:8083'
+    }
+
     stages {
         stage('Install dependencies') {
             steps {
-                script {
-                    sh('npm install')
-                }
+                sh 'npm install'
             }
         }
+
         stage('Unit Test') {
             steps {
+                sh 'npm test'
+            }
+        }
+
+        stage('Building images (node and mongo)') {
+            steps {
+                sh 'docker compose build'
+            }
+        }
+        stage('Deploy to Nexus') {
+            steps {
                 script {
-                    sh('npm test')
+                    withCredentials([
+                        usernamePassword(credentialsId: registryCredentials, passwordVariable: 'REGISTRY_PASSWORD', usernameVariable: 'REGISTRY_USERNAME')
+                    ]) {
+                        sh '''
+                            echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin $registry
+                            docker push $registry/nodemongoapp:5.0
+                        '''
+                    }
                 }
             }
         }
-        stage('Fix Coverage Report Style') {
-            steps {
+        stage('Run application ') {
+            steps{ 
                 script {
-                    sh "sed -i 's/font-family: Helvetica Neue, Helvetica, Arial;/font-family: Helvetica Neue, Helvetica, Arial, sans-serif;/g' coverage/lcov-report/base.css"
+                      withCredentials([
+                        usernamePassword(credentialsId: registryCredentials, passwordVariable: 'REGISTRY_PASSWORD', usernameVariable: 'REGISTRY_USERNAME')
+                    ]) {
+                        sh '''
+                            echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin $registry
+                            docker pull $registry/nodemongoapp:5.0 
+                            docker-compose up -d 
+                        '''
+                    }
+                  
+                    }
                 }
             }
-        }
-        stage('Jacoco Reports') {
-            steps {
-                jacoco(execPattern: '**/build/reports/jacoco/test/*.xml')
-                echo "Publishing Jacoco code coverage reports"
-            }
-        }
-     stage('SonarQube Analysis') {
-    steps {
-        script { 
-            def scannerHome = tool 'scanner'
-            sh "${scannerHome}/bin/sonar-scanner \
-                -Dsonar.projectKey=twinerzBackend \
-                -Dsonar.sources=. \
-                -Dsonar.host.url=http://192.168.50.14:9000 \
-                -Dsonar.login=3bcc2e54047dd2e2c89ca544cab2d31d6456c296 \
-                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info"
-        } 
-    } 
-}
-   
-        stage('Build application') {
-            steps {
-                script {
-                    sh('npm run build-dev')
-                }
-            }
-        }
+
     }
 }

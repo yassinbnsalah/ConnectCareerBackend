@@ -1,29 +1,31 @@
-const Education = require("../models/education");
-const User = require("../models/user");
+const Education = require('../models/education');
+const User = require('../models/user');
 
 const CreateEducation = async (req, res, admin) => {
   try {
-    const { student, uni_name, diplome, startedOn, endAt } = req.body;
-    let Attestation = "";
-    console.log(req.files["attestation"][0]);
-    if (req.files && req.files["attestation"] && req.files["attestation"][0]) {
-      const attestationFile = req.files["attestation"][0];
+    const {
+      student, uni_name, diplome, startedOn, endAt,
+    } = req.body;
+    let Attestation = '';
+    console.log(req.files.attestation[0]);
+    if (req.files && req.files.attestation && req.files.attestation[0]) {
+      const attestationFile = req.files.attestation[0];
       const AttestationBucket = admin.storage().bucket();
-      const folderName = "attestation";
+      const folderName = 'attestation';
       const fileName = attestationFile.originalname;
       const fileFullPath = `${folderName}/${fileName}`;
       const AttestationFileObject = AttestationBucket.file(fileFullPath);
       await AttestationFileObject.createWriteStream().end(
-        attestationFile.buffer
+        attestationFile.buffer,
       );
-      let attestation = `https://firebasestorage.googleapis.com/v0/b/${
+      const attestation = `https://firebasestorage.googleapis.com/v0/b/${
         AttestationBucket.name
       }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
       Attestation = attestation;
     }
-    const user =  await User.findOne({ _id:student })
-    user.hasEducation=  true 
-    await user.save(); 
+    const user = await User.findOne({ _id: student });
+    user.hasEducation = true;
+    await user.save();
     const newEducation = new Education({
       student,
       uni_name,
@@ -33,7 +35,7 @@ const CreateEducation = async (req, res, admin) => {
       Attestation,
     });
     await newEducation.save();
-    res.status(201).json({ message: "Education créée avec succès" });
+    res.status(201).json({ message: 'Education créée avec succès' });
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -43,7 +45,7 @@ const CreateEducation = async (req, res, admin) => {
 };
 
 const getListOfEducation = async (req, res) => {
-  const userId = req.params.userId;
+  const { userId } = req.params;
   try {
     const educations = await Education.find({ student: userId }).sort({
       startedOn: -1,
@@ -51,59 +53,63 @@ const getListOfEducation = async (req, res) => {
     res.json(educations);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
 const getListOfEducationById = async (req, res) => {
-  const Id = req.params.Id;
+  const { Id } = req.params;
   try {
     const educations = await Education.findById(Id);
 
     if (!educations || educations.length === 0) {
-      return res.status(404).json({ error: "Education not found" });
+      return res.status(404).json({ error: 'Education not found' });
     }
 
     res.json(educations);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
 const deleteEducationById = async (req, res) => {
-  const educationId = req.params.educationId;
+  const { educationId } = req.params;
 
   try {
     const deletedEducation = await Education.findByIdAndDelete(educationId);
 
     if (!deletedEducation) {
-      return res.status(404).json({ error: "Education not found" });
+      return res.status(404).json({ error: 'Education not found' });
     }
 
-    res.json({ message: "Education deleted successfully", deletedEducation });
+    res.json({ message: 'Education deleted successfully', deletedEducation });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
 const updateEducation = async (req, res, admin) => {
   try {
     const { uni_name, diplome, startedOn, endAt } = req.body;
-    const educationId = req.params.educationId;
 
-    let attestationURL = ""; // Initialize an empty string for the attestation URL
+    let Attestation = ""; // Default value is an empty string
 
-    // Check if an attestation file is provided in the request
+    // Check if attestation file is provided in the request
     if (req.files && req.files["attestation"] && req.files["attestation"][0]) {
       const attestationFile = req.files["attestation"][0];
       const AttestationBucket = admin.storage().bucket();
-      const fileFullPath = `attestation/${attestationFile.originalname}`;
+      // Define the path where you want to store the resume files
+      const folderName = "attestation";
+      const fileName = attestationFile.originalname;
+      const fileFullPath = `${folderName}/${fileName}`;
 
-      // Upload the file to Firebase Storage
-      const uploadStream = AttestationBucket.file(fileFullPath).createWriteStream();
-      uploadStream.end(attestationFile.buffer);
+      const AttestationFileObject = AttestationBucket.file(fileFullPath);
+
+      await AttestationFileObject.createWriteStream().end(
+        attestationFile.buffer
+      );
 
       // Await the 'finish' event of the upload stream to ensure the file is uploaded
       await new Promise((resolve, reject) => {
@@ -115,25 +121,44 @@ const updateEducation = async (req, res, admin) => {
       attestationURL = `https://firebasestorage.googleapis.com/v0/b/${AttestationBucket.name}/o/${encodeURIComponent(fileFullPath)}?alt=media`;
     }
 
-    // Update the education document
-    const update = {
-      ...(uni_name && { uni_name }),
-      ...(diplome && { diplome }),
-      ...(startedOn && { startedOn }),
-      ...(endAt && { endAt }),
-      ...(attestationURL && { Attestation: attestationURL }), // Ensure this matches your schema field names
-    };
+    // Assuming you have an identifier for the education, like an ID
+    const educationId = req.params.educationId;
 
-    const updatedEducation = await Education.findByIdAndUpdate(educationId, update, { new: true });
+    // Find the education by ID
+    const existingEducation = await Education.findById(educationId);
 
-    if (!updatedEducation) {
+    if (!existingEducation) {
       return res.status(404).json({ message: "Education not found" });
     }
 
-    res.status(200).json({ message: "Education updated successfully", education: updatedEducation });
+    // Update education fields if provided
+    if (uni_name) {
+      existingEducation.uni_name = uni_name;
+    }
+    if (diplome) {
+      existingEducation.diplome = diplome;
+    }
+    if (startedOn) {
+      existingEducation.startedOn = startedOn;
+    }
+    if (endAt) {
+      existingEducation.endAt = endAt;
+    }
+
+    // Update attestation only if a new file is provided
+    if (Attestation) {
+      existingEducation.Attestation = Attestation;
+    }
+
+    // Save the updated Education
+    await existingEducation.save();
+
+    res.status(200).json({ message: "Education updated successfully" });
   } catch (error) {
     console.error("Error updating education:", error);
-    res.status(500).json({ message: "An error occurred while updating the Education" });
+    res
+      .status(500)
+      .json({ message: "An error occurred while updating the Education" });
   }
 };
 
@@ -141,5 +166,6 @@ module.exports = {
   CreateEducation,
   getListOfEducation,
   getListOfEducationById,
-  deleteEducationById,updateEducation
+  deleteEducationById,
+  updateEducation,
 };

@@ -1,38 +1,38 @@
-const Entreprise = require("../models/entreprise");
-const Job = require("../models/job");
-const Skills = require("../models/skills");
-const User = require("../models/user");
+const Entreprise = require('../models/entreprise');
+const Job = require('../models/job');
+const Skills = require('../models/skills');
+const User = require('../models/user');
+
 async function getJobsByEntrepriseId(entrepriseId) {
   try {
-    
     const jobs = await Job.find({
       $or: [
-          { Relatedentreprise: entrepriseId }, 
-          { "recruiter.entreprise": entrepriseId } 
-      ]
-  })
-  .populate('skills', 'skillname')
-  .populate('recruiter', 'name');
+        { Relatedentreprise: entrepriseId },
+        { 'recruiter.entreprise': entrepriseId },
+      ],
+    })
+      .populate('skills', 'skillname')
+      .populate('recruiter', 'name');
     if (!jobs || jobs.length === 0) {
-      return { status: 404, message: "No jobs found for this entreprise" };
+      return { status: 404, message: 'No jobs found for this entreprise' };
     }
     return { status: 200, data: jobs };
   } catch (error) {
-    console.error("Error fetching jobs by entreprise ID:", error);
-    return { status: 500, message: "Server Error" };
+    console.error('Error fetching jobs by entreprise ID:', error);
+    return { status: 500, message: 'Server Error' };
   }
 }
 
-async function getJobByRecruiter(userId , res) {
+async function getJobByRecruiter(userId, res) {
   try {
-    const jobs = await Job.find({ recruiter: userId }).populate("recruiter");
+    const jobs = await Job.find({ recruiter: userId }).populate('recruiter');
     if (!jobs) {
-      return res.status(404).json({ message: "No jobs found for this user" });
+      return res.status(404).json({ message: 'No jobs found for this user' });
     }
     return jobs;
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server Error" });
+    res.status(500).json({ message: 'Server Error' });
   }
 }
 
@@ -56,15 +56,15 @@ async function AddJob(req, res) {
       closeDate,
     } = req.body;
 
-    let user = await User.findById(recruiter);
+    const user = await User.findById(recruiter);
     if (user.nbopportunite) {
-      user.nbopportunite = user.nbopportunite + 1;
+      user.nbopportunite += 1;
     } else {
       user.nbopportunite = 1;
     }
     await user.save();
-    let skillsJob = [];
-    let SKillTab = JSON.parse(skills);
+    const skillsJob = [];
+    const SKillTab = JSON.parse(skills);
 
     for (const element of SKillTab) {
       try {
@@ -78,10 +78,9 @@ async function AddJob(req, res) {
         skillsJob.push(skill._id);
       } catch (error) {
         // Handle any errors that occur during the operations
-        console.error("Error occurred:", error);
+        console.error('Error occurred:', error);
       }
     }
-    console.log(skillsJob);
     const newJob = new Job({
       recruiter,
       jobTitle,
@@ -99,8 +98,16 @@ async function AddJob(req, res) {
       skills: skillsJob,
       closeDate,
     });
+    console.log(user);
     if (entrepriseID) {
       let entreprise = await Entreprise.findById(entrepriseID);
+      entreprise.nbOpportunitees =  entreprise.nbOpportunitees +1
+      await entreprise.save();
+      newJob.Relatedentreprise = entreprise;
+    }else{
+      let entreprise = await Entreprise.findById(user.entreprise)
+      entreprise.nbOpportunitees =  entreprise.nbOpportunitees +1
+      await entreprise.save();
       newJob.Relatedentreprise = entreprise;
     }
     await newJob.save();
@@ -109,47 +116,45 @@ async function AddJob(req, res) {
   }
 }
 
-
 async function getJobDetails(jobID) {
   try {
     const job = await Job.findById(jobID)
-      .populate("recruiter")
-      .populate("skills", "skillname");
+      .populate('recruiter')
+      .populate('Relatedentreprise')
+      .populate('skills', 'skillname');
     if (!job) {
-      return res.status(404).json({ message: "Job not found" });
+      return res.status(404).json({ message: 'Job not found' });
     }
     return job;
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server Error" });
+    res.status(500).json({ message: 'Server Error' });
   }
 }
-
 
 async function getJobUpdateDetails(jobID) {
   try {
     const job = await Job.findById(jobID)
-      .populate("recruiter")
-      .populate("skills", "skillname")
-      .populate("Relatedentreprise");
+      .populate('recruiter')
+      .populate('skills', 'skillname')
+      .populate('Relatedentreprise');
     if (!job) {
-      return res.status(404).json({ message: "Job not found" });
+      return res.status(404).json({ message: 'Job not found' });
     }
-    let entreprise
-    if (job.Relatedentreprise){
-       entreprise = job.Relatedentreprise 
-
-    }else{
-      const entrepriseData = await Entreprise.findById(job.recruiter?.entreprise)
-       entreprise = entrepriseData
+    let entreprise;
+    if (job.Relatedentreprise) {
+      entreprise = job.Relatedentreprise;
+    } else {
+      const entrepriseData = await Entreprise.findById(job.recruiter?.entreprise);
+      entreprise = entrepriseData;
     }
     const jobReturned = await Job.findById(jobID)
-      .populate("recruiter")
-      .populate("skills", "skillname");
-    return {jobReturned , entreprise};
+      .populate('recruiter')
+      .populate('skills', 'skillname');
+    return { jobReturned, entreprise };
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server Error" });
+    res.status(500).json({ message: 'Server Error' });
   }
 }
 
@@ -158,37 +163,37 @@ async function getAllJob() {
     const jobs = await Job.aggregate([
       {
         $lookup: {
-          from: "users",
-          localField: "recruiter",
-          foreignField: "_id",
-          as: "recruiter",
+          from: 'users',
+          localField: 'recruiter',
+          foreignField: '_id',
+          as: 'recruiter',
         },
       },
       {
-        $unwind: "$recruiter",
+        $unwind: '$recruiter',
       },
       {
         $lookup: {
-          from: "entreprises",
-          localField: "recruiter.entreprise",
-          foreignField: "_id",
-          as: "entreprise",
+          from: 'entreprises',
+          localField: 'recruiter.entreprise',
+          foreignField: '_id',
+          as: 'entreprise',
         },
       },
       {
-        $unwind: "$entreprise",
+        $unwind: '$entreprise',
       },
     ]);
 
     // Populating RelatedEntreprise for each job
-    await Job.populate(jobs, { path: "Relatedentreprise" });
+    await Job.populate(jobs, { path: 'Relatedentreprise' });
     if (!jobs || jobs.length === 0) {
-      return { status: 404, message: "No jobs found" };
+      return { status: 404, message: 'No jobs found' };
     }
     return { status: 200, data: jobs };
   } catch (error) {
     console.error(error);
-    return { status: 500, message: "Server Error" };
+    return { status: 500, message: 'Server Error' };
   }
 }
 

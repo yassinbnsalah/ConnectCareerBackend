@@ -1,16 +1,16 @@
-const Entreprise = require("../models/entreprise");
-const Job = require("../models/job");
-const User = require("../models/user");
+const Entreprise = require('../models/entreprise');
+const Job = require('../models/job');
+const User = require('../models/user');
 
 async function getListeEntreprise() {
   try {
-    return await User.find({ role: "Recruiter" }).populate(
-      "entreprise"
+    const recruiters = await User.find({ role: 'Recruiter' }).populate(
+      'entreprise',
     );
 
   } catch (error) {
     console.error(error);
-    throw new Error("Internal Server Error");
+    throw new Error('Internal Server Error');
   }
 }
 async function getAllEntreprise() {
@@ -19,7 +19,7 @@ async function getAllEntreprise() {
    
   } catch (error) {
     console.error(error);
-    throw new Error("Internal Server Error");
+    throw new Error('Internal Server Error');
   }
 }
 async function getEntrepriseDetails(entrepriseId) {
@@ -28,14 +28,13 @@ async function getEntrepriseDetails(entrepriseId) {
     const entreprise = await Entreprise.findById(entrepriseId);
 
     if (!entreprise) {
-      return res.status(404).json({ message: "Entreprise not found" });
+      return res.status(404).json({ message: 'Entreprise not found' });
     }
 
-    let ownerEntreprise = await User.findOne({ entreprise: entrepriseId });
+    const ownerEntreprise = await User.findOne({ entreprise: entrepriseId });
     let jobs;
     if (!ownerEntreprise) {
       jobs = await Job.find({ Relatedentreprise: entrepriseId });
-     
     } else {
       jobs = await Job.find({ recruiter: ownerEntreprise._id });
     }
@@ -43,7 +42,7 @@ async function getEntrepriseDetails(entrepriseId) {
     return { entreprise, ownerEntreprise, jobs };
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server Error" });
+    res.status(500).json({ message: 'Server Error' });
   }
 }
 
@@ -53,60 +52,61 @@ async function getEntrepriseTech() {
     const entreprise = await Entreprise.findOne({ OwnedbyAdmin: true });
 
     if (!entreprise) {
-      return res.status(404).json({ message: "Entreprise not found" });
+      return res.status(404).json({ message: 'Entreprise not found' });
     }
 
     return entreprise;
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server Error" });
+    res.status(500).json({ message: 'Server Error' });
   }
 }
 
 async function UpdateEntreprise(req, res, admin) {
   
   try {
-    let entreprise = await Entreprise.findById(req.params.CompanyID);
-    console.log("updating " + entreprise.CompanyName);
-    if (req.files["CompanyLogo"]) {
-      console.log("Company Logo Updated");
-      const CompanyLogoFile = req.files["CompanyLogo"][0];
+    const entreprise = await Entreprise.findById(req.params.CompanyID);
+    console.log(`updating ${entreprise.CompanyName}`);
+    if (req.files.CompanyLogo) {
+      console.log('Company Logo Updated');
+      const CompanyLogoFile = req.files.CompanyLogo[0];
       const CompanyLogoBucket = admin.storage().bucket();
       const CompanyLogoFileObject = CompanyLogoBucket.file(
-        CompanyLogoFile.originalname
+        CompanyLogoFile.originalname,
       );
       await CompanyLogoFileObject.createWriteStream().end(
-        CompanyLogoFile.buffer
+        CompanyLogoFile.buffer,
       );
       CompanyLogo = `https://firebasestorage.googleapis.com/v0/b/${CompanyLogoBucket.name}/o/${CompanyLogoFileObject.name}`;
       entreprise.CompanyLogo = CompanyLogo;
       await entreprise.save();
     }
-    console.log("Company Logo Updated SS");
-    return await Entreprise.findByIdAndUpdate(
+    console.log('Company Logo Updated SS');
+    const updateEntreprise = await Entreprise.findByIdAndUpdate(
       req.params.CompanyID,
       { $set: req.body },
-      { new: true }
+      { new: true },
     );
   
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server Error" });
+    res.status(500).json({ message: 'Server Error' });
   }
 }
 
 async function CreateEntreprise(req, res, admin) {
-  const { CompanyName, CompanyAdress, CompanyType, description, CompanyCity } =
-    req.body;
+  const {
+    CompanyName, CompanyAdress, CompanyType, description, CompanyCity,
+  } = req.body;
   try {
-    if (req.files["CompanyLogo"]) {
-      const CompanyLogoFile = req.files["CompanyLogo"][0];
+    if (req.files.CompanyLogo) {
+      const CompanyLogoFile = req.files.CompanyLogo[0];
       const CompanyLogoBucket = admin.storage().bucket();
       const CompanyLogoFileObject = CompanyLogoBucket.file(
-        CompanyLogoFile.originalname
+        CompanyLogoFile.originalname,
       );
       await CompanyLogoFileObject.createWriteStream().end(
-        CompanyLogoFile.buffer
+        CompanyLogoFile.buffer,
       );
       CompanyLogo = `https://firebasestorage.googleapis.com/v0/b/${CompanyLogoBucket.name}/o/${CompanyLogoFileObject.name}`;
     }
@@ -118,11 +118,11 @@ async function CreateEntreprise(req, res, admin) {
       CompanyLogo,
       CompanyCity,
     });
-    
+
     await entreprise.save();
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server Error" });
+    res.status(500).json({ message: 'Server Error' });
   }
 }
 

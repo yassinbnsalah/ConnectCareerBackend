@@ -1,5 +1,5 @@
-const Skills = require("../models/skills");
-const User = require("../models/user");
+const Skills = require('../models/skills');
+const User = require('../models/user');
 
 const createSkills = async (req, res) => {
   try {
@@ -7,57 +7,55 @@ const createSkills = async (req, res) => {
     const skills = new Skills({ skillname });
     await skills.save();
   } catch (error) {
-    console.error("Error updating education:", error);
+    console.error('Error updating education:', error);
   }
 };
 const getAllSkills = async (req, res) => {
   try {
-  
     const skills = await Skills.find();
 
     res.status(200).json({ skills });
   } catch (error) {
-    console.error("Error fetching all skills:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error('Error fetching all skills:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
 const AffectSkillToUser = async (req, res) => {
   try {
-      const userID = req.params.userID;
-      const { skillname } = req.body;
-      let skill = await Skills.findOne({ skillname: skillname });
-      if (!skill) {
-          skill = new Skills({ skillname: skillname });
-          await skill.save();
-      }
-      const user = await User.findById(userID);
-      if (!user) {
-          return res.status(404).json({ message: "User not found" });
-      }
-      if (user.skills.includes(skill._id)) {
-          return res.status(200).json({ message: "Skill already exists in user's selection" });
-      }
-      user.skills.push(skill._id);
-      await user.save();
+    const { userID } = req.params;
+    const { skillname } = req.body;
+    let skill = await Skills.findOne({ skillname });
+    if (!skill) {
+      skill = new Skills({ skillname });
+      await skill.save();
+    }
+    const user = await User.findById(userID);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    if (user.skills.includes(skill._id)) {
+      return res.status(200).json({ message: "Skill already exists in user's selection" });
+    }
+    user.skills.push(skill._id);
+    await user.save();
 
-      res.status(200).json({ message: "Skill added to user successfully" });
+    res.status(200).json({ message: 'Skill added to user successfully' });
   } catch (error) {
-      console.error("Error affecting skill to user:", error);
-      res.status(500).json({ message: "Internal server error" });
+    console.error('Error affecting skill to user:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-
 const SkilsByUserid = async (req, res) => {
   try {
-    const userID = req.params.userID;
+    const { userID } = req.params;
 
     // Find the user by ID and populate the 'skills' field to retrieve the skill names
-    const user = await User.findById(userID).populate("skills", "skillname");
+    const user = await User.findById(userID).populate('skills', 'skillname');
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: 'User not found' });
     }
 
     // Extract skill names from the populated 'skills' array
@@ -66,21 +64,21 @@ const SkilsByUserid = async (req, res) => {
     // Send response with skill names
     res.status(200).json({ skills: skillNames });
   } catch (error) {
-    console.error("Error fetching skills by user ID:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error('Error fetching skills by user ID:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
 const RemoveSkillFromUser = async (req, res) => {
   try {
-    const userID = req.params.userID;
+    const { userID } = req.params;
     const { skillname } = req.body;
-    const skill = await Skills.findOne({ skillname: skillname });
+    const skill = await Skills.findOne({ skillname });
     console.log(skill);
     // Find the user by ID
     const user = await User.findById(userID);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: 'User not found' });
     }
 
     // Check if the skill exists in the user's skills array
@@ -103,7 +101,7 @@ const RemoveSkillFromUser = async (req, res) => {
       .json({ message: "Skill removed from user's selection successfully" });
   } catch (error) {
     console.error("Error removing skill from user's selection:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
