@@ -39,9 +39,23 @@ async function getListOfEducation(userId) {
     return { error: 'Internal Server Error' };
   }
 }
+  
+  async function getListOfExperience(userId) {
+    try {
+      const experiences = await Experience.find({ student: userId }).sort({
+        startedOn: -1,
+      });
+      return experiences;
+    } catch (error) {
+      console.error("Error in getListOfExperience:", error.message);
+      // Return a structured error response
+      return { error: "Internal Server Error" };
+    }
+  }
+    module.exports = {
+    getRecruiterDetails,
+    getEntrepriseDetails,
+    getListOfEducation,
+    getListOfExperience
+  };
 
-module.exports = {
-  getRecruiterDetails,
-  getEntrepriseDetails,
-  getListOfEducation,
-};
