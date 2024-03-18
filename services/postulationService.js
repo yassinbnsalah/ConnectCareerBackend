@@ -121,7 +121,13 @@ async function UpdateApplicationState(applicationiD, state) {
       let job = await Job.findById(application.job).populate("recruiter").populate("Relatedentreprise")
       sendMailTRecruiter(job.recruiter?.email)
     }
-    return application;
+    if(state =="Cancel"){
+      await application.deleteOne()
+      return null
+    }else {
+      return application;
+    }
+  
   } catch (error) {
     console.error(error);
     throw error;

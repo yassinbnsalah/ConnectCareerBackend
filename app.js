@@ -266,10 +266,12 @@ app.post('/checkEmail', async (req, res) => {
 // app.use(require('webpack-dev-middleware')(compiler, {
 //   publicPath: webpackConfig.output.publicPath
 // }));
+const scheduledFunctions = require('./scheduledFunctions/crons');
+
 app.get("/", (req, res) => {
   res.send("Hello, Express!");
 });
-
+//scheduledFunctions.initScheduledJobs();
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });

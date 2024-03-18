@@ -6,7 +6,7 @@ const jobSchema = new mongoose.Schema({
     type: Schema.Types.ObjectId,
     ref: 'User',
   },
-
+  state: String ,
   jobTitle: String,
   location: String,
   typeofworkplace: String,
