@@ -22,7 +22,9 @@ const interviewSchema = new mongoose.Schema({
   heure: Number,
   minutes: Number,
   description: String,
-
+  type: String ,
+  link : String, 
+  location:String,
 });
 
 const Interview = mongoose.model('Interview', interviewSchema);

@@ -12,10 +12,10 @@ const CreateAdmin = require('./services/createadmin');
 const AuthentificaitonAdmin = require('./routes/authentificationadmin');
 
 const app = express();
-const port = 5000;
+const port = 3001;
 const webpack = require('webpack');
-const webpackConfig = require('./webpack.config.js');
-const compiler = webpack(webpackConfig);
+// const webpackConfig = require('./webpack.config.js');
+// const compiler = webpack(webpackConfig);
 app.use(cors());
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -263,9 +263,9 @@ app.post('/checkEmail', async (req, res) => {
   }
 });
 // Middleware pour servir les fichiers statiques générés par Webpack
-app.use(require('webpack-dev-middleware')(compiler, {
-  publicPath: webpackConfig.output.publicPath
-}));
+// app.use(require('webpack-dev-middleware')(compiler, {
+//   publicPath: webpackConfig.output.publicPath
+// }));
 app.get("/", (req, res) => {
   res.send("Hello, Express!");
 });
