@@ -67,26 +67,42 @@ router.get('/', async (req, res) => {
   }
 });
 
+// router.post(
+//   '/becomeAlumni/:studentId',
+//   upload.fields([{ name: 'diploma', maxCount: 1 }]),
+//   async (req, res) => {
+//     try {
+//       const { studentId } = req.params;
+
+//       const updatedStudent = await StudentService.becomeAlumni(
+//         studentId,
+//         req,
+//         res,
+//         admin,
+//       );
+
+//       res.json(updatedStudent);
+//     } catch (error) {
+//       console.error(error);
+//       res.status(500).json({ message: 'Internal Server Error' });
+//     }
+//   },
+// );
 router.post(
-  '/becomeAlumni/:studentId',
-  upload.fields([{ name: 'diploma', maxCount: 1 }]),
+  '/becomeAlumni/:studentId', upload.fields([
+    { name: 'CompanyLogo', maxCount: 1 },
+  ]),
   async (req, res) => {
     try {
       const { studentId } = req.params;
-
-      const updatedStudent = await StudentService.becomeAlumni(
-        studentId,
-        req,
-        res,
-        admin,
-      );
-
-      res.json(updatedStudent);
+      const updatedStudent = await StudentService.becomeAlumni(studentId, req, admin);
+      res.json({ message: 'User role updated to Alumni successfully', user: updatedStudent });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Internal Server Error' });
     }
   },
 );
+
 
 module.exports = router;
