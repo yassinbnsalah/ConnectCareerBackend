@@ -1,5 +1,6 @@
 const express = require('express');
 const jobService = require('../services/jobService');
+const admin = require('firebase-admin');
 
 const router = express.Router();
 const bodyParser = require('body-parser');
@@ -146,6 +147,24 @@ router.put('/disabled/:jobID', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error updating job' });
+  }
+});
+router.post('/add-pdf', upload.fields([{ name: 'jobFile', maxCount: 1 }, { name: 'jobTitle' }]), async (req, res) => {
+  try {
+      const jobTitle = req.body.jobTitle;
+      const jobFile = req.files.jobFile[0];
+
+      const newJob = new Job({
+          jobTitle: jobTitle,
+          jobFile: jobFile, 
+      });
+
+      await newJob.save();
+
+      res.json({ message: 'Job and PDF uploaded successfully' });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error uploading job and PDF' });
   }
 });
 

@@ -11,7 +11,7 @@ const User = require('./models/user');
 const CreateAdmin = require('./services/createadmin');
 const AuthentificaitonAdmin = require('./routes/authentificationadmin');
 const app = express();
-const port = 5000;
+const port = 3001;
 const webpack = require('webpack');
 const webpackConfig = require('./webpack.config.js');
 const compiler = webpack(webpackConfig);
@@ -261,10 +261,12 @@ app.post('/checkEmail', async (req, res) => {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+/*
 // Middleware pour servir les fichiers statiques générés par Webpack
 app.use(require('webpack-dev-middleware')(compiler, {
   publicPath: webpackConfig.output.publicPath
 }));
+*/
 app.get("/", (req, res) => {
   res.send("Hello, Express!");
 });
