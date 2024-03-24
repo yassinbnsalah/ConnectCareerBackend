@@ -21,14 +21,14 @@ pipeline {
         stage('SonarQube Analysis') {
             steps{
                 script { 
-                    def scannerHome = tool 'scanner'
-                    sh "${scannerHome}/bin/sonar-scanner \
-                        -Dsonar.projectKey=twinerzBackend \
-                        -Dsonar.sources=. \
-                        -Dsonar.host.url=http://172.16.5.155:9000/ \
-                        -Dsonar.login=squ_99662c597f93b62784b85abad47171d02fc9d464"
+                def scannerHome = tool 'scanner'
+            sh "${scannerHome}/bin/sonar-scanner \
+                -Dsonar.projectKey=twinerzBackend \
+                -Dsonar.sources=. \
+                -Dsonar.host.url=http://172.16.5.155:9000/ \
+                -Dsonar.login=squ_99662c597f93b62784b85abad47171d02fc9d464"
+                        } 
                 } 
-            }
         }
         stage('Build application') {
             steps{
@@ -36,12 +36,10 @@ pipeline {
                     withCredentials([
                         usernamePassword(credentialsId: registryCredentials, passwordVariable: 'REGISTRY_PASSWORD', usernameVariable: 'REGISTRY_USERNAME')
                     ]) {
-                        maskPasswords {
-                            sh '''
-                                echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin $registry
-                                docker push $registry/nodemongoapp:5.0
-                            '''
-                        }
+                        sh '''
+                            echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin $registry
+                            docker push $registry/nodemongoapp:5.0
+                        '''
                     }
                 }
             }
@@ -56,22 +54,22 @@ pipeline {
         stage('Deploy to Nexus') {
             steps{
                 script {
-                    docker.withRegistry("http://"+registry,registryCredentials ) {
-                        sh('docker push $registry/nodemongoapp:6.0 ')
-                    }
+                 docker.withRegistry("http://"+registry,registryCredentials ) {
+                    sh('docker push $registry/nodemongoapp:6.0 ')
+                             }
+                        }
                 }
-            }
         }
         stage('Run application ') {
             steps{
                 script {
                     docker.withRegistry("http://"+registry, registryCredentials) {
-                        sh('docker pull $registry/nodemongoapp:6.0 ')
-                        sh('docker compose up -d ')
-                    }
+                     sh('docker pull $registry/nodemongoapp:6.0 ')
+                     sh('docker compose up -d ')
+                           }
+                        }
                 }
             }
-        }
         stage('Prometheus Setup') {
             steps {
                 sh 'docker compose up -d prometheus'
