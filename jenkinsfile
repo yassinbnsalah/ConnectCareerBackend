@@ -30,27 +30,24 @@ pipeline {
                         } 
                 } 
         }
-        stage('Building images (node and mongo)') {
-            steps{
-                script {
-                    sh('docker compose build')
-                }
+       
+        stage('Build application') {
+    steps {
+        script {
+            withCredentials([
+                usernamePassword(credentialsId: registryCredentials, passwordVariable: 'REGISTRY_PASSWORD', usernameVariable: 'REGISTRY_USERNAME')
+            ]) {
+                // Log in to the Docker registry
+                sh "echo $REGISTRY_PASSWORD | docker login -u $REGISTRY_USERNAME --password-stdin $registry"
+
+                // Tag the local image with the registry address and push it
+                sh "docker tag nodemongoapp:5.0 $registry/nodemongoapp:5.0"
+                sh "docker push $registry/nodemongoapp:5.0"
             }
         }
-        // stage('Build application') {
-        //     steps{
-        //         script {
-        //             withCredentials([
-        //                 usernamePassword(credentialsId: registryCredentials, passwordVariable: 'REGISTRY_PASSWORD', usernameVariable: 'REGISTRY_USERNAME')
-        //             ]) {
-        //                 sh '''
-        //                     echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin $registry
-        //                     docker push $registry/nodemongoapp:5.0
-        //                 '''
-        //             }
-        //         }
-        //     }
-        // }
+    }
+}
+
         stage('Deploy to Nexus') {
             steps{
                 script {
@@ -59,6 +56,13 @@ pipeline {
                              }
                         }
                 }
+        }
+         stage('Building images (node and mongo)') {
+            steps{
+                script {
+                    sh('docker compose build')
+                }
+            }
         }
         stage('Run application ') {
             steps{
