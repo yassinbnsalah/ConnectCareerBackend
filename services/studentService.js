@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const speakeasy = require('speakeasy');
 const QRCode = require('qrcode');
 const User = require('../models/user');
+const Entreprise = require('../models/entreprise');
 
 const CreateStudent = async (req, res, admin) => {
   try {
@@ -19,14 +20,16 @@ const CreateStudent = async (req, res, admin) => {
       institution,
       diploma,
       TwoFactorAuthentication,
+      role,
     } = req.body;
-    const role = 'Student';
+    
     let profileImage = '';
 
     if (req.files.profileImage) {
       const profileImageFile = req.files.profileImage[0];
       const imageExtension = profileImageFile.originalname.split('.').pop();
       const imageName = `${firstname}${lastname}.${imageExtension}`;
+
       const profileImageBucket = admin.storage().bucket();
       const profileImageFileObject = profileImageBucket.file(imageName);
       await profileImageFileObject
@@ -56,7 +59,9 @@ const CreateStudent = async (req, res, admin) => {
     if (TwoFactorAuthentication === 'true') {
       const secret = speakeasy.generateSecret({ length: 20 });
       newUser.secret = secret.base32;
+
       let qrCodeUrl;
+
       try {
         qrCodeUrl = await new Promise((resolve, reject) => {
           QRCode.toDataURL(secret.otpauth_url, (err, image_data) => {
@@ -75,11 +80,14 @@ const CreateStudent = async (req, res, admin) => {
         return res.status(500).send('Internal Server Error');
       }
     }
+
     try {
       // Save the user and obtain the saved user object
       const savedUser = await newUser.save();
+
       // Additional logic, if needed, after saving the user
       sendMailtoStudent(email, firstname + lastname);
+
       // Send the success response with the created user data to the client
       res.status(201).json({
         message: 'Utilisateur inscrit avec succès',
@@ -97,10 +105,14 @@ const CreateStudent = async (req, res, admin) => {
 
 async function getStudentDetails(studentId) {
   try {
-    return await User.findById(studentId);
+    const student = await User.findById(studentId);
+    if (!student) {
+      throw new Error('Student not found');
+    }
+    return student;
   } catch (error) {
-    console.error(error);
-    throw new Error('Internal Server Error');
+    console.error(`Error fetching student details for ID ${studentId}:`, error);
+    throw new Error(`Failed to fetch student details for ID ${studentId}`);
   }
 }
 
@@ -140,6 +152,7 @@ async function updateStudent2(req, res, admin) {
       const profileImageFile = req.files.profileImage[0];
       const imageExtension = profileImageFile.originalname.split('.').pop();
       const imageName = `${req.body.email}.${imageExtension}`;
+
       const profileImageBucket = admin.storage().bucket();
       const profileImageFileObject = profileImageBucket.file(imageName);
       await profileImageFileObject
@@ -156,7 +169,9 @@ async function updateStudent2(req, res, admin) {
       const folderName = 'student';
       const fileName = resumeFile.originalname;
       const fileFullPath = `${folderName}/${fileName}`;
+
       const ResumeFileObject = ResumeBucket.file(fileFullPath);
+
       await ResumeFileObject.createWriteStream().end(resumeFile.buffer);
 
       const resume = `https://firebasestorage.googleapis.com/v0/b/${
@@ -172,7 +187,9 @@ async function updateStudent2(req, res, admin) {
       const folderName = 'student';
       const fileName = carteEtudiantFile.originalname;
       const fileFullPath = `${folderName}/${fileName}`;
+
       const CarteEtudiantFileObject = CarteEtudiantBucket.file(fileFullPath);
+
       await CarteEtudiantFileObject.createWriteStream().end(
         carteEtudiantFile.buffer,
       );
@@ -189,35 +206,88 @@ async function updateStudent2(req, res, admin) {
     throw new Error('Internal Server Error');
   }
 }
+// async function becomeAlumni(studentId, req, res, admin) {
+//   try {
+//     const state = 'En cours de traitement';
+//     let diploma = '';
 
-async function becomeAlumni(studentId, req, res, admin) {
+//     if (req.files && req.files.diploma) {
+//       const DiplomaFile = req.files.diploma[0];
+//       const DiplomaBucket = admin.storage().bucket();
+//       // Set the path where you want to store the diploma files
+//       const folderName = 'diplomas';
+//       const fileName = DiplomaFile.originalname;
+//       const fileFullPath = `${folderName}/${fileName}`;
+
+//       const DiplomaFileObject = DiplomaBucket.file(fileFullPath);
+
+//       await DiplomaFileObject.createWriteStream().end(DiplomaFile.buffer);
+
+//       diploma = `https://firebasestorage.googleapis.com/v0/b/${
+//         DiplomaBucket.name
+//       }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
+//     }
+
+//     const updatedStudent = await User.findByIdAndUpdate(
+//       studentId,
+//       { $set: { diploma, state, request: true } },
+//       { new: true },
+//     );
+
+//     return updatedStudent;
+//   } catch (error) {
+//     console.error(error);
+//     throw new Error('Internal Server Error');
+//   }
+// }
+async function becomeAlumni(studentId, req, admin) {
   try {
-    const state = 'En cours de traitement';
-    let diploma = '';
-
-    if (req.files && req.files.diploma) {
-      const DiplomaFile = req.files.diploma[0];
-      const DiplomaBucket = admin.storage().bucket();
-      // Set the path where you want to store the diploma files
-      const folderName = 'diplomas';
-      const fileName = DiplomaFile.originalname;
-      const fileFullPath = `${folderName}/${fileName}`;
-      const DiplomaFileObject = DiplomaBucket.file(fileFullPath);
-      await DiplomaFileObject.createWriteStream().end(DiplomaFile.buffer);
-      diploma = `https://firebasestorage.googleapis.com/v0/b/${
-        DiplomaBucket.name
-      }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
+    const {
+      CompanyName,
+      CompanyAdress,
+      CompanyCity,
+      CompanyType,
+      matriculeFiscale,
+      description,
+    } = req.body;
+    let CompanyLogo = '';
+    if (req.files && req.files.CompanyLogo) {
+      const CompanyLogoFile = req.files.CompanyLogo[0];
+      const CompanyLogoBucket = admin.storage().bucket();
+      const CompanyLogoFileObject = CompanyLogoBucket.file(
+        CompanyLogoFile.originalname,
+      );
+      await CompanyLogoFileObject.createWriteStream().end(
+        CompanyLogoFile.buffer,
+      );
+      CompanyLogo = `https://firebasestorage.googleapis.com/v0/b/${CompanyLogoBucket.name}/o/${CompanyLogoFileObject.name}`;
     }
-    return await User.findByIdAndUpdate(
+    const entreprise = new Entreprise({
+      CompanyName,
+      CompanyAdress,
+      CompanyCity,
+      CompanyType,
+      matriculeFiscale,
+      description,
+      CompanyLogo,
+    });
+    await entreprise.save();
+
+    // Update the user document with the enterprise's ID
+    const updatedUser = await User.findByIdAndUpdate(
       studentId,
-      { $set: { diploma, state, request: true } },
-      { new: true },
+      { $set: { entreprise: entreprise._id, role: 'Alumni' } },
+      { new: true }
     );
+
+    return updatedUser; // Return the updated user
   } catch (error) {
     console.error(error);
     throw new Error('Internal Server Error');
   }
 }
+ 
+
 const secretKey = 'qsdsqdqdssqds';
 async function sendMailtoStudent(email, fullname) {
   const token = jwt.sign({ email }, secretKey, { expiresIn: '1d' });
@@ -236,6 +306,7 @@ async function sendMailtoStudent(email, fullname) {
       pass: 'ebrh bilu ygsn zrkw', // ethereal password
     },
   });
+
   const msg = {
     from: {
       name: 'ConnectCareer Esprit',
@@ -257,7 +328,6 @@ async function sendMailtoStudent(email, fullname) {
   };
   sendMail(transporter, msg);
 }
-
 module.exports = {
   getListStudents,
   becomeAlumni,
