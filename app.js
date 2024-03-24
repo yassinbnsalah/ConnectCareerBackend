@@ -46,9 +46,10 @@ const interviewRoute = require('./routes/interview');
 const teacherRoute = require('./routes/teacher');
 const statRoute = require('./routes/stats');
 const statRecruiter = require('./routes/statsRecruiter');
-
+const alumniRoute = require ('./routes/alumni')
 app.use('/studentapi/', studentRoute);
 app.use('/recruiterapi/', recruiterRoute);
+app.use('/alumniapi/', alumniRoute);
 app.use('/entrepriseapi/', entrepriseRoute);
 app.use('/jobapi/', jobRoutes);
 app.use('/postulationapi/', postulationRoute);

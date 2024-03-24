@@ -106,12 +106,16 @@ const CreateStudent = async (req, res, admin) => {
 async function getStudentDetails(studentId) {
   try {
     const student = await User.findById(studentId);
+    if (!student) {
+      throw new Error('Student not found');
+    }
     return student;
   } catch (error) {
-    console.error(error);
-    throw new Error('Internal Server Error');
+    console.error(`Error fetching student details for ID ${studentId}:`, error);
+    throw new Error(`Failed to fetch student details for ID ${studentId}`);
   }
 }
+
 async function getListStudents() {
   try {
     const students = await User.find({ role: 'Student' });

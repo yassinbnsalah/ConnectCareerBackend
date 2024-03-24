@@ -26,7 +26,7 @@ pipeline {
                 -Dsonar.projectKey=twinerzBackend \
                 -Dsonar.sources=. \
                 -Dsonar.host.url=http://172.16.5.155:9000/ \
-                -Dsonar.login=b1a89361febd6ba0fd1345b93efe579d3e0e9b4d"
+                -Dsonar.login=squ_99662c597f93b62784b85abad47171d02fc9d464"
                         } 
                 } 
         }
