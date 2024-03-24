@@ -30,7 +30,13 @@ pipeline {
                         } 
                 } 
         }
-       
+       stage('Building images (node and mongo)') {
+            steps{
+                script {
+                    sh('docker compose build')
+                }
+            }
+        }
         stage('Build application') {
             steps{
                 script {
@@ -54,13 +60,7 @@ pipeline {
                         }
                 }
         }
-         stage('Building images (node and mongo)') {
-            steps{
-                script {
-                    sh('docker compose build')
-                }
-            }
-        }
+         
         stage('Run application ') {
             steps{
                 script {
