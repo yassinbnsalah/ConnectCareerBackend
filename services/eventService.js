@@ -83,6 +83,16 @@ const getAllEvents = async (req, res) => {
   }
 };
 
+const getAllEventPublished = async (req, res) => {
+  try {
+    const events = await Event.find({state : "Publish"});
+
+    res.status(200).json({ events });
+  } catch (error) {
+    console.error('Error fetching all events:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 const findEventByID = async (req ,res , eventID) => {
   try {
     const event = await Event.findById(eventID);
@@ -97,5 +107,6 @@ const findEventByID = async (req ,res , eventID) => {
 module.exports = {
   CreateOrUpdateEvent,
   getAllEvents,
+  getAllEventPublished,
   findEventByID
 };

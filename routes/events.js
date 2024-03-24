@@ -5,7 +5,7 @@ const admin = require("firebase-admin");
 const multer = require("multer");
 
 const upload = multer();
-const {getAllEvents, findEventByID, CreateOrUpdateEvent } = require("../services/eventService");
+const {getAllEvents, findEventByID, CreateOrUpdateEvent, getAllEventPublished } = require("../services/eventService");
 
 router.post(
   "/createEvent",
@@ -45,6 +45,15 @@ router.get("/allEvents" , async (req, res) => {
   }
 } )
 
+router.get("/publicEvent" , async (req, res) => {
+  try {
+    await getAllEventPublished(req, res);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+} )
 router.get("/:id" , async (req, res) => {
   try {
     await findEventByID(req, res , req.params.id);
