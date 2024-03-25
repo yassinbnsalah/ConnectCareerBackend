@@ -11,9 +11,9 @@ const Job = require('../models/job');
 const Skills = require('../models/skills');
 
 const upload = multer();
-router.post('/add', upload.none(), async (req, res) => {
+router.post('/add',   upload.fields([{ name: 'jobFile', maxCount: 1 }]), async (req, res) => {
   try {
-    const jobs = await jobService.AddJob(req, res);
+    const jobs = await jobService.AddJob(req, res,admin);
     res.json(jobs);
   } catch (error) {
     console.error(error);

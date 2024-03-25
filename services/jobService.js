@@ -1,8 +1,8 @@
-const Entreprise = require('../models/entreprise');
-const Job = require('../models/job');
-const Skills = require('../models/skills');
-const User = require('../models/user');
-const admin = require('firebase-admin');
+const Entreprise = require("../models/entreprise");
+const Job = require("../models/job");
+const Skills = require("../models/skills");
+const User = require("../models/user");
+const admin = require("firebase-admin");
 async function getJobsByEntrepriseId(entrepriseId) {
   try {
     const jobs = await Job.find({
@@ -37,7 +37,7 @@ async function getJobByRecruiter(userId, res) {
   }
 }
 
-async function AddJob(req, res,admin) {
+async function AddJob(req, res, admin) {
   try {
     const {
       recruiter,
@@ -58,7 +58,7 @@ async function AddJob(req, res,admin) {
 
     const user = await User.findById(recruiter);
     if (!user) {
-      return res.status(404).json({ error: 'Recruiter not found' });
+      return res.status(404).json({ error: "Recruiter not found" });
     }
 
     if (user.nbopportunite) {
@@ -87,13 +87,13 @@ async function AddJob(req, res,admin) {
       }
     }
 
-    let jobFileUrl = '';
+    let jobFileUrl = "";
 
     if (req.files && req.files.jobFile && req.files.jobFile[0]) {
       const jobFile = req.files.jobFile[0];
       const bucket = admin.storage().bucket();
 
-      const folderName = 'jobFiles';
+      const folderName = "jobFiles";
       const fileName = `${Date.now()}_${jobFile.originalname}`;
       const fileFullPath = `${folderName}/${fileName}`;
 
@@ -101,9 +101,11 @@ async function AddJob(req, res,admin) {
 
       await file.save(jobFile.buffer);
 
-      jobFileUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(fileFullPath)}?alt=media`;
+      jobFileUrl = `https://firebasestorage.googleapis.com/v0/b/${
+        bucket.name
+      }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
     }
-
+    console.log(jobFileUrl);
     const newJob = new Job({
       recruiter,
       jobTitle,
@@ -128,7 +130,7 @@ async function AddJob(req, res,admin) {
     if (entrepriseID) {
       let entreprise = await Entreprise.findById(entrepriseID);
       if (!entreprise) {
-        return res.status(404).json({ error: 'Entreprise not found' });
+        return res.status(404).json({ error: "Entreprise not found" });
       }
       entreprise.nbOpportunitees += 1;
       await entreprise.save();
@@ -139,15 +141,17 @@ async function AddJob(req, res,admin) {
       await entreprise.save();
       newJob.Relatedentreprise = entreprise;
     }
-    console.log("we ll send reports at" + closeDate);
-    scheduledFunctions.initSendReports(closeDate);
+    if (closeDate != "null") {
+      console.log("we ll send reports at" + closeDate);
+      scheduledFunctions.initSendReports(closeDate);
+    }
+
     await newJob.save();
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'Error adding job' });
+    return res.status(500).json({ error: "Error adding job" });
   }
 }
-
 
 async function getJobDetails(jobID) {
   try {
@@ -232,14 +236,14 @@ async function getAllJob() {
   }
 }
 
-async function CloseJob(jobID){
+async function CloseJob(jobID) {
   try {
-    const job = await Job.findById(jobID) ;
+    const job = await Job.findById(jobID);
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
     }
-    job.state = "Close"
-    await job.save()
+    job.state = "Close";
+    await job.save();
     return { job };
   } catch (error) {
     console.error(error);
@@ -253,5 +257,5 @@ module.exports = {
   AddJob,
   getAllJob,
   getJobsByEntrepriseId,
-  CloseJob
+  CloseJob,
 };
