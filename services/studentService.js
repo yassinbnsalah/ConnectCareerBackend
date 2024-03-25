@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const speakeasy = require('speakeasy');
 const QRCode = require('qrcode');
 const User = require('../models/user');
+const Entreprise = require('../models/entreprise');
 
 const CreateStudent = async (req, res, admin) => {
   try {
@@ -19,8 +20,9 @@ const CreateStudent = async (req, res, admin) => {
       institution,
       diploma,
       TwoFactorAuthentication,
+      role,
     } = req.body;
-    const role = 'Student';
+    
     let profileImage = '';
 
     if (req.files.profileImage) {
@@ -104,12 +106,16 @@ const CreateStudent = async (req, res, admin) => {
 async function getStudentDetails(studentId) {
   try {
     const student = await User.findById(studentId);
+    if (!student) {
+      throw new Error('Student not found');
+    }
     return student;
   } catch (error) {
-    console.error(error);
-    throw new Error('Internal Server Error');
+    console.error(`Error fetching student details for ID ${studentId}:`, error);
+    throw new Error(`Failed to fetch student details for ID ${studentId}`);
   }
 }
+
 async function getListStudents() {
   try {
     const students = await User.find({ role: 'Student' });
@@ -200,40 +206,88 @@ async function updateStudent2(req, res, admin) {
     throw new Error('Internal Server Error');
   }
 }
-async function becomeAlumni(studentId, req, res, admin) {
+// async function becomeAlumni(studentId, req, res, admin) {
+//   try {
+//     const state = 'En cours de traitement';
+//     let diploma = '';
+
+//     if (req.files && req.files.diploma) {
+//       const DiplomaFile = req.files.diploma[0];
+//       const DiplomaBucket = admin.storage().bucket();
+//       // Set the path where you want to store the diploma files
+//       const folderName = 'diplomas';
+//       const fileName = DiplomaFile.originalname;
+//       const fileFullPath = `${folderName}/${fileName}`;
+
+//       const DiplomaFileObject = DiplomaBucket.file(fileFullPath);
+
+//       await DiplomaFileObject.createWriteStream().end(DiplomaFile.buffer);
+
+//       diploma = `https://firebasestorage.googleapis.com/v0/b/${
+//         DiplomaBucket.name
+//       }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
+//     }
+
+//     const updatedStudent = await User.findByIdAndUpdate(
+//       studentId,
+//       { $set: { diploma, state, request: true } },
+//       { new: true },
+//     );
+
+//     return updatedStudent;
+//   } catch (error) {
+//     console.error(error);
+//     throw new Error('Internal Server Error');
+//   }
+// }
+async function becomeAlumni(studentId, req, admin) {
   try {
-    const state = 'En cours de traitement';
-    let diploma = '';
-
-    if (req.files && req.files.diploma) {
-      const DiplomaFile = req.files.diploma[0];
-      const DiplomaBucket = admin.storage().bucket();
-      // Set the path where you want to store the diploma files
-      const folderName = 'diplomas';
-      const fileName = DiplomaFile.originalname;
-      const fileFullPath = `${folderName}/${fileName}`;
-
-      const DiplomaFileObject = DiplomaBucket.file(fileFullPath);
-
-      await DiplomaFileObject.createWriteStream().end(DiplomaFile.buffer);
-
-      diploma = `https://firebasestorage.googleapis.com/v0/b/${
-        DiplomaBucket.name
-      }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
+    const {
+      CompanyName,
+      CompanyAdress,
+      CompanyCity,
+      CompanyType,
+      matriculeFiscale,
+      description,
+    } = req.body;
+    let CompanyLogo = '';
+    if (req.files && req.files.CompanyLogo) {
+      const CompanyLogoFile = req.files.CompanyLogo[0];
+      const CompanyLogoBucket = admin.storage().bucket();
+      const CompanyLogoFileObject = CompanyLogoBucket.file(
+        CompanyLogoFile.originalname,
+      );
+      await CompanyLogoFileObject.createWriteStream().end(
+        CompanyLogoFile.buffer,
+      );
+      CompanyLogo = `https://firebasestorage.googleapis.com/v0/b/${CompanyLogoBucket.name}/o/${CompanyLogoFileObject.name}`;
     }
+    const entreprise = new Entreprise({
+      CompanyName,
+      CompanyAdress,
+      CompanyCity,
+      CompanyType,
+      matriculeFiscale,
+      description,
+      CompanyLogo,
+    });
+    await entreprise.save();
 
-    const updatedStudent = await User.findByIdAndUpdate(
+    // Update the user document with the enterprise's ID
+    const updatedUser = await User.findByIdAndUpdate(
       studentId,
-      { $set: { diploma, state, request: true } },
-      { new: true },
+      { $set: { entreprise: entreprise._id, role: 'Alumni' } },
+      { new: true }
     );
 
-    return updatedStudent;
+    return updatedUser; // Return the updated user
   } catch (error) {
     console.error(error);
     throw new Error('Internal Server Error');
   }
 }
+ 
+
 const secretKey = 'qsdsqdqdssqds';
 async function sendMailtoStudent(email, fullname) {
   const token = jwt.sign({ email }, secretKey, { expiresIn: '1d' });

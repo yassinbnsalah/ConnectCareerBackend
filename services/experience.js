@@ -7,19 +7,15 @@ const confirmedExperience = async (req, res, admin) => {
     // Assuming you have an identifier for the experience, like an ID
     const { experienceId } = req.params;
 
-    // Find the experience by ID
     const existingExperience = await Experience.findById(experienceId);
-
     if (!existingExperience) {
       return res.status(404).json({ message: 'Experience not found' });
     }
 
-    // Update only the 'etat' property if it is provided in the request body
     if (etat !== undefined) {
       existingExperience.etat = etat;
     }
 
-    // Save the updated experience
     await existingExperience.save();
 
     res.status(200).json({ message: 'Experience updated successfully' });
@@ -41,13 +37,10 @@ const CreateExperience = async (req, res, admin) => {
       jobDescription,
       startedOn,
       endAt,
-      etat,
       entrepriseSecture,
     } = req.body;
 
-    console.log(req.body);
-
-    let Attestation = null; // Initialize Attestation to null
+    let Attestation = null;
 
     if (req.files && req.files.attestation && req.files.attestation[0]) {
       const attestationFile = req.files.attestation[0];
@@ -88,12 +81,9 @@ const CreateExperience = async (req, res, admin) => {
     res.status(201).json({ message: 'Experience créée avec succès' });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({
-        message:
-          "Une erreur s'est produite lors de la création de l'expérience",
-      });
+    res.status(500).json({
+      message: "Une erreur s'est produite lors de la création de l'expérience",
+    });
   }
 };
 
@@ -102,7 +92,6 @@ const deleteExperienceById = async (req, res) => {
 
   try {
     const deletedExperience = await Experience.findByIdAndDelete(experienceId);
-
     if (!deletedExperience) {
       return res.status(404).json({ error: 'Experience not found' });
     }
@@ -151,12 +140,10 @@ const updateExperience = async (req, res, admin) => {
 
     const { experienceId } = req.params;
     const existingExperience = await Experience.findById(experienceId);
-
     if (!existingExperience) {
       return res.status(404).json({ message: 'Experience not found' });
     }
 
-    // Update only if the fields are provided in the request body
     if (entrepriseName) {
       existingExperience.entrepriseName = entrepriseName;
     }
@@ -181,11 +168,9 @@ const updateExperience = async (req, res, admin) => {
     if (isAttestationProvided) {
       existingExperience.Attestation = Attestation;
     }
-
     if (etat !== undefined) {
       existingExperience.etat = false;
     }
-
     await existingExperience.save();
 
     res.status(200).json({ message: 'Experience updated successfully' });
@@ -196,17 +181,18 @@ const updateExperience = async (req, res, admin) => {
       .json({ message: 'An error occurred while updating the experience' });
   }
 };
+
 const getListOfExperience = async (req, res) => {
   const { userId } = req.params;
   try {
     const experiences = await Experience.find({ student: userId }).sort({ startedOn: -1 });
-
     res.json(experiences);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 const getListOfExperienceById = async (req, res) => {
   const { Id } = req.params;
   try {

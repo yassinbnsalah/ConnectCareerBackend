@@ -43,7 +43,6 @@ async function createRecruiter(req, res, admin) {
       const profileImageFile = req.files.profileImage[0];
       const imageExtension = profileImageFile.originalname.split('.').pop();
       const imageName = `${firstname}${lastname}.${imageExtension}`;
-
       const profileImageBucket = admin.storage().bucket();
       const profileImageFileObject = profileImageBucket.file(imageName);
       await profileImageFileObject
@@ -92,10 +91,11 @@ async function createRecruiter(req, res, admin) {
     // sendMailtorecruiter(email,firstname+lastname);
   } catch (error) {
     console.error(error);
+    throw new Error("Internal Server Error");
   }
 }
 
-async function verifyrecruiter(email) {
+async function verifyRecruiter(email) {
   try {
     const recruiter = await User.find({ email });
     console.log(recruiter);
@@ -105,6 +105,7 @@ async function verifyrecruiter(email) {
     return false;
   } catch (error) {
     console.error(error);
+    throw new Error("Internal Server Error");
   }
 }
 const secretKey = 'qsdsqdqdssqds';
@@ -125,7 +126,6 @@ async function sendMailtorecruiter(email, fullname) {
       pass: 'ebrh bilu ygsn zrkw', // ethereal password
     },
   });
-
   const msg = {
     from: {
       name: 'ConnectCareer Esprit',
@@ -168,7 +168,6 @@ async function updateRecruiter(req, res, admin) {
       const profileImageFile = req.files.profileImage[0];
       const imageExtension = profileImageFile.originalname.split('.').pop();
       const imageName = `${req.body.email}.${imageExtension}`;
-
       const profileImageBucket = admin.storage().bucket();
       const profileImageFileObject = profileImageBucket.file(imageName);
       await profileImageFileObject
@@ -185,10 +184,12 @@ async function updateRecruiter(req, res, admin) {
     throw new Error('Internal Server Error');
   }
 }
+
 module.exports = {
   getListeRecruiter,
   createRecruiter,
-  verifyrecruiter,
+  verifyRecruiter,
   getRecruiterDetails,
   updateRecruiter,
+  sendMailtorecruiter,
 };

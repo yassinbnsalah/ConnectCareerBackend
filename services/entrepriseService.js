@@ -7,7 +7,7 @@ async function getListeEntreprise() {
     const recruiters = await User.find({ role: 'Recruiter' }).populate(
       'entreprise',
     );
-    return recruiters;
+
   } catch (error) {
     console.error(error);
     throw new Error('Internal Server Error');
@@ -15,8 +15,8 @@ async function getListeEntreprise() {
 }
 async function getAllEntreprise() {
   try {
-    const entreprises = await Entreprise.find();
-    return entreprises;
+    return await Entreprise.find();
+   
   } catch (error) {
     console.error(error);
     throw new Error('Internal Server Error');
@@ -63,14 +63,7 @@ async function getEntrepriseTech() {
 }
 
 async function UpdateEntreprise(req, res, admin) {
-  // const {
-  //   CompanyName,
-  //   CompanyAdress,
-  //   CompanyType,
-  //   description,
-  //   CompanyCity,
-  //   CompanyWebsite,
-  // } = req.body;
+  
   try {
     const entreprise = await Entreprise.findById(req.params.CompanyID);
     console.log(`updating ${entreprise.CompanyName}`);
@@ -94,7 +87,7 @@ async function UpdateEntreprise(req, res, admin) {
       { $set: req.body },
       { new: true },
     );
-    return updateEntreprise;
+  
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });

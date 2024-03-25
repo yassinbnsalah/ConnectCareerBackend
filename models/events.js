@@ -11,7 +11,8 @@ const eventsSchema = new mongoose.Schema({
     default: Date.now,
   },
   publish_date : Date,
-  eventDate : Date
+  eventDate : Date,
+ 
 });
 
 const Event = mongoose.model('Event', eventsSchema);

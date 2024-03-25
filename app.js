@@ -47,8 +47,10 @@ const teacherRoute = require('./routes/teacher');
 const statRoute = require('./routes/stats');
 const statRecruiter = require('./routes/statsRecruiter');
 const eventroute = require('./routes/events')
+const alumniRoute = require ('./routes/alumni')
 app.use('/studentapi/', studentRoute);
 app.use('/recruiterapi/', recruiterRoute);
+app.use('/alumniapi/', alumniRoute);
 app.use('/entrepriseapi/', entrepriseRoute);
 app.use('/jobapi/', jobRoutes);
 app.use('/postulationapi/', postulationRoute);
@@ -268,6 +270,9 @@ app.post('/checkEmail', async (req, res) => {
 //   publicPath: webpackConfig.output.publicPath
 // }));
 
+/*app.use(require('webpack-dev-middleware')(compiler, {
+  publicPath: webpackConfig.output.publicPath
+}));*/
 app.get("/", (req, res) => {
   res.send("Hello, Express!");
 });

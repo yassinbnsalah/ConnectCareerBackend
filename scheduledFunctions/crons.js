@@ -1,4 +1,5 @@
 const { CronJob } = require("cron");
+const { CloseJob } = require("../services/jobService");
 
 exports.initScheduledJobs = () => {
   const scheduledJobFunction = new CronJob(
@@ -13,7 +14,7 @@ exports.initScheduledJobs = () => {
   scheduledJobFunction.start();
 };
 
-exports.initSendReports = (date) => {
+exports.initSendReports = (date, jobID) => {
   let dateConverted = new Date(date);
   const day = dateConverted.getDate();
   const month = dateConverted.getMonth();
@@ -23,6 +24,7 @@ exports.initSendReports = (date) => {
     () => {
       console.log("Sending Job Report");
       // Add your custom logic here
+      CloseJob(jobID)
     },
     null,
     true

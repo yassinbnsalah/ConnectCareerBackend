@@ -9,7 +9,7 @@ const User = require('../models/user');
 
 const getUserByEmail = async (email) => {
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email });
     return user;
   } catch (error) {
     console.error(error);
@@ -60,8 +60,8 @@ const Authentification = async (req, res) => {
 
 const CheckProgress = async (user) => {
   let progress = 0;
-  if (user.firstname && user.lastname) {
-    progress += 10;
+  if (user.firstname && user.firstname) {
+    progress = progress + 10;
   }
   if (user.phoneNumber) {
     progress += 5;
@@ -163,7 +163,7 @@ async function sendMailtoResetPassword(email, fullname) {
       .replace('{{token}}', token),
   };
 
-  const sendMail = async (transporter, msg) => {
+
     try {
       await transporter.sendMail(msg);
       console.log('Email has been sent !');
@@ -171,10 +171,11 @@ async function sendMailtoResetPassword(email, fullname) {
       console.error(error);
       res.status(500).send('Internal Server Error');
     }
-  };
 
   sendMail(transporter, msg);
-}
+};
+
+
 
 const ReceiveToken = async (req, res) => {
   const { token } = req.params;

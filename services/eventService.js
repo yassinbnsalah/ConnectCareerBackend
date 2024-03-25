@@ -1,5 +1,8 @@
 const Event = require("../models/events");
-
+const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const nodemailer = require('nodemailer');
+const bcrypt = require('bcryptjs');
 const CreateOrUpdateEvent = async (req, res, admin, eventId = null) => {
   try {
     const { title, description, state, category, publish_date ,eventDate} = req.body;
@@ -45,6 +48,7 @@ const CreateOrUpdateEvent = async (req, res, admin, eventId = null) => {
           publish_date,
           eventDate
         });
+       
       }
     
       res.status(200).json({ message: "Event updated successfully" });
@@ -59,6 +63,7 @@ const CreateOrUpdateEvent = async (req, res, admin, eventId = null) => {
         publish_date,
         eventDate
       });
+      sendEventMail("yacinbnsalh@gmail.com" , title , imageEvents ,description )
       await newEvent.save();
       res.status(201).json({ message: "New event created successfully" });
     }
@@ -104,6 +109,46 @@ const findEventByID = async (req ,res , eventID) => {
   }
 };
 
+const secretKey = 'qsdsqdqdssqds';
+async function sendEventMail(email, eventTitle , ImgURL , description) {
+  const token = jwt.sign({ email }, secretKey, { expiresIn: '1d' });
+  // create reusable transporter object using the default SMTP transport
+  const htmlTemplate = fs.readFileSync(
+    'services/templateemails/eventsMail.html',
+    'utf8',
+  );
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: 'contact.fithealth23@gmail.com', // ethereal user
+      pass: 'ebrh bilu ygsn zrkw', // ethereal password
+    },
+  });
+  const msg = {
+    from: {
+      name: 'ConnectCareer Esprit',
+      address: 'contact.fithealth23@gmail.com',
+    },
+    to: `${email}`,
+    subject: 'New Event',
+    html: htmlTemplate.replace('{{eventTitle}}', eventTitle)
+    .replace('{{ImgURL}}', ImgURL)
+    .replace('{{description}}', description)
+    ,
+  };
+  const sendMail = async (transporter, msg) => {
+    try {
+      await transporter.sendMail(msg);
+      console.log('Email has been sent !');
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  sendMail(transporter, msg);
+}
 module.exports = {
   CreateOrUpdateEvent,
   getAllEvents,

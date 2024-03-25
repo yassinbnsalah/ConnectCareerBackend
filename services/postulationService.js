@@ -74,7 +74,7 @@ async function getApplications(owner) {
     const postulations = await Postulation.find({ owner }).populate(
       'job',
     );
-    return postulations;
+
   } catch (error) {
     console.error('Error fetching postulations by owner:', error);
     throw error;
@@ -105,7 +105,7 @@ async function getApplicationDetails(applicationID) {
     const application = await Postulation.findById(applicationID).populate(
       'owner',
     );
-    return application;
+
   } catch (error) {
     console.error(error);
     throw error;
