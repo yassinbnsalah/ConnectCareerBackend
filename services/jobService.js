@@ -23,6 +23,7 @@ async function getJobsByEntrepriseId(entrepriseId) {
   }
 }
 const scheduledFunctions = require("../scheduledFunctions/crons");
+const Stats = require("../models/stats");
 
 async function getJobByRecruiter(userId, res) {
   try {
@@ -126,21 +127,35 @@ async function AddJob(req, res, admin) {
     });
 
     await newJob.save();
-
+    let entreprise;
     if (entrepriseID) {
-      let entreprise = await Entreprise.findById(entrepriseID);
+       entreprise = await Entreprise.findById(entrepriseID);
       if (!entreprise) {
         return res.status(404).json({ error: "Entreprise not found" });
       }
       entreprise.nbOpportunitees += 1;
+
       await entreprise.save();
       newJob.Relatedentreprise = entreprise;
     } else {
-      let entreprise = await Entreprise.findById(user.entreprise);
+       entreprise = await Entreprise.findById(user.entreprise);
       entreprise.nbOpportunitees = entreprise.nbOpportunitees + 1;
       await entreprise.save();
+
       newJob.Relatedentreprise = entreprise;
     }
+    const stats = entreprise.stats
+    console.log(stats);
+    const STATA = await Stats.findById(stats)
+    STATA.totalNBOpportunite += 1 ; 
+    if(jobType=="fullTime"){
+      STATA.nbFullTimeOP += 1 
+    }else if (jobType=="Summer internship"){
+      STATA.nbSummerOP += 1 
+    }else if (jobType=="PFE"){
+      STATA.nbPFEOP += 1 
+    }
+    await STATA.save()
     if (closeDate != "null") {
       console.log("we ll send reports at" + closeDate);
       scheduledFunctions.initSendReports(closeDate);
