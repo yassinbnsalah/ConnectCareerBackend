@@ -61,7 +61,13 @@ router.get('/details/:jobID', async (req, res) => {
   const { jobID } = req.params;
   try {
     const data = await jobService.getJobDetails(jobID);
-    res.json(data);
+    let summary = null;
+    if (data.jobFile) {
+      const model = "mistral-7b-instruct";
+      summary = await jobService.summarizeJobFile(data.jobFile, model);
+     // console.log(`Summary: ${summary}`);
+    }
+    res.json({ data, summary });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });

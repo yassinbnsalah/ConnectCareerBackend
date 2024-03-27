@@ -1,0 +1,4 @@
+ This job involves working with React and Axios to consume data from a JSON server. The specific tasks are:
+
+1. Install Axios and json-server.
+2. Set up json-server to run on port 3
