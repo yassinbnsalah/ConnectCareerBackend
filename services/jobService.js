@@ -34,7 +34,7 @@ async function summarizeJobFile(jobFile, model) {
 			jobChunks.push(jobText.slice(i, i + chunkSize));
 		}
 
-		console.log(`Job file has ${jobChunks.length} chunks and ${jobText.length} characters. This is around ${jobText.length / 4} tokens.`);
+//		console.log(`Job file has ${jobChunks.length} chunks and ${jobText.length} characters. This is around ${jobText.length / 4} tokens.`);
 
 		const summaries = [];
 		for (let i = 0; i < jobChunks.length; i++) {
