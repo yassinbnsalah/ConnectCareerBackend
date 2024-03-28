@@ -25,7 +25,7 @@ async function getAllEntreprise() {
 async function getEntrepriseDetails(entrepriseId) {
   try {
     // Find the entreprise by its ID
-    const entreprise = await Entreprise.findById(entrepriseId);
+    const entreprise = await Entreprise.findById(entrepriseId).populate("stats");
 
     if (!entreprise) {
       return res.status(404).json({ message: 'Entreprise not found' });

@@ -9,6 +9,10 @@ const PostulationSchema = new mongoose.Schema({
   State: String,
   Resume: String,
   MotivationLetter: String,
+  matching:  {
+    type: Number,
+  },
+  IARecommandation   : String,
   owner: {
     type: Schema.Types.ObjectId,
     ref: 'User',
