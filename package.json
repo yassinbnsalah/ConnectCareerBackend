@@ -54,6 +54,7 @@
     "prompts": "^2.4.2",
     "qrcode": "^1.5.3",
     "querystring-es3": "^0.2.1",
+    "socket.io": "^4.7.5",
     "speakeasy": "^2.0.0",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",

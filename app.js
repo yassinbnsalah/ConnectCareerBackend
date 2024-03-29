@@ -21,6 +21,27 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   storageBucket: 'twinerz-fceb6.appspot.com',
 });
+// SOcket io
+const http = require('http');
+const socketIo = require('socket.io');
+const server = http.createServer(app);
+const io = socketIo(server);
+
+// Gérez les connexions des clients
+io.on('connection', (socket) => {
+    console.log('Un client est connecté');
+    // Gérer la création d'un nouveau job
+    socket.on('nouveauJob', (jobData) => {
+      // Émettre une notification aux étudiants connectés
+      io.emit('notification', { type: 'nouveauJob', data: jobData });
+  });
+    // Gérer la déconnexion du client
+    socket.on('disconnect', () => {
+        console.log('Un client s\'est déconnecté');
+    });
+});
+
+
 
 // Middleware
 app.use(bodyParser.json());
@@ -68,6 +89,8 @@ app.post('/protected', requireToken, (req, res) => {
   // This route handler will only be called if the user's token is valid
   res.send('Protected resource accessed successfully');
 });
+const jobService = require('./services/jobService');
+jobService.initSocket(server);
 // TO TEST IT ********************
 app.post('/loginadmin', async (req, res) => {
   await AuthentificaitonAdmin(req, res);
