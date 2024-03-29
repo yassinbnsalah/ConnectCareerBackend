@@ -9,6 +9,7 @@ const PostulationSchema = new mongoose.Schema({
   State: String,
   Resume: String,
   MotivationLetter: String,
+  
   matching:  {
     type: Number,
   },

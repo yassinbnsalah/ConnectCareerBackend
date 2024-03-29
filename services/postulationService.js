@@ -65,6 +65,7 @@ async function CreateNewCandidate(req, res, admin) {
     });
 
     await nPostulation.save();
+    return nPostulation
   } catch (error) {
     console.error(error);
   }

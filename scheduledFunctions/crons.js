@@ -24,7 +24,7 @@ exports.initSendReports = (date, jobID) => {
     () => {
       console.log("Sending Job Report");
       // Add your custom logic here
-      CloseJob(jobID)
+      // CloseJob(jobID)
     },
     null,
     true

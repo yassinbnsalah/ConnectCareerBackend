@@ -48,6 +48,7 @@ const statRoute = require('./routes/stats');
 const statRecruiter = require('./routes/statsRecruiter');
 const eventroute = require('./routes/events')
 const alumniRoute = require ('./routes/alumni')
+const InvitationRoute = require('./routes/invite')
 app.use('/studentapi/', studentRoute);
 app.use('/recruiterapi/', recruiterRoute);
 app.use('/alumniapi/', alumniRoute);
@@ -63,6 +64,7 @@ app.use('/teachers', teacherRoute);
 app.use('/stats', statRoute);
 app.use('/statsRecruiter', statRecruiter);
 app.use('/events',eventroute)
+app.use('/invite' , InvitationRoute)
 /** ******************************************* */
 app.post('/protected', requireToken, (req, res) => {
   // This route handler will only be called if the user's token is valid
