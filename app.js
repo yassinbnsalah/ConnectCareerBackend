@@ -13,6 +13,7 @@ const AuthentificaitonAdmin = require('./routes/authentificationadmin');
 
 const app = express();
 const port = 3001;
+
 const webpack = require('webpack');
 // const webpackConfig = require('./webpack.config.js');
 // const compiler = webpack(webpackConfig);
@@ -22,25 +23,41 @@ admin.initializeApp({
   storageBucket: 'twinerz-fceb6.appspot.com',
 });
 // SOcket io
-const http = require('http');
-const socketIo = require('socket.io');
-const server = http.createServer(app);
-const io = socketIo(server);
 
-// Gérez les connexions des clients
+
+const http = require('http');
+const server = http.createServer(app);
+//const { Server } = require("socket.io");
+//const io = new Server(server);
+const socketIo = require('socket.io');
+const io=socketIo(server); 
+
 io.on('connection', (socket) => {
-    console.log('Un client est connecté');
-    // Gérer la création d'un nouveau job
-    socket.on('nouveauJob', (jobData) => {
-      // Émettre une notification aux étudiants connectés
-      io.emit('notification', { type: 'nouveauJob', data: jobData });
+  console.log("a user connected");
+
+ // socket.on('nouveauJob', (jobData) => {
+   // io.emit('notification', { type: 'nouveauJob', data: jobData });
+  // });
+
+  socket.on('disconnect', () => {
+    console.log("User disconnected");
   });
-    // Gérer la déconnexion du client
-    socket.on('disconnect', () => {
-        console.log('Un client s\'est déconnecté');
-    });
+  socket.on("new_user_login", (data) => {
+    console.log("new_user_login", data.message);
+   io.emit("new_user_login",{message: data.message} );
+  });
+  socket.on("new_job", (data) => {
+    console.log("run 2nd");
+   io.emit("new_job",{message: data.message} );
+  });
 });
 
+
+server.listen(3005, () => {
+  console.log('Socket listening on port 3005');
+});
+//const jobService = require('./services/jobService');
+//jobService.initSocket(server);
 
 
 // Middleware
@@ -89,8 +106,7 @@ app.post('/protected', requireToken, (req, res) => {
   // This route handler will only be called if the user's token is valid
   res.send('Protected resource accessed successfully');
 });
-const jobService = require('./services/jobService');
-jobService.initSocket(server);
+
 // TO TEST IT ********************
 app.post('/loginadmin', async (req, res) => {
   await AuthentificaitonAdmin(req, res);

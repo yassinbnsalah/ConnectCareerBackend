@@ -112,28 +112,22 @@ async function getJobByRecruiter(userId, res) {
     res.status(500).json({ message: "Server Error" });
   }
 }
-const socketIo = require('socket.io');
+//const socketIo = require('socket.io');
 
-// Définir une variable globale pour stocker l'instance de socket.io
-let io;
-
-// Fonction pour initialiser le socket.io avec le serveur Express
+//let io;
+/*
 function initSocket(server) {
-    io = socketIo(server);
+  io = socketIo(server);
 
-    // Gérer les connexions des clients
-    io.on('connection', (socket) => {
-        console.log('Un client est connecté');
-    });
+  io.on('connection', (socket) => {
+    console.log('Un client est connecté');
+  });
 }
 
-// Fonction pour émettre une notification à tous les clients connectés
-function emitNotification(event, data) {
-    io.emit(event, data);
+function emitNotificationToStudents(notificationType, data) {
+  io.emit('notification', { type: notificationType, data });
 }
-
-
-
+*/
 async function AddJob(req, res, admin) {
   try {
     const {
@@ -246,7 +240,7 @@ async function AddJob(req, res, admin) {
     }
 
     await newJob.save();
-    emitNotification('newJob', { message: 'Une nouvelle offre d\'emploi a été ajoutée !' });
+   
 
   } catch (error) {
     console.error(error);
@@ -360,6 +354,6 @@ module.exports = {
   getJobsByEntrepriseId,
   CloseJob,
   summarizeJobFile,
-  emitNotification,
-  initSocket,
+  //emitNotificationToStudents,
+  //initSocket,
 };
