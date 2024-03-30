@@ -27,17 +27,14 @@ admin.initializeApp({
 
 const http = require('http');
 const server = http.createServer(app);
-//const { Server } = require("socket.io");
-//const io = new Server(server);
+
 const socketIo = require('socket.io');
 const io=socketIo(server); 
 
 io.on('connection', (socket) => {
   console.log("a user connected");
 
- // socket.on('nouveauJob', (jobData) => {
-   // io.emit('notification', { type: 'nouveauJob', data: jobData });
-  // });
+
 
   socket.on('disconnect', () => {
     console.log("User disconnected");
@@ -47,8 +44,8 @@ io.on('connection', (socket) => {
    io.emit("new_user_login",{message: data.message} );
   });
   socket.on("new_job", (data) => {
-    console.log("run 2nd");
-   io.emit("new_job",{message: data.message} );
+
+    io.emit("new_job", {jobTitle: data.jobTitle,message: data.message });
   });
 });
 
@@ -56,8 +53,7 @@ io.on('connection', (socket) => {
 server.listen(3005, () => {
   console.log('Socket listening on port 3005');
 });
-//const jobService = require('./services/jobService');
-//jobService.initSocket(server);
+
 
 
 // Middleware
