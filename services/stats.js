@@ -1,4 +1,6 @@
+const Entreprise = require('../models/entreprise');
 const Job = require('../models/job');
+const Stats = require('../models/stats');
 const User = require('../models/user');
 
 const generateStats = async () => {
@@ -44,6 +46,33 @@ const generateStats = async () => {
   }
 };
 
+const syncStatsEntreprise = async() =>{
+  try {
+    const entreprises = await Entreprise.find()
+    entreprises.forEach(async entreprise =>{
+      let stats = new Stats ({
+        totalNBOpportunite : entreprise?.nbOpportunitees,
+        acceptedOpportunite: 0 , 
+        nbFullTimeOP : 0 , 
+        acceptedFullTimeOP : 0 , 
+        nbPFEOP : 0 , 
+        acceptedPFE  :0 , 
+        nbSummerOP : 0 , 
+        acceptedSummerOP : 0 , 
+        TotalReach: 0 
+      }) ; 
+      await stats.save()
+      entreprise.stats = stats 
+      await entreprise.save()
+    })
+    return ({"message":"Sync Created Succefully"})
+  } catch (error) {
+    console.error(error);
+    throw new Error('Internal Server Error');
+  }
+}
+
 module.exports = {
   generateStats,
+  syncStatsEntreprise
 };

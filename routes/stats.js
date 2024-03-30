@@ -15,4 +15,14 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/sync', async (req, res) => {
+  try {
+    const stat = await StatService.syncStatsEntreprise();
+    res.json(stat);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 module.exports = router;

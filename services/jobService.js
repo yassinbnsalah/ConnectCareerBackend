@@ -1,8 +1,8 @@
-const Entreprise = require('../models/entreprise');
-const Job = require('../models/job');
-const Skills = require('../models/skills');
-const User = require('../models/user');
-const admin = require('firebase-admin');
+const Entreprise = require("../models/entreprise");
+const Job = require("../models/job");
+const Skills = require("../models/skills");
+const User = require("../models/user");
+const admin = require("firebase-admin");
 async function getJobsByEntrepriseId(entrepriseId) {
   try {
     const jobs = await Job.find({
@@ -23,6 +23,7 @@ async function getJobsByEntrepriseId(entrepriseId) {
   }
 }
 const scheduledFunctions = require("../scheduledFunctions/crons");
+const Stats = require("../models/stats");
 
 async function getJobByRecruiter(userId, res) {
   try {
@@ -37,7 +38,7 @@ async function getJobByRecruiter(userId, res) {
   }
 }
 
-async function AddJob(req, res,admin) {
+async function AddJob(req, res, admin) {
   try {
     const {
       recruiter,
@@ -58,7 +59,7 @@ async function AddJob(req, res,admin) {
 
     const user = await User.findById(recruiter);
     if (!user) {
-      return res.status(404).json({ error: 'Recruiter not found' });
+      return res.status(404).json({ error: "Recruiter not found" });
     }
 
     if (user.nbopportunite) {
@@ -87,13 +88,13 @@ async function AddJob(req, res,admin) {
       }
     }
 
-    let jobFileUrl = '';
+    let jobFileUrl = "";
 
     if (req.files && req.files.jobFile && req.files.jobFile[0]) {
       const jobFile = req.files.jobFile[0];
       const bucket = admin.storage().bucket();
 
-      const folderName = 'jobFiles';
+      const folderName = "jobFiles";
       const fileName = `${Date.now()}_${jobFile.originalname}`;
       const fileFullPath = `${folderName}/${fileName}`;
 
@@ -101,9 +102,11 @@ async function AddJob(req, res,admin) {
 
       await file.save(jobFile.buffer);
 
-      jobFileUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(fileFullPath)}?alt=media`;
+      jobFileUrl = `https://firebasestorage.googleapis.com/v0/b/${
+        bucket.name
+      }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
     }
-
+    console.log(jobFileUrl);
     const newJob = new Job({
       recruiter,
       jobTitle,
@@ -124,36 +127,51 @@ async function AddJob(req, res,admin) {
     });
 
     await newJob.save();
+    let entreprise;
 
+    await statss.save();
     if (entrepriseID) {
-      let entreprise = await Entreprise.findById(entrepriseID);
+       entreprise = await Entreprise.findById(entrepriseID);
       if (!entreprise) {
-        return res.status(404).json({ error: 'Entreprise not found' });
+        return res.status(404).json({ error: "Entreprise not found" });
       }
-      entreprise.nbOpportunitees += 1;
-      await entreprise.save();
       newJob.Relatedentreprise = entreprise;
     } else {
-      let entreprise = await Entreprise.findById(user.entreprise);
-      entreprise.nbOpportunitees = entreprise.nbOpportunitees + 1;
-      await entreprise.save();
+       entreprise = await Entreprise.findById(user.entreprise);
+   
       newJob.Relatedentreprise = entreprise;
     }
-    console.log("we ll send reports at" + closeDate);
-    scheduledFunctions.initSendReports(closeDate);
+    const stats = entreprise.stats
+    console.log(stats);
+    const STATA = await Stats.findById(stats)
+    STATA.totalNBOpportunite += 1 ; 
+    if(jobType=="fullTime"){
+      STATA.nbFullTimeOP += 1 
+    }else if (jobType=="Summer internship"){
+      STATA.nbSummerOP += 1 
+    }else if (jobType=="PFE"){
+      STATA.nbPFEOP += 1 
+    }
+    await STATA.save()
+    if (closeDate != "null") {
+      console.log("we ll send reports at" + closeDate);
+       scheduledFunctions.initSendReports(closeDate,newJob);
+      //scheduledFunctions.initScheduledJobs();
+    }
+
     await newJob.save();
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'Error adding job' });
+    return res.status(500).json({ error: "Error adding job" });
   }
 }
-
 
 async function getJobDetails(jobID) {
   try {
     const job = await Job.findById(jobID)
       .populate("recruiter")
       .populate("Relatedentreprise")
+      .populate("recommendationCondidateurs")
       .populate("skills", "skillname");
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
@@ -232,19 +250,57 @@ async function getAllJob() {
   }
 }
 
-async function CloseJob(jobID){
+async function CloseJob(jobID) {
   try {
-    const job = await Job.findById(jobID) ;
+    const job = await Job.findById(jobID);
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
     }
-    job.state = "Close"
-    await job.save()
+    job.state = "Close";
+    sendMailTRecruiter(job);
+    await job.save();
     return { job };
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
   }
+}
+async function sendMailTRecruiter(job) {
+  const htmlTemplate = fs.readFileSync(
+    'services/templateemails/EndedJobMail.html',
+    'utf8',
+  );
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: 'contact.fithealth23@gmail.com', // ethereal user
+      pass: 'ebrh bilu ygsn zrkw', // ethereal password
+    },
+  });
+
+  const msg = {
+    from: {
+      name: 'ConnectCareer Esprit',
+      address: 'contact.fithealth23@gmail.com',
+    },
+    to: "yacinbnsalh@gmail.com",
+    subject: `Scheduled Job Close `,
+    html: htmlTemplate 
+    .replace('{{jobTitle}}', job.jobTitle),
+    
+  };
+  const sendMail = async (transporter, msg) => {
+    try {
+      await transporter.sendMail(msg);
+      console.log('Email has been sent !');
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  sendMail(transporter, msg);
 }
 module.exports = {
   getJobByRecruiter,
@@ -253,5 +309,5 @@ module.exports = {
   AddJob,
   getAllJob,
   getJobsByEntrepriseId,
-  CloseJob
+  CloseJob,
 };

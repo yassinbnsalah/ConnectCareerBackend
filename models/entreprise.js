@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+const { Schema } = mongoose;
 const entrepriseSchema = new mongoose.Schema({
   CompanyName: String,
   CompanyAdress: String,
@@ -22,6 +23,10 @@ const entrepriseSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  stats: {
+    type: Schema.Types.ObjectId,
+    ref: 'Stats',
+  }
 });
 
 const Entreprise = mongoose.model('Entreprise', entrepriseSchema);

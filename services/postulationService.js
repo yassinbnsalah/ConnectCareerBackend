@@ -1,5 +1,6 @@
 const Job = require('../models/job');
 const Postulation = require('../models/postulation');
+const Stats = require('../models/stats');
 const User = require('../models/user');
 const fs = require('fs');
 const nodemailer = require('nodemailer');
@@ -64,6 +65,7 @@ async function CreateNewCandidate(req, res, admin) {
     });
 
     await nPostulation.save();
+    return nPostulation
   } catch (error) {
     console.error(error);
   }
@@ -74,7 +76,7 @@ async function getApplications(owner) {
     const postulations = await Postulation.find({ owner }).populate(
       'job',
     );
-
+      return (postulations)
   } catch (error) {
     console.error('Error fetching postulations by owner:', error);
     throw error;
@@ -105,7 +107,7 @@ async function getApplicationDetails(applicationID) {
     const application = await Postulation.findById(applicationID).populate(
       'owner',
     );
-
+      return (application)
   } catch (error) {
     console.error(error);
     throw error;
@@ -119,6 +121,17 @@ async function UpdateApplicationState(applicationiD, state) {
     await application.save();
     if (state == "Accepted"){
       let job = await Job.findById(application.job).populate("recruiter").populate("Relatedentreprise")
+      let statsID = job.Relatedentreprise.stats
+      const STATA  = await Stats.findById(statsID)
+      STATA.acceptedOpportunite += 1 ; 
+      if(job.jobType=="fullTime"){
+        STATA.acceptedFullTimeOP += 1 
+      }else if (job.jobType=="Summer internship"){
+        STATA.acceptedSummerOP += 1 
+      }else if (job.jobType=="PFE"){
+        STATA.acceptedPFE += 1 
+      }
+      STATA.save()
       sendMailTRecruiter(job.recruiter?.email)
     }
     if(state =="Cancel"){

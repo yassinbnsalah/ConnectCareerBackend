@@ -5,6 +5,7 @@ const router = express.Router();
 const bodyParser = require('body-parser');
 const admin = require('firebase-admin');
 const multer = require('multer');
+const { default: axios } = require('axios');
 
 router.use(bodyParser.urlencoded({ extended: true }));
 
@@ -22,6 +23,11 @@ router.post(
         res,
         admin,
       );
+      console.log(postulation);
+      const response = await axios.get('http://127.0.0.1:8000/getapplication/'+postulation._id);
+      const data = response.data;
+      console.log("Matching Calculated Automatic");
+      console.log(data)
       res.json({ postulation });
     } catch (error) {
       console.error(error);

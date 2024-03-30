@@ -20,7 +20,8 @@ const jobSchema = new mongoose.Schema({
   jobFile: String,
   
   nbapplies: { type: Number, default: 0 },
-
+  profileMatched:{type:Number, default: 0},
+  autoRejected:{type:Number, default: 0},
   Relatedentreprise: {
     type: Schema.Types.ObjectId,
     ref: 'Entreprise',
@@ -33,9 +34,18 @@ const jobSchema = new mongoose.Schema({
       ref: 'Skills',
     },
   ],
+  recommendationCondidateurs:[
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      invited : Boolean
+    },
+   
+  ], 
   creationDate: {
     type: Date,
     default: Date.now,
+    
   },
 });
 

@@ -50,7 +50,7 @@ router.get('/:recruitertId', async (req, res) => {
 router.get('/verify/:email', async (req, res) => {
   try {
     const { email } = req.params;
-    const emailExiste = await recruiterService.verifyrecruiter(email);
+    const emailExiste = await recruiterService.verifyRecruiter(email);
     return res.status(200).json({ emailExiste });
   } catch (error) {
     console.error(error);
