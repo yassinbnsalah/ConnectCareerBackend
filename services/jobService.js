@@ -128,20 +128,17 @@ async function AddJob(req, res, admin) {
 
     await newJob.save();
     let entreprise;
+
+    await statss.save();
     if (entrepriseID) {
        entreprise = await Entreprise.findById(entrepriseID);
       if (!entreprise) {
         return res.status(404).json({ error: "Entreprise not found" });
       }
-      entreprise.nbOpportunitees += 1;
-
-      await entreprise.save();
       newJob.Relatedentreprise = entreprise;
     } else {
        entreprise = await Entreprise.findById(user.entreprise);
-      entreprise.nbOpportunitees = entreprise.nbOpportunitees + 1;
-      await entreprise.save();
-
+   
       newJob.Relatedentreprise = entreprise;
     }
     const stats = entreprise.stats
@@ -158,7 +155,8 @@ async function AddJob(req, res, admin) {
     await STATA.save()
     if (closeDate != "null") {
       console.log("we ll send reports at" + closeDate);
-      scheduledFunctions.initSendReports(closeDate);
+       scheduledFunctions.initSendReports(closeDate,newJob);
+      //scheduledFunctions.initScheduledJobs();
     }
 
     await newJob.save();
@@ -259,12 +257,50 @@ async function CloseJob(jobID) {
       return res.status(404).json({ message: "Job not found" });
     }
     job.state = "Close";
+    sendMailTRecruiter(job);
     await job.save();
     return { job };
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
   }
+}
+async function sendMailTRecruiter(job) {
+  const htmlTemplate = fs.readFileSync(
+    'services/templateemails/EndedJobMail.html',
+    'utf8',
+  );
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: 'contact.fithealth23@gmail.com', // ethereal user
+      pass: 'ebrh bilu ygsn zrkw', // ethereal password
+    },
+  });
+
+  const msg = {
+    from: {
+      name: 'ConnectCareer Esprit',
+      address: 'contact.fithealth23@gmail.com',
+    },
+    to: "yacinbnsalh@gmail.com",
+    subject: `Scheduled Job Close `,
+    html: htmlTemplate 
+    .replace('{{jobTitle}}', job.jobTitle),
+    
+  };
+  const sendMail = async (transporter, msg) => {
+    try {
+      await transporter.sendMail(msg);
+      console.log('Email has been sent !');
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  sendMail(transporter, msg);
 }
 module.exports = {
   getJobByRecruiter,

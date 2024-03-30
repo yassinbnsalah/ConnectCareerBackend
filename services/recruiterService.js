@@ -4,6 +4,7 @@ const nodemailer = require('nodemailer');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const Entreprise = require('../models/entreprise');
+const Stats = require('../models/stats');
 
 async function getListeRecruiter() {
   try {
@@ -61,6 +62,18 @@ async function createRecruiter(req, res, admin) {
       );
       CompanyLogo = `https://firebasestorage.googleapis.com/v0/b/${CompanyLogoBucket.name}/o/${CompanyLogoFileObject.name}`;
     }
+    const stats = new Stats({
+      totalNBOpportunite : 0 , 
+      acceptedOpportunite : 0 , 
+      nbSummerOP : 0 , 
+      acceptedSummerOP : 0 , 
+      nbPFEOP : 0 , 
+      acceptedPFE : 0 ,
+      nbFullTimeOP : 0 , 
+      acceptedFullTimeOP : 0 ,
+      TotalReach : 0 ,
+    })
+    await stats.save();
     const entreprise = new Entreprise({
       CompanyName,
       CompanyAdress,
@@ -69,6 +82,8 @@ async function createRecruiter(req, res, admin) {
       matriculeFiscale,
       description,
       CompanyLogo,
+      nbOpportunitees:0 ,
+      stats
     });
     await entreprise.save();
     const Hpassword = await bcrypt.hash(password, 10);
@@ -88,7 +103,7 @@ async function createRecruiter(req, res, admin) {
       isVerify: false,
     });
     await newUser.save();
-    // sendMailtorecruiter(email,firstname+lastname);
+     sendMailtorecruiter(email,firstname+lastname);
   } catch (error) {
     console.error(error);
     throw new Error("Internal Server Error");
