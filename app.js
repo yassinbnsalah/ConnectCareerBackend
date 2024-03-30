@@ -276,6 +276,7 @@ app.post('/checkEmail', async (req, res) => {
 app.get("/", (req, res) => {
   res.send("Hello, Express!");
 });
+
 //scheduledFunctions.initScheduledJobs();
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

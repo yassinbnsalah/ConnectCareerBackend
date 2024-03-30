@@ -177,9 +177,7 @@
 <a name='L112'></a><a href='#L112'>112</a>
 <a name='L113'></a><a href='#L113'>113</a>
 <a name='L114'></a><a href='#L114'>114</a>
-<a name='L115'></a><a href='#L115'>115</a>
-<a name='L116'></a><a href='#L116'>116</a>
-<a name='L117'></a><a href='#L117'>117</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L115'></a><a href='#L115'>115</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
@@ -193,7 +191,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
@@ -229,7 +226,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -295,8 +291,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const Skills = require("../models/skills");
-const User = require("../models/user");
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const Skills = require('../models/skills');
+const User = require('../models/user');
 &nbsp;
 const createSkills = async (req, res) =&gt; {
   try {
@@ -304,57 +300,55 @@ const createSkills = async (req, res) =&gt; {
     const skills = new Skills({ skillname });
     await skills.save();
   } catch (error) {
-    console.error("Error updating education:", error);
+    console.error('Error updating education:', error);
   }
 };
 const getAllSkills = async (req, res) =&gt; {
   try {
-  
     const skills = await Skills.find();
 &nbsp;
     res.status(200).json({ skills });
   } catch (error) {
-    console.error("Error fetching all skills:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error('Error fetching all skills:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 &nbsp;
 const AffectSkillToUser = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
 <span class="cstat-no" title="statement not covered" >  try {</span>
-      const userID = <span class="cstat-no" title="statement not covered" >req.params.userID;</span>
-      const { skillname } = <span class="cstat-no" title="statement not covered" >req.body;</span>
-      let skill = <span class="cstat-no" title="statement not covered" >await Skills.findOne({ skillname: skillname });</span>
-<span class="cstat-no" title="statement not covered" >      if (!skill) {</span>
-<span class="cstat-no" title="statement not covered" >          skill = new Skills({ skillname: skillname });</span>
-<span class="cstat-no" title="statement not covered" >          await skill.save();</span>
-      }
-      const user = <span class="cstat-no" title="statement not covered" >await User.findById(userID);</span>
-<span class="cstat-no" title="statement not covered" >      if (!user) {</span>
-<span class="cstat-no" title="statement not covered" >          return res.status(404).json({ message: "User not found" });</span>
-      }
-<span class="cstat-no" title="statement not covered" >      if (user.skills.includes(skill._id)) {</span>
-<span class="cstat-no" title="statement not covered" >          return res.status(200).json({ message: "Skill already exists in user's selection" });</span>
-      }
-<span class="cstat-no" title="statement not covered" >      user.skills.push(skill._id);</span>
-<span class="cstat-no" title="statement not covered" >      await user.save();</span>
+    const { userID } = <span class="cstat-no" title="statement not covered" >req.params;</span>
+    const { skillname } = <span class="cstat-no" title="statement not covered" >req.body;</span>
+    let skill = <span class="cstat-no" title="statement not covered" >await Skills.findOne({ skillname });</span>
+<span class="cstat-no" title="statement not covered" >    if (!skill) {</span>
+<span class="cstat-no" title="statement not covered" >      skill = new Skills({ skillname });</span>
+<span class="cstat-no" title="statement not covered" >      await skill.save();</span>
+    }
+    const user = <span class="cstat-no" title="statement not covered" >await User.findById(userID);</span>
+<span class="cstat-no" title="statement not covered" >    if (!user) {</span>
+<span class="cstat-no" title="statement not covered" >      return res.status(404).json({ message: 'User not found' });</span>
+    }
+<span class="cstat-no" title="statement not covered" >    if (user.skills.includes(skill._id)) {</span>
+<span class="cstat-no" title="statement not covered" >      return res.status(200).json({ message: "Skill already exists in user's selection" });</span>
+    }
+<span class="cstat-no" title="statement not covered" >    user.skills.push(skill._id);</span>
+<span class="cstat-no" title="statement not covered" >    await user.save();</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >      res.status(200).json({ message: "Skill added to user successfully" });</span>
+<span class="cstat-no" title="statement not covered" >    res.status(200).json({ message: 'Skill added to user successfully' });</span>
   } catch (error) {
-<span class="cstat-no" title="statement not covered" >      console.error("Error affecting skill to user:", error);</span>
-<span class="cstat-no" title="statement not covered" >      res.status(500).json({ message: "Internal server error" });</span>
+<span class="cstat-no" title="statement not covered" >    console.error('Error affecting skill to user:', error);</span>
+<span class="cstat-no" title="statement not covered" >    res.status(500).json({ message: 'Internal server error' });</span>
   }
 };
 &nbsp;
-&nbsp;
 const SkilsByUserid = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
 <span class="cstat-no" title="statement not covered" >  try {</span>
-    const userID = <span class="cstat-no" title="statement not covered" >req.params.userID;</span>
+    const { userID } = <span class="cstat-no" title="statement not covered" >req.params;</span>
 &nbsp;
     // Find the user by ID and populate the 'skills' field to retrieve the skill names
-    const user = <span class="cstat-no" title="statement not covered" >await User.findById(userID).populate("skills", "skillname");</span>
+    const user = <span class="cstat-no" title="statement not covered" >await User.findById(userID).populate('skills', 'skillname');</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (!user) {</span>
-<span class="cstat-no" title="statement not covered" >      return res.status(404).json({ message: "User not found" });</span>
+<span class="cstat-no" title="statement not covered" >      return res.status(404).json({ message: 'User not found' });</span>
     }
 &nbsp;
     // Extract skill names from the populated 'skills' array
@@ -363,21 +357,21 @@ const SkilsByUserid = <span class="fstat-no" title="function not covered" >as</s
     // Send response with skill names
 <span class="cstat-no" title="statement not covered" >    res.status(200).json({ skills: skillNames });</span>
   } catch (error) {
-<span class="cstat-no" title="statement not covered" >    console.error("Error fetching skills by user ID:", error);</span>
-<span class="cstat-no" title="statement not covered" >    res.status(500).json({ message: "Internal server error" });</span>
+<span class="cstat-no" title="statement not covered" >    console.error('Error fetching skills by user ID:', error);</span>
+<span class="cstat-no" title="statement not covered" >    res.status(500).json({ message: 'Internal server error' });</span>
   }
 };
 &nbsp;
 const RemoveSkillFromUser = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
 <span class="cstat-no" title="statement not covered" >  try {</span>
-    const userID = <span class="cstat-no" title="statement not covered" >req.params.userID;</span>
+    const { userID } = <span class="cstat-no" title="statement not covered" >req.params;</span>
     const { skillname } = <span class="cstat-no" title="statement not covered" >req.body;</span>
-    const skill = <span class="cstat-no" title="statement not covered" >await Skills.findOne({ skillname: skillname });</span>
+    const skill = <span class="cstat-no" title="statement not covered" >await Skills.findOne({ skillname });</span>
 <span class="cstat-no" title="statement not covered" >    console.log(skill);</span>
     // Find the user by ID
     const user = <span class="cstat-no" title="statement not covered" >await User.findById(userID);</span>
 <span class="cstat-no" title="statement not covered" >    if (!user) {</span>
-<span class="cstat-no" title="statement not covered" >      return res.status(404).json({ message: "User not found" });</span>
+<span class="cstat-no" title="statement not covered" >      return res.status(404).json({ message: 'User not found' });</span>
     }
 &nbsp;
     // Check if the skill exists in the user's skills array
@@ -400,7 +394,7 @@ const RemoveSkillFromUser = <span class="fstat-no" title="function not covered" 
       .json({ message: "Skill removed from user's selection successfully" });
   } catch (error) {
 <span class="cstat-no" title="statement not covered" >    console.error("Error removing skill from user's selection:", error);</span>
-<span class="cstat-no" title="statement not covered" >    res.status(500).json({ message: "Internal server error" });</span>
+<span class="cstat-no" title="statement not covered" >    res.status(500).json({ message: 'Internal server error' });</span>
   }
 };
 &nbsp;
@@ -418,7 +412,7 @@ module.exports = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2024-03-13T01:18:23.059Z
+                at 2024-03-27T14:49:47.603Z
             </div>
         <script src="../prettify.js"></script>
         <script>

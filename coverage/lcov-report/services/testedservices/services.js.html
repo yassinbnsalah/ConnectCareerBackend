@@ -124,13 +124,9 @@
 <a name='L59'></a><a href='#L59'>59</a>
 <a name='L60'></a><a href='#L60'>60</a>
 <a name='L61'></a><a href='#L61'>61</a>
-<a name='L62'></a><a href='#L62'>62</a>
-<a name='L63'></a><a href='#L63'>63</a>
-<a name='L64'></a><a href='#L64'>64</a>
-<a name='L65'></a><a href='#L65'>65</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L62'></a><a href='#L62'>62</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -145,7 +141,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -183,57 +178,54 @@
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const Entreprise = require("../../models/entreprise");
-const Education = require("../../models/education");
-const User = require("../../models/user");
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const Entreprise = require('../../models/entreprise');
+const Education = require('../../models/education');
+const User = require('../../models/user');
 &nbsp;
-&nbsp;
-//get entreprise details by id
+// get entreprise details by id
 async function getEntrepriseDetails(entrepriseId) {
   try {
     const entreprise = await Entreprise.findById(entrepriseId);
 &nbsp;
     if (!entreprise) {
-      throw new Error("Entreprise not found"); // Utiliser une exception au lieu de res.status(404)
+      throw new Error('Entreprise not found'); // Utiliser une exception au lieu de res.status(404)
     }
 &nbsp;
     return entreprise; // Retourner l'entreprise directement
   } catch (error) {
     console.error(error);
-    throw new Error("Server Error"); // Lancer une exception pour les erreurs serveur
+    throw new Error('Server Error'); // Lancer une exception pour les erreurs serveur
   }
 }
 &nbsp;
-&nbsp;
 async function getRecruiterDetails(recruiterId) {
-    try {
-      const recruiter = await User.findById(recruiterId);
-      return recruiter;
-    } catch (error) {
-      console.error(error);
-      throw new Error("Internal Server Error");
-    }
+  try {
+    const recruiter = await User.findById(recruiterId);
+    return recruiter;
+  } catch (error) {
+    console.error(error);
+    throw new Error('Internal Server Error');
   }
-  async function getListOfEducation(userId) {
-    try {
-      const educations = await Education.find({ student: userId }).sort({
-        startedOn: -1,
-      });
-<span class="cstat-no" title="statement not covered" >      return educations;</span>
-    } catch (error) {
-      console.error("Error in getListOfEducation:", error.message);
-      // Return a structured error response
-      return { error: "Internal Server Error" };
-    }
+}
+async function getListOfEducation(userId) {
+  try {
+    const educations = await Education.find({ student: userId }).sort({
+      startedOn: -1,
+    });
+<span class="cstat-no" title="statement not covered" >    return educations;</span>
+  } catch (error) {
+    console.error('Error in getListOfEducation:', error.message);
+    // Return a structured error response
+    return { error: 'Internal Server Error' };
   }
+}
   
   async function getListOfExperience(userId) {
     try {
@@ -247,22 +239,21 @@ async function getRecruiterDetails(recruiterId) {
       return { error: "Internal Server Error" };
     }
   }
-  
-&nbsp;
-  module.exports = {
+    module.exports = {
     getRecruiterDetails,
     getEntrepriseDetails,
     getListOfEducation,
     getListOfExperience
   };
-  </pre></td></tr></table></pre>
+&nbsp;
+&nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2024-03-13T01:18:23.059Z
+                at 2024-03-27T14:49:47.603Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

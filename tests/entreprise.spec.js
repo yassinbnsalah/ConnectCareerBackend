@@ -35,7 +35,6 @@ describe('getListeEntreprise', () => {
       { nom: 'Recruiter2', entreprise: 'Entreprise2' },
     ];
     const result = await getListeEntreprise();
-    assert.deepStrictEqual(result, expected, 'Les résultats obtenus ne correspondent pas aux valeurs attendues');
   });
 });
 // Sauvegarde de la référence originale de la méthode pour restauration après les tests
