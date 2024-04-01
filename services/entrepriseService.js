@@ -1,5 +1,7 @@
+
 const Entreprise = require('../models/entreprise');
 const Job = require('../models/job');
+const Stats = require('../models/stats');
 const User = require('../models/user');
 
 async function getListeEntreprise() {
@@ -52,7 +54,24 @@ async function getEntrepriseTech() {
     const entreprise = await Entreprise.findOne({ OwnedbyAdmin: true });
 
     if (!entreprise) {
-      return res.status(404).json({ message: 'Entreprise not found' });
+      let statss = new Stats({
+
+      })
+      await statss.save()
+     const entrepriseNew = new Entreprise({
+      CompanyName: "EspritTech",
+      CompanyAdress: "EspritTech",
+      CompanyCity: "EspritTech", 
+      matriculeFiscale: "EspritTech",
+      description:  "EspritTech",
+      CompanyType:  "EspritTech",
+      CompanyEmail:  "EspritTech",
+      CompanyWebsite:  "EspritTech",
+      OwnedbyAdmin: true,
+      stats : statss
+     })
+     await entrepriseNew.save()
+     return entrepriseNew;
     }
 
     return entreprise;

@@ -53,17 +53,18 @@ const CreateOrUpdateEvent = async (req, res, admin, eventId = null) => {
     
       res.status(200).json({ message: "Event updated successfully" });
     } else {
+      console.log(state);
       // Create new event
       const newEvent = new Event({
         title,
         description,
-        state,
+        state:state,
         category,
         image: imageEvents,
         publish_date,
         eventDate
       });
-      sendEventMail(["wiembenaraar2@gmail.com","benamorr.fedi@gmail.com"] , title , imageEvents ,description )
+   //   sendEventMail(["wiembenaraar2@gmail.com","benamorr.fedi@gmail.com"] , title , imageEvents ,description )
       await newEvent.save();
       res.status(201).json({ message: "New event created successfully" });
     }

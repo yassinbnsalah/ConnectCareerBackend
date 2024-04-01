@@ -129,7 +129,6 @@ async function AddJob(req, res, admin) {
     await newJob.save();
     let entreprise;
 
-    await statss.save();
     if (entrepriseID) {
        entreprise = await Entreprise.findById(entrepriseID);
       if (!entreprise) {
