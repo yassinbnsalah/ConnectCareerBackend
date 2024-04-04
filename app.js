@@ -17,11 +17,7 @@ const port = 5000;
 const webpack = require('webpack');
 // const webpackConfig = require('./webpack.config.js');
 // const compiler = webpack(webpackConfig);
-app.use(cors({
-  origin: ['https://trusted-origin1.com', 'https://trusted-origin2.com'], // Add trusted origins here
-  methods: ['GET', 'POST'], // Allow only safe methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Allow only specific headers
-}));
+app.use(cors());
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   storageBucket: 'twinerz-fceb6.appspot.com',
