@@ -159,6 +159,7 @@ async function AddJob(req, res, admin) {
     }
 
     await newJob.save();
+    return newJob ;
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Error adding job" });
