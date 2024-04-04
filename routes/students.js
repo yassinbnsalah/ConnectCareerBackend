@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 
 router.use(bodyParser.urlencoded({ extended: true }));
-const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
+const upload = multer();
 const admin = require('firebase-admin');
 
 router.get('/request', async (req, res) => {

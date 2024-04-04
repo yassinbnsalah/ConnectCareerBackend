@@ -36,7 +36,7 @@ mongoose.connect(
 );
 
 const storage = multer.memoryStorage();
-const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
+const upload = multer();
 const studentRoute = require('./routes/students');
 const recruiterRoute = require('./routes/recruiters');
 const entrepriseRoute = require('./routes/entreprise');
