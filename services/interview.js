@@ -1,10 +1,9 @@
-const fs = require("fs");
-const nodemailer = require("nodemailer");
-const Interview = require("../models/interview.js");
-const Job = require("../models/job.js");
-const Postulation = require("../models/postulation.js");
-const User = require("../models/user.js");
-const { log } = require("console");
+import fs from "fs";
+import nodemailer from "nodemailer";
+import Interview from "../models/interview.js";
+import Job from "../models/job.js";
+import Postulation from "../models/postulation.js";
+import User from "../models/user.js";
 
 async function getInterviewByRecruiter(userID) {
   try {
@@ -14,7 +13,7 @@ async function getInterviewByRecruiter(userID) {
     return interviews;
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "ServerError" });
+    throw new Error("ServerError");
   }
 }
 
@@ -28,10 +27,11 @@ async function getInterviewsByApplicationandUser(applicationID, userID) {
     return interviews;
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "ServerError" });
+    throw new Error("ServerError");
   }
 }
-async function createInterview(req, res) {
+
+async function createInterview(req) {
   try {
     const {
       recruiter,
@@ -92,9 +92,12 @@ async function createInterview(req, res) {
     await newInterview.save();
   } catch (error) {
     console.error(error);
+    throw new Error("Error creating interview");
   }
 }
+
 const secretKey = "qsdsqdqdssqds";
+
 async function sendMailToStudent(
   email,
   fullname,
@@ -133,15 +136,16 @@ async function sendMailToStudent(
       .replace("{{roomID}}", roomID)
       .replace("{{jobtitle}}", jobTitle),
   };
-  
-    try {
-      await transporter.sendMail(msg);
-      console.log("Email has been sent !");
-    } catch (error) {
-      console.error(error);
-    }
 
+  try {
+    await transporter.sendMail(msg);
+    console.log("Email has been sent !");
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error sending email to student");
+  }
 }
+
 async function VerifyInterview(roomID, idUser) {
   const interview = await Interview.find({ roomID });
   console.log(interview);
@@ -170,7 +174,8 @@ async function deleteInterview(id) {
     return false;
   }
 }
-module.exports = {
+
+export {
   getInterviewByRecruiter,
   createInterview,
   getInterviewsByApplicationandUser,
