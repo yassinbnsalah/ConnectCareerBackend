@@ -23,7 +23,7 @@ pipeline {
                 script { 
                 def scannerHome = tool 'scanner'
             sh "${scannerHome}/bin/sonar-scanner \
-                -Dsonar.projectKey=twinerzBackend \
+                -Dsonar.projectKey=twinerzDevops \
                 -Dsonar.sources=. \
                 -Dsonar.host.url=http://172.16.5.155:9000/ \
                 -Dsonar.login=squ_99662c597f93b62784b85abad47171d02fc9d464"
