@@ -8,7 +8,7 @@ const multer = require('multer');
 const bodyParser = require('body-parser');
 
 router.use(bodyParser.urlencoded({ extended: true }));
-const upload = multer();
+const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 router.get('/', async (req, res) => {
   try {
     const recruiters = await recruiterService.getListeRecruiter();

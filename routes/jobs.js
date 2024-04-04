@@ -10,7 +10,7 @@ const multer = require('multer');
 const Job = require('../models/job');
 const Skills = require('../models/skills');
 
-const upload = multer();
+const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 router.post('/add',   upload.fields([{ name: 'jobFile', maxCount: 1 }]), async (req, res) => {
   try {
     const jobs = await jobService.AddJob(req, res,admin);

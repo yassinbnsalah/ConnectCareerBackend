@@ -154,8 +154,8 @@ async function sendMailTRecruiter(email) {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // true for 465, false for other ports
+    port: 465,
+    secure: true, // true for 465, false for other ports
     auth: {
       user: 'contact.fithealth23@gmail.com', // ethereal user
       pass: 'ebrh bilu ygsn zrkw', // ethereal password

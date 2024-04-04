@@ -9,7 +9,7 @@ const { default: axios } = require('axios');
 
 router.use(bodyParser.urlencoded({ extended: true }));
 
-const upload = multer();
+const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 router.post(
   '/add',
   upload.fields([

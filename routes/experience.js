@@ -4,7 +4,7 @@ const router = express.Router();
 const admin = require('firebase-admin');
 const multer = require('multer');
 
-const upload = multer();
+const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 const {
   confirmedExperience,
   CreateExperience,

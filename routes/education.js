@@ -12,7 +12,7 @@ const {
   deleteEducationById,
 } = require('../services/education');
 
-const upload = multer();
+const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 router.post(
   '/createEducation',
   upload.fields([{ name: 'attestation', maxCount: 1 }]),
