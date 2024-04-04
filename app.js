@@ -18,7 +18,7 @@ const webpack = require('webpack');
 // const webpackConfig = require('./webpack.config.js');
 // const compiler = webpack(webpackConfig);
 app.use(cors({
-  origin: ['http://trusted-origin1.com', 'http://trusted-origin2.com'], // Add trusted origins here
+  origin: ['https://trusted-origin1.com', 'https://trusted-origin2.com'], // Add trusted origins here
   methods: ['GET', 'POST'], // Allow only safe methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Allow only specific headers
 }));
