@@ -88,13 +88,14 @@ router.get('/detailstoupdate/:jobID', async (req, res) => {
   }
 });
 
-router.put('/update-job/:jobID', async (req, res) => {
+router.put('/update-job/:jobID',   upload.fields([{ name: 'jobFile', maxCount: 1 }]), async (req, res) => {
   const { jobID } = req.params;
   const updatedFields = {
 
     jobTitle: req.body.jobTitle,
     location: req.body.location,
     typeofworkplace: req.body.typeofworkplace,
+    jobFile:req.body.jobFile,
     jobType: req.body.jobType,
     salary: req.body.salary,
     description: req.body.description,
@@ -156,6 +157,7 @@ router.put('/disabled/:jobID', async (req, res) => {
     res.status(500).json({ error: 'Error updating job' });
   }
 });
+/*
 router.post('/add-pdf', upload.fields([{ name: 'jobFile', maxCount: 1 }, { name: 'jobTitle' }]), async (req, res) => {
   try {
       const jobTitle = req.body.jobTitle;
@@ -174,5 +176,5 @@ router.post('/add-pdf', upload.fields([{ name: 'jobFile', maxCount: 1 }, { name:
       res.status(500).json({ error: 'Error uploading job and PDF' });
   }
 });
-
+*/
 module.exports = router;

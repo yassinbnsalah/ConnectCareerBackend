@@ -78,7 +78,7 @@ async function summarizeJobFile(jobFile, model) {
 	}
 }
 
-/////////////
+
 async function getJobsByEntrepriseId(entrepriseId) {
   try {
     const jobs = await Job.find({
@@ -112,22 +112,7 @@ async function getJobByRecruiter(userId, res) {
     res.status(500).json({ message: "Server Error" });
   }
 }
-//const socketIo = require('socket.io');
 
-//let io;
-/*
-function initSocket(server) {
-  io = socketIo(server);
-
-  io.on('connection', (socket) => {
-    console.log('Un client est connecté');
-  });
-}
-
-function emitNotificationToStudents(notificationType, data) {
-  io.emit('notification', { type: notificationType, data });
-}
-*/
 async function AddJob(req, res, admin) {
   try {
     const {
@@ -247,23 +232,6 @@ async function AddJob(req, res, admin) {
     return res.status(500).json({ error: "Error adding job" });
   }
 }
-
-async function getJobDetails(jobID) {
-  try {
-    const job = await Job.findById(jobID)
-      .populate("recruiter")
-      .populate("Relatedentreprise")
-      .populate("skills", "skillname");
-    if (!job) {
-      throw new Error("Job not found");
-    }
-    return job;
-  } catch (error) {
-    console.error(error);
-    throw new Error("Server Error");
-  }
-}
-
 async function getJobUpdateDetails(jobID) {
   try {
     const job = await Job.findById(jobID)
@@ -291,6 +259,23 @@ async function getJobUpdateDetails(jobID) {
     res.status(500).json({ message: "Server Error" });
   }
 }
+async function getJobDetails(jobID) {
+  try {
+    const job = await Job.findById(jobID)
+      .populate("recruiter")
+      .populate("Relatedentreprise")
+      .populate("skills", "skillname");
+    if (!job) {
+      throw new Error("Job not found");
+    }
+    return job;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Server Error");
+  }
+}
+
+
 
 async function getAllJob() {
   try {
@@ -354,6 +339,5 @@ module.exports = {
   getJobsByEntrepriseId,
   CloseJob,
   summarizeJobFile,
-  //emitNotificationToStudents,
-  //initSocket,
+
 };
