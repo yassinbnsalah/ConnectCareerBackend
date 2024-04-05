@@ -66,7 +66,13 @@ router.get('/details/:jobID', async (req, res) => {
   const { jobID } = req.params;
   try {
     const data = await jobService.getJobDetails(jobID);
-    res.json(data);
+    let summary = null;
+    if (data.jobFile) {
+      const model = "mistral-7b-instruct";
+      summary = await jobService.summarizeJobFile(data.jobFile, model);
+     // console.log(`Summary: ${summary}`);
+    }
+    res.json({ data, summary });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -86,13 +92,14 @@ router.get('/detailstoupdate/:jobID', async (req, res) => {
   }
 });
 
-router.put('/update-job/:jobID', async (req, res) => {
+router.put('/update-job/:jobID',upload.fields([{ name: 'newFile', maxCount: 1 }]),  async (req, res) => {
   const { jobID } = req.params;
   const updatedFields = {
 
     jobTitle: req.body.jobTitle,
     location: req.body.location,
     typeofworkplace: req.body.typeofworkplace,
+ 
     jobType: req.body.jobType,
     salary: req.body.salary,
     description: req.body.description,
@@ -106,7 +113,7 @@ router.put('/update-job/:jobID', async (req, res) => {
 
   };
   try {
-    console.log('skills ');
+    console.log('************************** UPDATE ');
     console.log(JSON.parse(req.body.skillers));
     const JobToUpdate = await Job.findById(jobID);
     const skillsJob = [];
@@ -126,6 +133,30 @@ router.put('/update-job/:jobID', async (req, res) => {
       }
     }
     JobToUpdate.skills = skillsJob;
+    
+    let jobFileUrl = "";
+    console.log(req.files);
+    if (req.files && req.files.newFile && req.files.newFile[0]) {
+      console.log("File toupdate ");
+      const jobFile = req.files.newFile[0];
+      const bucket = admin.storage().bucket();
+
+      const folderName = "jobFiles";
+      const fileName = `${Date.now()}_${jobFile.originalname}`;
+      const fileFullPath = `${folderName}/${fileName}`;
+
+      const file = bucket.file(fileFullPath);
+
+      await file.save(jobFile.buffer);
+
+      jobFileUrl = `https://firebasestorage.googleapis.com/v0/b/${
+        bucket.name
+      }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
+      
+    console.log(jobFileUrl);
+
+      JobToUpdate.jobFile = jobFileUrl
+    }
     await JobToUpdate.save();
     const updatedJob = await Job.findByIdAndUpdate(
       jobID,
@@ -154,6 +185,7 @@ router.put('/disabled/:jobID', async (req, res) => {
     res.status(500).json({ error: 'Error updating job' });
   }
 });
+/*
 router.post('/add-pdf', upload.fields([{ name: 'jobFile', maxCount: 1 }, { name: 'jobTitle' }]), async (req, res) => {
   try {
       const jobTitle = req.body.jobTitle;
@@ -172,5 +204,5 @@ router.post('/add-pdf', upload.fields([{ name: 'jobFile', maxCount: 1 }, { name:
       res.status(500).json({ error: 'Error uploading job and PDF' });
   }
 });
-
+*/
 module.exports = router;

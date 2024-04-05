@@ -3,6 +3,82 @@ const Job = require("../models/job");
 const Skills = require("../models/skills");
 const User = require("../models/user");
 const admin = require("firebase-admin");
+/////////////////
+require('dotenv').config();
+const { Client } = require("@octoai/client");
+const pdf = require('pdf-parse');
+const prompts = require('prompts');
+const axios = require('axios'); 
+const fs = require('fs/promises');
+const path = require('path');
+prompts.override(require('yargs').argv);
+
+// Vérifiez si la clé ENV est définie, sinon, demandez à l'utilisateur de renommer le fichier .env.example en .env et d'ajouter la clé
+if (!process.env.OCTOAI_TOKEN) {
+	console.log('No OctoAI API key found. Please rename .env.example to .env and add your OctoAI API key.');
+	return;
+}
+
+// Connectez-vous au client OctoML
+const client = new Client(process.env.OCTOAI_TOKEN);
+const model ="mistral-7b-instruct";
+async function summarizeJobFile(jobFile, model) {
+	try {
+		const response = await axios.get(jobFile, { responseType: 'arraybuffer' });
+		const dataBuffer = Buffer.from(response.data, 'binary');
+		const jobText = await pdf(dataBuffer).then(data => data.text);
+
+		const chunkSize = 500 * 4;
+		const jobChunks = [];
+		for (let i = 0; i < jobText.length; i += chunkSize) {
+			jobChunks.push(jobText.slice(i, i + chunkSize));
+		}
+
+//		console.log(`Job file has ${jobChunks.length} chunks and ${jobText.length} characters. This is around ${jobText.length / 4} tokens.`);
+
+		const summaries = [];
+		for (let i = 0; i < jobChunks.length; i++) {
+			const completion = await client.chat.completions.create({
+				messages: [
+					{ role: "system", content: "You are a tool that summarizes job files." },
+					{ role: "assistant", content: `Job content:\n${jobChunks[i]}` }
+				],
+				model: model,
+				max_tokens: 500,
+				presence_penalty: 0,
+				temperature: 0.1,
+				top_p: 0.9
+			});
+
+			summaries.push(completion.choices[0].message.content);
+		}
+
+		let summary = summaries.join('\n\n');
+
+		if (summary.length > 500) {
+			const completion = await client.chat.completions.create({
+				messages: [
+					{ role: "system", content: "You are a tool that summarizes job files." },
+					{ role: "user", content: `Job content:\n${summary}` }
+				],
+				model: model,
+				max_tokens: 500,
+				presence_penalty: 0,
+				temperature: 0.1,
+				top_p: 0.9
+			});
+			if (completion.choices[0].message.content) {
+				summary = completion.choices[0].message.content;
+			}
+		}
+
+		return summary;
+	} catch (error) {
+		throw new Error(`Error summarizing job file: ${error.message}`);
+	}
+}
+
+
 async function getJobsByEntrepriseId(entrepriseId) {
   try {
     const jobs = await Job.find({
@@ -55,6 +131,7 @@ async function AddJob(req, res, admin) {
       yearOfExperience,
       cible,
       closeDate,
+    
     } = req.body;
 
     const user = await User.findById(recruiter);
@@ -107,6 +184,7 @@ async function AddJob(req, res, admin) {
       }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
     }
     console.log(jobFileUrl);
+
     const newJob = new Job({
       recruiter,
       jobTitle,
@@ -125,10 +203,10 @@ async function AddJob(req, res, admin) {
       closeDate,
       jobFile: jobFileUrl,
     });
-
-    await newJob.save();
+    
+    // await newJob.save();
     let entreprise;
-
+    console.log(entrepriseID);
     if (entrepriseID) {
        entreprise = await Entreprise.findById(entrepriseID);
       if (!entreprise) {
@@ -165,25 +243,7 @@ async function AddJob(req, res, admin) {
     return res.status(500).json({ error: "Error adding job" });
   }
 }
-
-async function getJobDetails(jobID) {
-  try {
-    const job = await Job.findById(jobID)
-      .populate("recruiter")
-      .populate("Relatedentreprise")
-      .populate("recommendationCondidateurs")
-      .populate("skills", "skillname");
-    if (!job) {
-      return res.status(404).json({ message: "Job not found" });
-    }
-    return job;
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server Error" });
-  }
-}
-
-async function getJobUpdateDetails(jobID) {
+async function getJobUpdateDetails(jobID,req, res, admin) {
   try {
     const job = await Job.findById(jobID)
       .populate("recruiter")
@@ -210,6 +270,23 @@ async function getJobUpdateDetails(jobID) {
     res.status(500).json({ message: "Server Error" });
   }
 }
+async function getJobDetails(jobID) {
+  try {
+    const job = await Job.findById(jobID)
+      .populate("recruiter")
+      .populate("Relatedentreprise")
+      .populate("skills", "skillname");
+    if (!job) {
+      throw new Error("Job not found");
+    }
+    return job;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Server Error");
+  }
+}
+
+
 
 async function getAllJob() {
   try {
@@ -310,4 +387,6 @@ module.exports = {
   getAllJob,
   getJobsByEntrepriseId,
   CloseJob,
+  summarizeJobFile,
+
 };
