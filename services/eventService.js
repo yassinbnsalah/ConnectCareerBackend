@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcryptjs');
+const scheduledFunctions = require("../scheduledFunctions/crons");
 const CreateOrUpdateEvent = async (req, res, admin, eventId = null) => {
   try {
     const { title, description, state, category, publish_date ,eventDate} = req.body;
@@ -66,6 +67,10 @@ const CreateOrUpdateEvent = async (req, res, admin, eventId = null) => {
       });
    //   sendEventMail(["wiembenaraar2@gmail.com","benamorr.fedi@gmail.com"] , title , imageEvents ,description )
       await newEvent.save();
+      if(publish_date){
+        scheduledFunctions.initPublishEvent(publish_date,newEvent);
+      }
+     
       res.status(201).json({ message: "New event created successfully" });
     }
   } catch (error) {
