@@ -7,6 +7,7 @@ const nodemailer = require('nodemailer');
 async function CreateNewCandidate(req, res, admin) {
   try {
     const { owner, job, useMyResume } = req.body;
+    console.log(req.body);
     const State = 'InProgress';
     let Resume = '';
     const user = await User.findById(owner);

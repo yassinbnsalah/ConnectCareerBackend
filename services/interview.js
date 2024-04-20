@@ -81,14 +81,14 @@ async function createInterview(req, res) {
     const job = await Job.findById(applicationref).populate(
       "Relatedentreprise"
     );
-    // sendMailToStudent(
-    //   user.email,
-    //   user.firstname + user.lastname,
-    //   `${dateInterview.split('T')[0]} ${heure}:${minutes}`,
-    //   roomID,
-    //   job.Relatedentreprise.CompanyName,
-    //   job.jobTitle,
-    // );
+    sendMailToStudent(
+      user.email,
+      user.firstname + user.lastname,
+      `${dateInterview.split('T')[0]} ${heure}:${minutes}`,
+      roomID,
+      job.Relatedentreprise.CompanyName,
+      job.jobTitle,
+    );
     await newInterview.save();
   } catch (error) {
     console.error(error);

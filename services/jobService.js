@@ -275,6 +275,7 @@ async function getJobDetails(jobID) {
     const job = await Job.findById(jobID)
       .populate("recruiter")
       .populate("Relatedentreprise")
+      .populate("recommendationCondidateurs")
       .populate("skills", "skillname");
     if (!job) {
       throw new Error("Job not found");
