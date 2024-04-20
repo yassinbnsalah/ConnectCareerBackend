@@ -7,6 +7,7 @@ const admin = require("firebase-admin");
 require('dotenv').config();
 const { Client } = require("@octoai/client");
 const pdf = require('pdf-parse');
+const mammoth = require("mammoth");
 const prompts = require('prompts');
 const axios = require('axios'); 
 const fs = require('fs/promises');
@@ -22,61 +23,57 @@ if (!process.env.OCTOAI_TOKEN) {
 // Connectez-vous au client OctoML
 const client = new Client(process.env.OCTOAI_TOKEN);
 const model ="mistral-7b-instruct";
+
+
 async function summarizeJobFile(jobFile, model) {
-	try {
-		const response = await axios.get(jobFile, { responseType: 'arraybuffer' });
-		const dataBuffer = Buffer.from(response.data, 'binary');
-		const jobText = await pdf(dataBuffer).then(data => data.text);
+  try {
+      const response = await axios.get(jobFile, { responseType: 'arraybuffer' });
+      const dataBuffer = Buffer.from(response.data, 'binary');
 
-		const chunkSize = 500 * 4;
-		const jobChunks = [];
-		for (let i = 0; i < jobText.length; i += chunkSize) {
-			jobChunks.push(jobText.slice(i, i + chunkSize));
-		}
+      const url = new URL(jobFile);
+      const pathname = url.pathname;
+      const fileType = path.extname(pathname).toLowerCase();  // This will correctly extract .docx
+      
+      if (fileType === '.pdf') {
+          docText = await pdf(dataBuffer).then(data => data.text);
+      } else if (fileType === '.docx') {
+          docText = await mammoth.extractRawText({ buffer: dataBuffer }).then(result => result.value);
+      } else {
+          throw new Error("Unsupported file format: " + fileType);
+      }
+      
 
-//		console.log(`Job file has ${jobChunks.length} chunks and ${jobText.length} characters. This is around ${jobText.length / 4} tokens.`);
+      const chunkSize = 500 * 4;
+      const jobChunks = [];
+      for (let i = 0; i < docText.length; i += chunkSize) {
+          jobChunks.push(docText.slice(i, i + chunkSize));
+      }
 
-		const summaries = [];
-		for (let i = 0; i < jobChunks.length; i++) {
-			const completion = await client.chat.completions.create({
-				messages: [
-					{ role: "system", content: "You are a tool that summarizes job files." },
-					{ role: "assistant", content: `Job content:\n${jobChunks[i]}` }
-				],
-				model: model,
-				max_tokens: 500,
-				presence_penalty: 0,
-				temperature: 0.1,
-				top_p: 0.9
-			});
+      const summaries = [];
+      for (let i = 0; i < jobChunks.length; i++) {
+          const completion = await client.chat.completions.create({
+              messages: [
+                  { role: "system", content: "You are a tool that summarizes job files." },
+                  { role: "assistant", content: `Job content:\n${jobChunks[i]}` }
+              ],
+              model: model,
+              max_tokens: 500,
+              presence_penalty: 0,
+              temperature: 0.1,
+              top_p: 0.9
+          });
 
-			summaries.push(completion.choices[0].message.content);
-		}
+          summaries.push(completion.choices[0].message.content);
+      }
 
-		let summary = summaries.join('\n\n');
-
-		if (summary.length > 500) {
-			const completion = await client.chat.completions.create({
-				messages: [
-					{ role: "system", content: "You are a tool that summarizes job files." },
-					{ role: "user", content: `Job content:\n${summary}` }
-				],
-				model: model,
-				max_tokens: 500,
-				presence_penalty: 0,
-				temperature: 0.1,
-				top_p: 0.9
-			});
-			if (completion.choices[0].message.content) {
-				summary = completion.choices[0].message.content;
-			}
-		}
-
-		return summary;
-	} catch (error) {
-		throw new Error(`Error summarizing job file: ${error.message}`);
-	}
+      return summaries.join('\n\n');
+  } catch (error) {
+      throw new Error(`Error summarizing job file: ${error.message}`);
+  }
 }
+
+
+
 
 
 async function getJobsByEntrepriseId(entrepriseId) {
@@ -165,25 +162,24 @@ async function AddJob(req, res, admin) {
       }
     }
 
+  
     let jobFileUrl = "";
 
     if (req.files && req.files.jobFile && req.files.jobFile[0]) {
-      const jobFile = req.files.jobFile[0];
-      const bucket = admin.storage().bucket();
+        const jobFile = req.files.jobFile[0];
+        const bucket = admin.storage().bucket();
+        const folderName = "jobFiles";
+        const fileName = `${Date.now()}_${jobFile.originalname}`;
+        const fileFullPath = `${folderName}/${fileName}`;
+        const file = bucket.file(fileFullPath);
+        await file.save(jobFile.buffer);
+        jobFileUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(fileFullPath)}?alt=media`;
 
-      const folderName = "jobFiles";
-      const fileName = `${Date.now()}_${jobFile.originalname}`;
-      const fileFullPath = `${folderName}/${fileName}`;
-
-      const file = bucket.file(fileFullPath);
-
-      await file.save(jobFile.buffer);
-
-      jobFileUrl = `https://firebasestorage.googleapis.com/v0/b/${
-        bucket.name
-      }/o/${encodeURIComponent(fileFullPath)}?alt=media`;
+        // Summarize the job file based on type
+        const summary = await summarizeJobFile(jobFileUrl, "mistral-7b-instruct");
+        console.log("Summary of the job file:", summary);
     }
-    console.log(jobFileUrl);
+    
 
     const newJob = new Job({
       recruiter,
