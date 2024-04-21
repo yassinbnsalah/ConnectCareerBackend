@@ -12,12 +12,17 @@ const CreateAdmin = require('./services/createadmin');
 const AuthentificaitonAdmin = require('./routes/authentificationadmin');
 
 const app = express();
+app.disable('x-powered-by');
 const port = 3001;
 
 const webpack = require('webpack');
 // const webpackConfig = require('./webpack.config.js');
 // const compiler = webpack(webpackConfig);
-app.use(cors());  
+app.use(cors({
+  origin: ['http://localhost:3002','http://localhost:3000'], // Add trusted origins here
+  methods: ['GET', 'POST'], // Allow only safe methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allow only specific headers
+}));
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   storageBucket: 'twinerz-fceb6.appspot.com',
@@ -65,7 +70,7 @@ mongoose.connect(
 );
 
 const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = multer();
 const studentRoute = require('./routes/students');
 const recruiterRoute = require('./routes/recruiters');
 const entrepriseRoute = require('./routes/entreprise');
@@ -118,8 +123,8 @@ app.post('/activate-account', async (req, res) => {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // true for 465, false for other ports
+    port: 465,
+    secure: true, // true for 465, false for other ports
     auth: {
       user: 'contact.fithealth23@gmail.com', // ethereal user
       pass: 'ebrh bilu ygsn zrkw', // ethereal password
@@ -313,6 +318,7 @@ app.post('/checkEmail', async (req, res) => {
 app.get("/", (req, res) => {
   res.send("Hello, Express!");
 });
+
 //scheduledFunctions.initScheduledJobs();
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

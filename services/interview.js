@@ -4,7 +4,7 @@ const Interview = require("../models/interview.js");
 const Job = require("../models/job.js");
 const Postulation = require("../models/postulation.js");
 const User = require("../models/user.js");
-const { log } = require("console");
+
 
 async function getInterviewByRecruiter(userID) {
   try {
@@ -110,8 +110,8 @@ async function sendMailToStudent(
   const transporter = nodemailer.createTransport({
     service: "gmail",
     host: "smtp.gmail.com",
-    port: 587,
-    secure: false, // true for 465, false for other ports
+    port: 465,
+    secure: true, // true for 465, false for other ports
     auth: {
       user: "contact.fithealth23@gmail.com", // ethereal user
       pass: "ebrh bilu ygsn zrkw", // ethereal password

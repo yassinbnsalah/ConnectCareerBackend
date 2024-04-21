@@ -1,21 +1,14 @@
 const User = require('../models/user');
 
-
 async function getListeAlumni() {
   try {
-    const recruiters = await User.find({ role: 'Alumni' }).populate(
-      'entreprise',
-    );
-    return recruiters;
+    const alumni = await User.find({ role: 'Alumni' }).populate('entreprise');
+    return alumni;
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
-    return res;
+    throw new Error('Internal Server Error');
   }
 }
-
-
-
 async function getAlumniDetails(alumniId) {
   try {
     const alumni = await User.findById(alumniId).populate('entreprise');
@@ -25,7 +18,6 @@ async function getAlumniDetails(alumniId) {
     throw new Error('Internal Server Error');
   }
 }
-
 module.exports = {
   getListeAlumni,
   getAlumniDetails

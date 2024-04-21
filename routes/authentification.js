@@ -31,13 +31,14 @@ router.get('/getUserByEmail/:email', async (req, res) => {
 router.post('/loginadmin', async (req, res) => {
   await AuthentificationAdmin(req, res);
 });
+router.post('/Ajouter2FA/:email', async (req, res) => {
+  await Ajouter2FA(req, res);
+});
 
 router.post('/UpdatePassword/:email', async (req, res) => {
   await UpdatePassword(req, res);
 });
-router.post('/Ajouter2FA/:email', async (req, res) => {
-  await Ajouter2FA(req, res);
-});
+
 
 router.post('/forgetpassword', async (req, res) => {
   await ForgetPassword(req, res);
