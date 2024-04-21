@@ -47,6 +47,7 @@ io.on('connection', (socket) => {
 
     io.emit("new_job", {jobTitle: data.jobTitle,message: data.message,recruiterFullName:data.recruiterFullName, profileImage:data.profileImage, date:data.date });
   });
+
 });
 
 

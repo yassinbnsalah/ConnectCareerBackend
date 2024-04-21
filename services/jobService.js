@@ -162,7 +162,7 @@ async function AddJob(req, res, admin) {
       }
     }
 
-  
+    let jobDescription = req.body.description; 
     let jobFileUrl = "";
 
     if (req.files && req.files.jobFile && req.files.jobFile[0]) {
@@ -178,6 +178,7 @@ async function AddJob(req, res, admin) {
         // Summarize the job file based on type
         const summary = await summarizeJobFile(jobFileUrl, "mistral-7b-instruct");
         console.log("Summary of the job file:", summary);
+        jobDescription = summary;
     }
     
 
@@ -188,7 +189,7 @@ async function AddJob(req, res, admin) {
       typeofworkplace,
       jobType,
       salary,
-      description,
+      description: jobDescription,
       termsAndConditions,
       isActive: true,
       creationDate: new Date(),
