@@ -5,7 +5,7 @@ const admin = require("firebase-admin");
 const multer = require("multer");
 
 const upload = multer();
-const {getAllEvents, findEventByID, CreateOrUpdateEvent, getAllEventPublished } = require("../services/eventService");
+const {getAllEvents, findEventByID, CreateOrUpdateEvent, getAllEventPublished,sendEmail } = require("../services/eventService");
 
 router.post(
   "/createEvent",
@@ -20,7 +20,15 @@ router.post(
     }
   }
 );
+router.post("/sendEmail/:id", async(req,res) =>{
+  try{
+    await sendEmail(req,res);
+  }catch (error) {
+    console.error(error);
 
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+})
 router.post(
   "/update/:id",
   upload.fields([{ name: "image", maxCount: 1 }]),

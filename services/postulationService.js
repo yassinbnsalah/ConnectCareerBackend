@@ -7,6 +7,7 @@ const nodemailer = require('nodemailer');
 async function CreateNewCandidate(req, res, admin) {
   try {
     const { owner, job, useMyResume } = req.body;
+    console.log(req.body);
     const State = 'InProgress';
     let Resume = '';
     const user = await User.findById(owner);
@@ -154,8 +155,8 @@ async function sendMailTRecruiter(email) {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // true for 465, false for other ports
+    port: 465,
+    secure: true, // true for 465, false for other ports
     auth: {
       user: 'contact.fithealth23@gmail.com', // ethereal user
       pass: 'ebrh bilu ygsn zrkw', // ethereal password

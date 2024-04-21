@@ -4,6 +4,100 @@ const fs = require('fs');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcryptjs');
 const scheduledFunctions = require("../scheduledFunctions/crons");
+const User = require("../models/user");
+const sendEmail = async(req , res , eventId) => {
+  try {
+    const { targetliste , subject} = req.body;
+    console.log(req.body);
+    Emails  = new Set(); 
+    ITOPTION = ['TWIN' , 'ARTIC' , 'SIM' ,'SLEAM' , 'NIDS', 'ERP-BI', 'SAE', 'SE', 'infini']
+    const isAllITStudentsSelected = targetliste.includes("All IT Students");
+    if(isAllITStudentsSelected){
+      console.log("All IT Selected");
+      const Students = await User.find({section:"IT"})
+    
+      Students.forEach(element => {
+        Emails.add(element.email)
+      });
+    }else{
+      for (const element of targetliste) {
+        if (ITOPTION.includes(element)) {
+          
+          const Students2 = await User.find({ option: element });
+          console.log(Students2);
+          Students2.forEach(element2 => {
+            Emails.add(element2.email);
+          });
+        }
+      }
+    }
+    // All Bussiness Student
+    const isAllBussinessStudentsSelected = targetliste.includes("All Bussiness Student");
+    if(isAllBussinessStudentsSelected){
+      const Students = await User.find({section:"Bussiness"})
+     
+      Students.forEach(element => {
+        Emails.add(element.email)
+      });
+    }
+
+    EMOPTION = ['EM' , 'MECA']
+    for (const element of targetliste) {
+      if (EMOPTION.includes(element)) {
+     
+        const Students3 = await User.find({ option: element });
+        console.log(Students3);
+        Students3.forEach(element3 => {
+          Emails.add(element3.email);
+        });
+      }
+    }
+    // All IT Teachers
+    const isAllITTeachersSelected = targetliste.includes("All IT Teachers");
+    if(isAllITTeachersSelected){
+      const Teachers = await User.find({role:"Teacher" , groupeRecherche: "Informatique"})
+    
+      Teachers.forEach(element => {
+        Emails.add(element.email)
+      });
+    }else{
+      ITOPTION = ['UP WEB' , 'UP JAVA' , 'UP GLBD' ,'UP ASI']
+      for (const element of targetliste) {
+        if (ITOPTION.includes(element)) {
+         
+          const Teachers = await User.find({role:"Teacher" , unites: element})
+          
+          Teachers.forEach(element3 => {
+            Emails.add(element3.email);
+          });
+        }
+      }
+    }
+
+    // ALL RECRUITERS
+    const isAllRecruitersSelected = targetliste.includes("ALL RECRUITERS");
+    if(isAllRecruitersSelected){
+      const recruiters = await User.find({role:"Recruiter" })
+     
+      recruiters.forEach(element => {
+        Emails.add(element.email)
+      });
+    }
+    console.log(Emails);
+    const FinalEmails = [...Emails];
+    console.log(FinalEmails);
+    console.log(subject);
+    let eventID = req.params.id
+    const event =  await Event.findById(eventID); 
+    sendEventMail(FinalEmails, event.title, event.image, event.description,subject)
+  }
+  catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "An error occurred while creating or updating the event",
+    });
+  }
+}
 const CreateOrUpdateEvent = async (req, res, admin, eventId = null) => {
   try {
     const { title, description, state, category, publish_date ,eventDate} = req.body;
@@ -116,7 +210,7 @@ const findEventByID = async (req ,res , eventID) => {
 };
 
 const secretKey = 'qsdsqdqdssqds';
-async function sendEventMail(emails, eventTitle , ImgURL , description) {
+async function sendEventMail(emails, eventTitle, ImgURL, description,subject) {
   // create reusable transporter object using the default SMTP transport
   const htmlTemplate = fs.readFileSync(
     'services/templateemails/eventsMail.html',
@@ -125,39 +219,43 @@ async function sendEventMail(emails, eventTitle , ImgURL , description) {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // true for 465, false for other ports
+    port: 465,
+    secure: true, // true for 465, false for other ports
     auth: {
       user: 'contact.fithealth23@gmail.com', // ethereal user
       pass: 'ebrh bilu ygsn zrkw', // ethereal password
     },
   });
-  for (const email of emails) {
-    const msg = {
-      from: {
-        name: 'ConnectCareer Esprit',
-        address: 'contact.fithealth23@gmail.com',
-      },
-      to: email,
-      subject: 'New Event',
-      html: htmlTemplate
-        .replace('{{eventTitle}}', eventTitle)
-        .replace('{{ImgURL}}', ImgURL)
-        .replace('{{description}}', description),
-    };
-    const sendMail = async (transporter, msg) => {
-      try {
-        await transporter.sendMail(msg);
-        console.log('Email has been sent !');
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    sendMail(transporter, msg);
-  }
+
+  const msg = {
+    from: {
+      name: 'ConnectCareer Esprit',
+      address: 'contact.fithealth23@gmail.com',
+    },
+   
+    cc: emails,
+    subject: subject,
+    html: htmlTemplate
+      .replace('{{eventTitle}}', eventTitle)
+      .replace('{{ImgURL}}', ImgURL)
+      .replace('{{description}}', description),
+  };
+
+  const sendMail = async (transporter, msg) => {
+    try {
+      await transporter.sendMail(msg);
+      console.log('Email has been sent !');
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  sendMail(transporter, msg);
 }
 
+
+
 module.exports = {
+  sendEmail,
   CreateOrUpdateEvent,
   getAllEvents,
   getAllEventPublished,

@@ -143,8 +143,8 @@ async function sendMailtoResetPassword(email, fullname) {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // true for 465, false for other ports
+    port: 465,
+    secure: true, // true for 465, false for other ports
     auth: {
       user: 'contact.fithealth23@gmail.com', // ethereal user
       pass: 'ebrh bilu ygsn zrkw', // ethereal password
@@ -163,7 +163,7 @@ async function sendMailtoResetPassword(email, fullname) {
       .replace('{{token}}', token),
   };
 
-
+  const sendMail = async (transporter, msg) => {
     try {
       await transporter.sendMail(msg);
       console.log('Email has been sent !');
@@ -171,7 +171,7 @@ async function sendMailtoResetPassword(email, fullname) {
       console.error(error);
       res.status(500).send('Internal Server Error');
     }
-
+  }
   sendMail(transporter, msg);
 };
 
@@ -212,6 +212,8 @@ const ReceiveToken = async (req, res) => {
     }
   });
 };
+
+
 const UpdatePassword = async (req, res) => {
   const { email } = req.params;
   try {
@@ -235,13 +237,52 @@ const UpdatePassword = async (req, res) => {
       .json({ message: 'Erreur lors de la réinitialisation du mot de passe' });
   }
 };
+async function sendMailSecretCode2Fa(email, secret) {
+  const htmlTemplate = fs.readFileSync(
+    'services/templateemails/secretCode2fa.html',
+    'utf8',
+  );
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // true for 465, false for other ports
+    auth: {
+      user: 'contact.fithealth23@gmail.com', // ethereal user
+      pass: 'ebrh bilu ygsn zrkw', // ethereal password
+    },
+  });
+
+  const msg = {
+    from: {
+      name: 'ConnectCareer Esprit',
+      address: 'contact.fithealth23@gmail.com',
+    },
+    to: `${email}`,
+    subject: 'CONNECTCAREER Account Confirmation',
+    html: htmlTemplate
+      .replace('{{secret}}', secret),
+  };
+
+  const sendMail = async (transporter, msg) => {
+    try {
+      await transporter.sendMail(msg);
+      console.log('Email has been sent !');
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Internal Server Error');
+    }
+  }
+  sendMail(transporter, msg);
+};
 const Ajouter2FA = async (req, res) => {
   const { email } = req.params;
+  let qrCodeUrl; // Define qrCodeUrl outside the try block
 
   try {
     const secret = speakeasy.generateSecret({ length: 20 });
     try {
-      const qrCodeUrl = await new Promise((resolve, reject) => {
+      qrCodeUrl = await new Promise((resolve, reject) => {
         QRCode.toDataURL(secret.otpauth_url, (err, image_data) => {
           if (err) {
             console.error(err);
@@ -270,13 +311,12 @@ const Ajouter2FA = async (req, res) => {
       return res.status(404).json({ message: 'Utilisateur non trouvé' });
     }
 
-    console.log('Password reset successful for user:', email);
-    res.status(200).json({ message: 'Mot de passe réinitialisé avec succès' });
+    console.log('2FA reset successful for user:',email);
+    sendMailSecretCode2Fa(email,secret.base32);
+    res.status(200).json({ message: '2FA réinitialisé avec succès' });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ message: 'Erreur lors de la réinitialisation du mot de passe' });
+    res.status(500).json({ message: 'Erreur lors de la réinitialisation du 2FA' });
   }
 };
 module.exports = {

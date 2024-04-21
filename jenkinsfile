@@ -23,7 +23,7 @@ pipeline {
                 script { 
                 def scannerHome = tool 'scanner'
             sh "${scannerHome}/bin/sonar-scanner \
-                -Dsonar.projectKey=twinerzBackend \
+                -Dsonar.projectKey=twinerzDevops \
                 -Dsonar.sources=. \
                 -Dsonar.host.url=http://172.16.5.155:9000/ \
                 -Dsonar.login=squ_99662c597f93b62784b85abad47171d02fc9d464"
@@ -45,7 +45,7 @@ pipeline {
                     ]) {
                         sh '''
                             echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin $registry
-                            docker push $registry/nodemongoapp:5.0
+                            docker push $registry/nodemongoapp:6.0
                         '''
                     }
                 }
@@ -55,7 +55,7 @@ pipeline {
             steps{
                 script {
                  docker.withRegistry("http://"+registry,registryCredentials ) {
-                    sh('docker push $registry/nodemongoapp:5.0 ')
+                    sh('docker push $registry/nodemongoapp:6.0 ')
                              }
                         }
                 }
@@ -65,12 +65,17 @@ pipeline {
             steps{
                 script {
                     docker.withRegistry("http://"+registry, registryCredentials) {
-                     sh('docker pull $registry/nodemongoapp:5.0 ')
+                     sh('docker pull $registry/nodemongoapp:6.0')
                      sh('docker compose up -d ')
                            }
                         }
                 }
             }
+        stage('SMTP Notification logs'){
+            steps{
+                emailext attachLog: true, body: 'check our logs after running the pipeline', compressLog: true, subject: 'this is Jekins output logs from benamor fedi pipeline', to: 'benamorr.fedi@gmail.com'
+            }
+        }
         stage('Prometheus Setup') {
             steps {
                 sh 'docker compose up -d prometheus'

@@ -60,8 +60,8 @@ async function sendMailTRecruiter(job) {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // true for 465, false for other ports
+    port: 465,
+    secure: true, // true for 465, false for other ports
     auth: {
       user: 'contact.fithealth23@gmail.com', // ethereal user
       pass: 'ebrh bilu ygsn zrkw', // ethereal password
@@ -96,9 +96,9 @@ exports.initPublishEvent = (date, event) => {
   const day = dateConverted.getDate();
   const month = dateConverted.getMonth();
   const year = dateConverted.getFullYear();
-
+   
   const publishEvent = new CronJob(
-    `0 20 4 ${day} ${month+1} *`,
+    `0 34 9 ${day} ${month+1} *`,
     () => {
       console.log("publishEvent");
       // Add your custom logic here
