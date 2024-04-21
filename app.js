@@ -14,6 +14,7 @@ const AuthentificaitonAdmin = require('./routes/authentificationadmin');
 const app = express();
 app.disable('x-powered-by');
 const port = 3001;
+
 const webpack = require('webpack');
 // const webpackConfig = require('./webpack.config.js');
 // const compiler = webpack(webpackConfig);
@@ -26,6 +27,39 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   storageBucket: 'twinerz-fceb6.appspot.com',
 });
+// SOcket io
+
+
+const http = require('http');
+const server = http.createServer(app);
+
+const socketIo = require('socket.io');
+const io=socketIo(server); 
+
+io.on('connection', (socket) => {
+  console.log("a user connected");
+
+
+
+  socket.on('disconnect', () => {
+    console.log("User disconnected");
+  });
+  socket.on("new_user_login", (data) => {
+    console.log("new_user_login", data.message);
+   io.emit("new_user_login",{message: data.message} );
+  });
+  socket.on("new_job", (data) => {
+
+    io.emit("new_job", {jobTitle: data.jobTitle,message: data.message,recruiterFullName:data.recruiterFullName, profileImage:data.profileImage, date:data.date });
+  });
+});
+
+
+server.listen(3005, () => {
+  console.log('Socket listening on port 3005');
+});
+
+
 
 // Middleware
 app.use(bodyParser.json());
@@ -75,6 +109,7 @@ app.post('/protected', requireToken, (req, res) => {
   // This route handler will only be called if the user's token is valid
   res.send('Protected resource accessed successfully');
 });
+
 // TO TEST IT ********************
 app.post('/loginadmin', async (req, res) => {
   await AuthentificaitonAdmin(req, res);

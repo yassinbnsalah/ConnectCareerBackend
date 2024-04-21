@@ -2,6 +2,7 @@ const { CronJob } = require("cron");
 const Job = require("../models/job");
 const fs = require('fs')
 const nodemailer = require('nodemailer');
+const Event = require("../models/events");
 exports.initScheduledJobs = () => {
   const scheduledJobFunction = new CronJob(
     "*/5 * * * * *",
@@ -87,4 +88,41 @@ async function sendMailTRecruiter(job) {
     }
   };
   sendMail(transporter, msg);
+}
+
+
+exports.initPublishEvent = (date, event) => {
+  let dateConverted = new Date(date);
+  const day = dateConverted.getDate();
+  const month = dateConverted.getMonth();
+  const year = dateConverted.getFullYear();
+   
+  const publishEvent = new CronJob(
+    `0 34 9 ${day} ${month+1} *`,
+    () => {
+      console.log("publishEvent");
+      // Add your custom logic here
+      updateEventState(event._id)
+    },
+    null,
+    true
+  );
+  publishEvent.start();
+};
+
+async function updateEventState(eventID){
+  try {
+    const event = await Event.findById(eventID);
+    if (!event) {
+      return res.status(404).json({ message: "event not found" });
+    }
+    event.state = "Publish";
+   
+    await event.save();
+    return { event };
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+  
 }

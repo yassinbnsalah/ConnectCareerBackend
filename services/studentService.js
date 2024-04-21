@@ -6,6 +6,7 @@ const speakeasy = require('speakeasy');
 const QRCode = require('qrcode');
 const User = require('../models/user');
 const Entreprise = require('../models/entreprise');
+const Stats = require('../models/stats');
 
 const CreateStudent = async (req, res, admin) => {
   try {
@@ -262,6 +263,19 @@ async function becomeAlumni(studentId, req, admin) {
       );
       CompanyLogo = `https://firebasestorage.googleapis.com/v0/b/${CompanyLogoBucket.name}/o/${CompanyLogoFileObject.name}`;
     }
+    /////
+    const stats = new Stats({
+      totalNBOpportunite : 0 , 
+      acceptedOpportunite : 0 , 
+      nbSummerOP : 0 , 
+      acceptedSummerOP : 0 , 
+      nbPFEOP : 0 , 
+      acceptedPFE : 0 ,
+      nbFullTimeOP : 0 , 
+      acceptedFullTimeOP : 0 ,
+      TotalReach : 0 ,
+    })
+    await stats.save();
     const entreprise = new Entreprise({
       CompanyName,
       CompanyAdress,
@@ -270,6 +284,7 @@ async function becomeAlumni(studentId, req, admin) {
       matriculeFiscale,
       description,
       CompanyLogo,
+      stats
     });
     await entreprise.save();
 

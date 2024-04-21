@@ -18,6 +18,7 @@ const userSchema = new mongoose.Schema({
   jobType: String,
   isVerify: Boolean,
   section : String, 
+  option : String,
   profileImage: String,
   role: String,
   diploma: String,
