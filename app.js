@@ -20,7 +20,7 @@ const webpack = require('webpack');
 // const compiler = webpack(webpackConfig);
 app.use(cors({
   origin: ['http://localhost:3002','http://localhost:3000'], // Add trusted origins here
-  methods: ['GET', 'POST'], // Allow only safe methods
+  methods: ['GET', 'POST','PUT','DELETE'], // Allow only safe methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Allow only specific headers
 }));
 admin.initializeApp({
