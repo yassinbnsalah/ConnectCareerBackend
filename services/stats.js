@@ -5,6 +5,7 @@ const User = require("../models/user");
 
 const generateStats = async () => {
   try {
+
     const currentDate = new Date();
     const currentMonthStart = new Date(
       currentDate.getFullYear(),
@@ -29,7 +30,35 @@ const generateStats = async () => {
         $count: "totalJobs",
       },
     ]);
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const nbStudentThisMonth = await User.aggregate([
+      {
+          $match: {
+              role: "Student",
+              joinedAt: { $gte: startOfMonth }
+          }
+      },
+      {
+          $count: "totalStudents"
+      }
+  ]);
+  const totalStudents = nbStudentThisMonth[0] ? nbStudentThisMonth[0].totalStudents : 0;
+        
+  const nbRecruiterThisMonth = await User.aggregate([
+    {
+        $match: {
+            role: "Recruiter",
+            joinedAt: { $gte: startOfMonth }
+        }
+    },
+    {
+        $count: "totalRecruiters"
+    }
+]);
+const totalRecruitersnb = nbRecruiterThisMonth[0] ? nbRecruiterThisMonth[0].totalRecruiters : 0;
     const toprecruiters = await User.find({ role: "Recruiter" });
+   
     const recentOp = await Job.aggregate([
       {
         $lookup: {
@@ -96,7 +125,8 @@ const generateStats = async () => {
       jobPFECount,
       jobSummerCount,
       otherJobsCount,
-      totalJobsInCurrentMonth
+      totalJobsInCurrentMonth,
+      totalStudents,totalRecruitersnb
     };
   } catch (error) {
     console.error("Error getting stats:", error);
