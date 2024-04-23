@@ -1,9 +1,11 @@
 const Job = require('../models/job');
+const Notification = require('../models/notification');
 const Postulation = require('../models/postulation');
 const Stats = require('../models/stats');
 const User = require('../models/user');
 const fs = require('fs');
 const nodemailer = require('nodemailer');
+
 async function CreateNewCandidate(req, res, admin) {
   try {
     const { owner, job, useMyResume } = req.body;
@@ -24,7 +26,6 @@ async function CreateNewCandidate(req, res, admin) {
       if (req.files.resume) {
         const resumeFile = req.files.resume[0];
         const ResumeBucket = admin.storage().bucket();
-        // Define the path where you want to store the resume files
         const folderName = 'resumes';
         const fileName = resumeFile.originalname;
         const fileFullPath = `${folderName}/${fileName}`;
@@ -45,7 +46,6 @@ async function CreateNewCandidate(req, res, admin) {
     if (req.files.MotivationLettre) {
       const motivationFile = req.files.MotivationLettre[0];
       const motivationBucket = admin.storage().bucket();
-      // Define the path where you want to store the resume files
       const folderName = 'motivations';
       const fileName = motivationFile.originalname;
       const fileFullPath = `${folderName}/${fileName}`;
@@ -66,11 +66,22 @@ async function CreateNewCandidate(req, res, admin) {
     });
 
     await nPostulation.save();
-    return nPostulation
+
+    // Send notification to the recruiter
+    const recruiter = await User.findById(jobD.recruiter);
+    const notification = new Notification({
+      recipient: recruiter._id,
+      sender:owner,
+      message: `A new candidate has applied for the job "${jobD.jobTitle}"`,
+    });
+    await notification.save();
+
+    return nPostulation;
   } catch (error) {
     console.error(error);
   }
 }
+
 
 async function getApplications(owner) {
   try {

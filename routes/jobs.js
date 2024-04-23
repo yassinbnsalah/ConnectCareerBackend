@@ -12,13 +12,25 @@ const Skills = require('../models/skills');
 const { default: axios } = require('axios');
 
 const upload = multer();
+/*
 router.post('/add',   upload.fields([{ name: 'jobFile', maxCount: 1 }]), async (req, res) => {
   try {
     const jobs = await jobService.AddJob(req, res,admin);
-    const response = await axios.get('http://127.0.0.1:8000/getRecommandedCondidature/'+jobs._id);
+   // const response = await axios.get('http://127.0.0.1:8000/getRecommandedCondidature/'+jobs._id);
     const data = response.data;
     console.log("Recommanded Condidates Calculated Successully");
     console.log(data)
+    res.json(jobs);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+*/
+router.post('/add',   upload.fields([{ name: 'jobFile', maxCount: 1 }]), async (req, res) => {
+  try {
+    const jobs = await jobService.AddJob(req, res,admin);
+
     res.json(jobs);
   } catch (error) {
     console.error(error);
@@ -70,7 +82,7 @@ router.get('/details/:jobID', async (req, res) => {
     if (data.jobFile) {
       const model = "mistral-7b-instruct";
       summary = await jobService.summarizeJobFile(data.jobFile, model);
-     // console.log(`Summary: ${summary}`);
+   // console.log(`Summary: ${summary}`);
     }
     res.json({ data, summary });
   } catch (error) {

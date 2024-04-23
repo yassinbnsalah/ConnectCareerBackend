@@ -18,11 +18,7 @@ const port = 3001;
 const webpack = require('webpack');
 // const webpackConfig = require('./webpack.config.js');
 // const compiler = webpack(webpackConfig);
-app.use(cors({
-  origin: ['http://localhost:3002','http://localhost:3000'], // Add trusted origins here
-  methods: ['GET', 'POST'], // Allow only safe methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Allow only specific headers
-}));
+app.use(cors());
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   storageBucket: 'twinerz-fceb6.appspot.com',
@@ -51,6 +47,9 @@ io.on('connection', (socket) => {
   socket.on("new_job", (data) => {
 
     io.emit("new_job", {jobTitle: data.jobTitle,message: data.message,recruiterFullName:data.recruiterFullName, profileImage:data.profileImage, date:data.date });
+  });
+  socket.on("new_application", (data) => {
+  io.emit("new_application", {message: data.message,profileImage:data.profileImage,firstname:data.firstname,lastname:data.lastname,timestamp:data.timestamp,alertmsg:data.alertmsg});
   });
 });
 
@@ -88,6 +87,8 @@ const statRecruiter = require('./routes/statsRecruiter');
 const eventroute = require('./routes/events')
 const alumniRoute = require ('./routes/alumni')
 const InvitationRoute = require('./routes/invite')
+const NotificationRoute = require('./routes/notification')
+app.use('/notificationapi/', NotificationRoute);
 app.use('/studentapi/', studentRoute);
 app.use('/recruiterapi/', recruiterRoute);
 app.use('/alumniapi/', alumniRoute);
