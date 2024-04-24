@@ -46,7 +46,14 @@ io.on('connection', (socket) => {
   });
   socket.on("new_job", (data) => {
 
-    io.emit("new_job", {jobTitle: data.jobTitle,message: data.message,recruiterFullName:data.recruiterFullName, profileImage:data.profileImage, date:data.date });
+    io.emit("new_job", {
+      message: data.message,
+      profileImage:data.profileImage,
+      firstname:data.firstname,
+      lastname:data.lastname,
+      timestamp:data.timestamp,
+      alertmsg:data.alertmsg , 
+    path: data.path});
   });
   // Here we ll Send The Path 
   socket.on("new_application", (data) => {

@@ -18,7 +18,17 @@ const getListOfNotification = async (req, res) => {
       throw new Error('Internal Server Error');
     }
   }
+  async function getNumberofNotificationsbyid(userId) {
+    try {
+      const countNotifications = await Notification.countDocuments({ recipient: userId });
+      return countNotifications;
+    } catch (error) {
+      console.error(error);
+      throw new Error('Internal Server Error');
+    }
+  }
   module.exports = {
     getListOfNotification,
-    getListOfNotificationsbyid
+    getListOfNotificationsbyid,
+    getNumberofNotificationsbyid
   };

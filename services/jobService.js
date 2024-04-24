@@ -9,66 +9,66 @@ const { Client } = require("@octoai/client");
 const pdf = require('pdf-parse');
 const mammoth = require("mammoth");
 const prompts = require('prompts');
-const axios = require('axios'); 
+const axios = require('axios');
 const fs = require('fs/promises');
 const path = require('path');
 prompts.override(require('yargs').argv);
 
 // Vérifiez si la clé ENV est définie, sinon, demandez à l'utilisateur de renommer le fichier .env.example en .env et d'ajouter la clé
 if (!process.env.OCTOAI_TOKEN) {
-	console.log('No OctoAI API key found. Please rename .env.example to .env and add your OctoAI API key.');
-	return;
+  console.log('No OctoAI API key found. Please rename .env.example to .env and add your OctoAI API key.');
+  return;
 }
 
 // Connectez-vous au client OctoML
 const client = new Client(process.env.OCTOAI_TOKEN);
-const model ="mistral-7b-instruct";
+const model = "mistral-7b-instruct";
 
 
 async function summarizeJobFile(jobFile, model) {
   try {
-      const response = await axios.get(jobFile, { responseType: 'arraybuffer' });
-      const dataBuffer = Buffer.from(response.data, 'binary');
+    const response = await axios.get(jobFile, { responseType: 'arraybuffer' });
+    const dataBuffer = Buffer.from(response.data, 'binary');
 
-      const url = new URL(jobFile);
-      const pathname = url.pathname;
-      const fileType = path.extname(pathname).toLowerCase();  // This will correctly extract .docx
-      
-      if (fileType === '.pdf') {
-          docText = await pdf(dataBuffer).then(data => data.text);
-      } else if (fileType === '.docx') {
-          docText = await mammoth.extractRawText({ buffer: dataBuffer }).then(result => result.value);
-      } else {
-          throw new Error("Unsupported file format: " + fileType);
-      }
-      
+    const url = new URL(jobFile);
+    const pathname = url.pathname;
+    const fileType = path.extname(pathname).toLowerCase();  // This will correctly extract .docx
 
-      const chunkSize = 500 * 4;
-      const jobChunks = [];
-      for (let i = 0; i < docText.length; i += chunkSize) {
-          jobChunks.push(docText.slice(i, i + chunkSize));
-      }
+    if (fileType === '.pdf') {
+      docText = await pdf(dataBuffer).then(data => data.text);
+    } else if (fileType === '.docx') {
+      docText = await mammoth.extractRawText({ buffer: dataBuffer }).then(result => result.value);
+    } else {
+      throw new Error("Unsupported file format: " + fileType);
+    }
 
-      const summaries = [];
-      for (let i = 0; i < jobChunks.length; i++) {
-          const completion = await client.chat.completions.create({
-              messages: [
-                  { role: "system", content: "You are a tool that summarizes job files." },
-                  { role: "assistant", content: `Job content:\n${jobChunks[i]}` }
-              ],
-              model: model,
-              max_tokens: 500,
-              presence_penalty: 0,
-              temperature: 0.1,
-              top_p: 0.9
-          });
 
-          summaries.push(completion.choices[0].message.content);
-      }
+    const chunkSize = 500 * 4;
+    const jobChunks = [];
+    for (let i = 0; i < docText.length; i += chunkSize) {
+      jobChunks.push(docText.slice(i, i + chunkSize));
+    }
 
-      return summaries.join('\n\n');
+    const summaries = [];
+    for (let i = 0; i < jobChunks.length; i++) {
+      const completion = await client.chat.completions.create({
+        messages: [
+          { role: "system", content: "You are a tool that summarizes job files." },
+          { role: "assistant", content: `Job content:\n${jobChunks[i]}` }
+        ],
+        model: model,
+        max_tokens: 500,
+        presence_penalty: 0,
+        temperature: 0.1,
+        top_p: 0.9
+      });
+
+      summaries.push(completion.choices[0].message.content);
+    }
+
+    return summaries.join('\n\n');
   } catch (error) {
-      throw new Error(`Error summarizing job file: ${error.message}`);
+    throw new Error(`Error summarizing job file: ${error.message}`);
   }
 }
 
@@ -97,6 +97,7 @@ async function getJobsByEntrepriseId(entrepriseId) {
 }
 const scheduledFunctions = require("../scheduledFunctions/crons");
 const Stats = require("../models/stats");
+const Notification = require("../models/notification");
 
 async function getJobByRecruiter(userId, res) {
   try {
@@ -128,7 +129,7 @@ async function AddJob(req, res, admin) {
       yearOfExperience,
       cible,
       closeDate,
-    
+
     } = req.body;
 
     const user = await User.findById(recruiter);
@@ -162,24 +163,24 @@ async function AddJob(req, res, admin) {
       }
     }
 
-  
+
     let jobFileUrl = "";
 
     if (req.files && req.files.jobFile && req.files.jobFile[0]) {
-        const jobFile = req.files.jobFile[0];
-        const bucket = admin.storage().bucket();
-        const folderName = "jobFiles";
-        const fileName = `${Date.now()}_${jobFile.originalname}`;
-        const fileFullPath = `${folderName}/${fileName}`;
-        const file = bucket.file(fileFullPath);
-        await file.save(jobFile.buffer);
-        jobFileUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(fileFullPath)}?alt=media`;
+      const jobFile = req.files.jobFile[0];
+      const bucket = admin.storage().bucket();
+      const folderName = "jobFiles";
+      const fileName = `${Date.now()}_${jobFile.originalname}`;
+      const fileFullPath = `${folderName}/${fileName}`;
+      const file = bucket.file(fileFullPath);
+      await file.save(jobFile.buffer);
+      jobFileUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(fileFullPath)}?alt=media`;
 
-        // Summarize the job file based on type
-        const summary = await summarizeJobFile(jobFileUrl, "mistral-7b-instruct");
-        console.log("Summary of the job file:", summary);
+      // Summarize the job file based on type
+      const summary = await summarizeJobFile(jobFileUrl, "mistral-7b-instruct");
+      console.log("Summary of the job file:", summary);
     }
-    
+
 
     const newJob = new Job({
       recruiter,
@@ -199,47 +200,60 @@ async function AddJob(req, res, admin) {
       closeDate,
       jobFile: jobFileUrl,
     });
-    
+
     // await newJob.save();
     let entreprise;
     console.log(entrepriseID);
     if (entrepriseID) {
-       entreprise = await Entreprise.findById(entrepriseID);
+      entreprise = await Entreprise.findById(entrepriseID);
       if (!entreprise) {
         return res.status(404).json({ error: "Entreprise not found" });
       }
       newJob.Relatedentreprise = entreprise;
     } else {
-       entreprise = await Entreprise.findById(user.entreprise);
-   
+      entreprise = await Entreprise.findById(user.entreprise);
+
       newJob.Relatedentreprise = entreprise;
     }
     const stats = entreprise.stats
     console.log(stats);
     const STATA = await Stats.findById(stats)
-    STATA.totalNBOpportunite += 1 ; 
-    if(jobType=="fullTime"){
-      STATA.nbFullTimeOP += 1 
-    }else if (jobType=="Summer internship"){
-      STATA.nbSummerOP += 1 
-    }else if (jobType=="PFE"){
-      STATA.nbPFEOP += 1 
+    STATA.totalNBOpportunite += 1;
+    if (jobType == "fullTime") {
+      STATA.nbFullTimeOP += 1
+    } else if (jobType == "Summer internship") {
+      STATA.nbSummerOP += 1
+    } else if (jobType == "PFE") {
+      STATA.nbPFEOP += 1
     }
     await STATA.save()
     if (closeDate != "null") {
       console.log("we ll send reports at" + closeDate);
-       scheduledFunctions.initSendReports(closeDate,newJob);
+      scheduledFunctions.initSendReports(closeDate, newJob);
       //scheduledFunctions.initScheduledJobs();
     }
 
     await newJob.save();
-    return newJob ;
+    // Send notification to the admin
+    const adminNotif = await User.findOne({ role: 'Admin' });
+    if (!adminNotif) {
+      return res.status(404).json({ error: "Admin user not found" });
+    }
+
+    const notification = new Notification({
+      recipient: adminNotif._id,
+      sender: recruiter,
+      message: `A new Job has been created by "${entreprise.CompanyName}"`,
+      path: '/liste/entreprises/'+entreprise._id
+    });
+    await notification.save();
+    return newJob;
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Error adding job" });
   }
 }
-async function getJobUpdateDetails(jobID,req, res, admin) {
+async function getJobUpdateDetails(jobID, req, res, admin) {
   try {
     const job = await Job.findById(jobID)
       .populate("recruiter")
@@ -362,9 +376,9 @@ async function sendMailTRecruiter(job) {
     },
     to: "yacinbnsalh@gmail.com",
     subject: `Scheduled Job Close `,
-    html: htmlTemplate 
-    .replace('{{jobTitle}}', job.jobTitle),
-    
+    html: htmlTemplate
+      .replace('{{jobTitle}}', job.jobTitle),
+
   };
   const sendMail = async (transporter, msg) => {
     try {
