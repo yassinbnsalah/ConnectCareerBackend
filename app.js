@@ -48,8 +48,16 @@ io.on('connection', (socket) => {
 
     io.emit("new_job", {jobTitle: data.jobTitle,message: data.message,recruiterFullName:data.recruiterFullName, profileImage:data.profileImage, date:data.date });
   });
+  // Here we ll Send The Path 
   socket.on("new_application", (data) => {
-  io.emit("new_application", {message: data.message,profileImage:data.profileImage,firstname:data.firstname,lastname:data.lastname,timestamp:data.timestamp,alertmsg:data.alertmsg});
+  io.emit("new_application", {
+    message: data.message,
+    profileImage:data.profileImage,
+    firstname:data.firstname,
+    lastname:data.lastname,
+    timestamp:data.timestamp,
+    alertmsg:data.alertmsg , 
+  path: data.path });
   });
 });
 

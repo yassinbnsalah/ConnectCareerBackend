@@ -6,6 +6,7 @@ const notificationSchema = new mongoose.Schema({
     ref: 'User', // Reference to the User model, assuming you have one
     required: true
   },
+  path: String , 
   sender: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User', // Reference to the User model, assuming you have one

@@ -11,7 +11,7 @@ const getListOfNotification = async (req, res) => {
   };
   async function getListOfNotificationsbyid(userId) {
     try {
-      const notifications = await Notification.find({ recipient: userId }).populate('sender');
+      const notifications = await Notification.find({ recipient: userId }).populate('sender').sort({ timestamp: -1 }).limit(3); 
       return notifications;
     } catch (error) {
       console.error(error);
