@@ -49,6 +49,10 @@ const userSchema = new mongoose.Schema({
   hasEducation: { type: Boolean, default: false },
   hasExperience: { type: Boolean, default: false },
   profileProgress: { type: Number, default: 0 },
+  joinedAt : {
+    type:Date ,
+    default: Date.now
+  }
 });
 
 const User = mongoose.model('User', userSchema);

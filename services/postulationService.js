@@ -143,6 +143,7 @@ async function UpdateApplicationState(applicationiD, state) {
       }else if (job.jobType=="PFE"){
         STATA.acceptedPFE += 1 
       }
+      STATA.TotalReach = STATA.totalNBOpportunite/STATA.acceptedFullTimeOP*100; 
       STATA.save()
       sendMailTRecruiter(job.recruiter?.email)
     }

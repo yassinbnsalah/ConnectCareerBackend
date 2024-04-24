@@ -23,11 +23,15 @@ router.post(
         res,
         admin,
       );
-      console.log(postulation);
-     // const response = await axios.get('http://127.0.0.1:8000/getapplication/'+postulation._id);
-     // const data = response.data;
-     // console.log("Matching Calculated Automatic");
-      //console.log(data)
+      try {
+        console.log(postulation);
+        const response = await axios.get('http://127.0.0.1:8000/getapplication/' + postulation._id);
+        const data = response.data;
+        console.log("Matching Calculated Automatic");
+        console.log(data);
+      } catch (error) {
+        console.log("Matching Can't be Calculated");
+      }
       res.json({ postulation });
     } catch (error) {
       console.error(error);
