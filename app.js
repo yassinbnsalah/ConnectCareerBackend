@@ -48,6 +48,17 @@ io.on('connection', (socket) => {
 
     io.emit("new_job", {jobTitle: data.jobTitle,message: data.message,recruiterFullName:data.recruiterFullName, profileImage:data.profileImage, date:data.date });
   });
+  // Here we ll Send The Path 
+  socket.on("new_application", (data) => {
+  io.emit("new_application", {
+    message: data.message,
+    profileImage:data.profileImage,
+    firstname:data.firstname,
+    lastname:data.lastname,
+    timestamp:data.timestamp,
+    alertmsg:data.alertmsg , 
+  path: data.path });
+  });
 });
 
 
@@ -84,6 +95,8 @@ const statRecruiter = require('./routes/statsRecruiter');
 const eventroute = require('./routes/events')
 const alumniRoute = require ('./routes/alumni')
 const InvitationRoute = require('./routes/invite')
+const NotificationRoute = require('./routes/notification')
+app.use('/notificationapi/', NotificationRoute);
 app.use('/studentapi/', studentRoute);
 app.use('/recruiterapi/', recruiterRoute);
 app.use('/alumniapi/', alumniRoute);
