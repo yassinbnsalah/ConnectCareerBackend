@@ -331,15 +331,32 @@ async function CloseJob(jobID) {
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
     }
-    job.state = "Close";
-    sendMailTRecruiter(job);
+    
+    const currentDate = new Date();
+    const jobClosingDate = new Date(job.closeDate);
+    
+    // Comparaison des dates au format UTC
+    const isJobClosed = currentDate.toISOString() > jobClosingDate.toISOString();
+    
+    // Si la date de fermeture est passée, le poste est fermé
+    job.state = isJobClosed ? "Closed" : "Open";
+    
+    // Logging pour le débogage
+    console.log(`Job ID: ${jobID} - Current State: ${job.state}`);
+    console.log(`Current Date (UTC): ${currentDate.toISOString()}`);
+    console.log(`Job Closing Date (UTC): ${jobClosingDate.toISOString()}`);
+
+    sendMailToRecruiter(job);
     await job.save();
     return { job };
   } catch (error) {
-    console.error(error);
+    console.error("Error in CloseJob function:", error);
     res.status(500).json({ message: "Server Error" });
   }
 }
+
+
+
 async function sendMailTRecruiter(job) {
   const htmlTemplate = fs.readFileSync(
     'services/templateemails/EndedJobMail.html',
