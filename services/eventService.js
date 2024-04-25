@@ -162,28 +162,30 @@ const CreateOrUpdateEvent = async (req, res, admin, eventId = null) => {
       });
    //   sendEventMail(["wiembenaraar2@gmail.com","benamorr.fedi@gmail.com"] , title , imageEvents ,description )
       await newEvent.save();
+       // Send notification to the student
+    const students = await User.find({ role: "Student" }); 
+
+    const admina = await User.findOne({role:"Admin"});
+    console.log(+admina)
+    students.forEach(async student => {
+
+    const notification = new Notification({
+      recipient: student._id,
+      sender:admina._id,
+      message: `A new Event has published:"${title}"`,
+      path : '/events',
+    });
+    await notification.save();
+
+    });
       if(publish_date){
         scheduledFunctions.initPublishEvent(publish_date,newEvent);
       }
      
       res.status(201).json({ message: "New event created successfully" });
     }
-    // Send notification to the student
-    const students = await User.find({ role: "Student" }); 
-
-    const admin = await User.find({role:"Admin"});
-    students.forEach(async student => {
-
-    const notification = new Notification({
-      recipient: student._id,
-      sender:admin[0]._id,
-      message: `A new Event has published:"${title}"`,
-      path : '/events'
-    });
-    await notification.save();
-
-    }
-    );
+   
+    
   } catch (error) {
     console.error(error);
     res.status(500).json({
