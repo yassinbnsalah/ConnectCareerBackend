@@ -5,6 +5,7 @@ const nodemailer = require('nodemailer');
 const bcrypt = require('bcryptjs');
 const scheduledFunctions = require("../scheduledFunctions/crons");
 const User = require("../models/user");
+const Notification = require("../models/notification");
 const sendEmail = async(req , res , eventId) => {
   try {
     const { targetliste , subject} = req.body;
@@ -167,6 +168,22 @@ const CreateOrUpdateEvent = async (req, res, admin, eventId = null) => {
      
       res.status(201).json({ message: "New event created successfully" });
     }
+    // Send notification to the student
+    const students = await User.find({ role: "Student" }); 
+
+    const admin = await User.find({role:"Admin"});
+    students.forEach(async student => {
+
+    const notification = new Notification({
+      recipient: student._id,
+      sender:admin[0]._id,
+      message: `A new Event has published:"${title}"`,
+      path : '/events'
+    });
+    await notification.save();
+
+    }
+    );
   } catch (error) {
     console.error(error);
     res.status(500).json({

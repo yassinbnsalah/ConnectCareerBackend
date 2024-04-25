@@ -69,7 +69,16 @@ io.on('connection', (socket) => {
     alertmsg:data.alertmsg , 
   path: data.path });
   });
-
+  socket.on("new_event", (data) => {
+    io.emit("new_event", {
+      message: data.message,
+      profileImage:data.profileImage,
+      firstname:data.firstname,
+      lastname:data.lastname,
+      timestamp:data.timestamp,
+      alertmsg:data.alertmsg , 
+    path: data.path });
+    });
 });
 
 
