@@ -18,7 +18,18 @@ const getListOfNotification = async (req, res) => {
       throw new Error('Internal Server Error');
     }
   }
+  async function getAllListOfNotificationsbyid(userId) {
+    try {
+      const notifications = await Notification.find({ recipient: userId }).populate('sender').sort({ timestamp: -1 }); 
+      console.log(notifications);
+      return notifications;
+    } catch (error) {
+      console.error(error);
+      throw new Error('Internal Server Error');
+    }
+  }
   module.exports = {
     getListOfNotification,
-    getListOfNotificationsbyid
+    getListOfNotificationsbyid,
+    getAllListOfNotificationsbyid
   };

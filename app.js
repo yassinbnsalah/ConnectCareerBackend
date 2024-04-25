@@ -18,7 +18,11 @@ const port = 3001;
 const webpack = require('webpack');
 // const webpackConfig = require('./webpack.config.js');
 // const compiler = webpack(webpackConfig);
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3002','http://localhost:3000'], // Add trusted origins here
+  methods: ['GET', 'POST','PUT','DELETE'], // Allow only safe methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allow only specific headers
+}));
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   storageBucket: 'twinerz-fceb6.appspot.com',
@@ -33,12 +37,12 @@ const socketIo = require('socket.io');
 const io=socketIo(server); 
 
 io.on('connection', (socket) => {
-  console.log("a user connected");
+  // console.log("a user connected");
 
 
 
   socket.on('disconnect', () => {
-    console.log("User disconnected");
+    // console.log("User disconnected");
   });
   socket.on("new_user_login", (data) => {
     console.log("new_user_login", data.message);
