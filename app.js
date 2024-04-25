@@ -36,12 +36,12 @@ const socketIo = require('socket.io');
 const io=socketIo(server); 
 
 io.on('connection', (socket) => {
-  console.log("a user connected");
+  // console.log("a user connected");
 
 
 
   socket.on('disconnect', () => {
-    console.log("User disconnected");
+    // console.log("User disconnected");
   });
   socket.on("new_user_login", (data) => {
     console.log("new_user_login", data.message);
@@ -78,7 +78,6 @@ io.on('connection', (socket) => {
     alertmsg:data.alertmsg , 
   path: data.path });
   });
-
 });
 
 

@@ -164,7 +164,6 @@ async function AddJob(req, res, admin) {
     }
 
     let jobDescription = req.body.description; 
-
     let jobFileUrl = "";
 
     if (req.files && req.files.jobFile && req.files.jobFile[0]) {
@@ -181,12 +180,12 @@ async function AddJob(req, res, admin) {
         const summary = await summarizeJobFile(jobFileUrl, "mistral-7b-instruct");
         console.log("Summary of the job file:", summary);
         jobDescription = summary;
-
     }
 
 
     const newJob = new Job({
       recruiter,
+      state:"Active",
       jobTitle,
       location,
       typeofworkplace,
@@ -355,7 +354,7 @@ async function CloseJob(jobID) {
     const isJobClosed = currentDate.toISOString() > jobClosingDate.toISOString();
     
     // Si la date de fermeture est passée, le poste est fermé
-    job.state = isJobClosed ? "Closed" : "Open";
+    job.state = isJobClosed ? "Closed" : "Active";
     
     // Logging pour le débogage
     console.log(`Job ID: ${jobID} - Current State: ${job.state}`);

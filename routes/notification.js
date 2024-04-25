@@ -20,6 +20,16 @@ router.get('/', async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });  
+  router.get('/allnotifications/:userID', async (req, res) => {
+    const userId = req.params.userID;
+    try {
+      const notifications = await notificationService.getAllListOfNotificationsbyid(userId);
+      res.json(notifications);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
   router.get('/number/:userID', async (req, res) => {
     const userId = req.params.userID;
     try {
@@ -29,5 +39,5 @@ router.get('/', async (req, res) => {
       console.error(error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
-  }); 
+  });
 module.exports = router;
