@@ -10,7 +10,6 @@ const serviceAccount = require('./prv.json');
 const User = require('./models/user');
 const CreateAdmin = require('./services/createadmin');
 const AuthentificaitonAdmin = require('./routes/authentificationadmin');
-
 const app = express();
 app.disable('x-powered-by');
 const port = 3001;
@@ -50,7 +49,14 @@ io.on('connection', (socket) => {
   });
   socket.on("new_job", (data) => {
 
-    io.emit("new_job", {jobTitle: data.jobTitle,message: data.message,recruiterFullName:data.recruiterFullName, profileImage:data.profileImage, date:data.date });
+    io.emit("new_job", {
+      message: data.message,
+      profileImage:data.profileImage,
+      firstname:data.firstname,
+      lastname:data.lastname,
+      timestamp:data.timestamp,
+      alertmsg:data.alertmsg , 
+    path: data.path});
   });
   // Here we ll Send The Path 
   socket.on("new_application", (data) => {
@@ -101,6 +107,8 @@ const alumniRoute = require ('./routes/alumni')
 const InvitationRoute = require('./routes/invite')
 const NotificationRoute = require('./routes/notification')
 app.use('/notificationapi/', NotificationRoute);
+const lessonRoutes = require('./routes/lessons') // added
+const learingRoutes = require('./routes/learnings')// added
 app.use('/studentapi/', studentRoute);
 app.use('/recruiterapi/', recruiterRoute);
 app.use('/alumniapi/', alumniRoute);
@@ -117,6 +125,8 @@ app.use('/stats', statRoute);
 app.use('/statsRecruiter', statRecruiter);
 app.use('/events',eventroute)
 app.use('/invite' , InvitationRoute)
+app.use("/lessonapi" , lessonRoutes); // added
+app.use("/learningapi" , learingRoutes); // added
 /** ******************************************* */
 app.post('/protected', requireToken, (req, res) => {
   // This route handler will only be called if the user's token is valid

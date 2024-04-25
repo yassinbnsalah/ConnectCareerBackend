@@ -11,6 +11,10 @@ const entrepriseSchema = new mongoose.Schema({
   CompanyType: String,
   CompanyEmail: String,
   CompanyWebsite: String,
+  Createdat : {
+    type: Date , 
+    default: Date.now
+  } , 
   nbOpportunitees   :{
     type: Number,
     default: 0,
