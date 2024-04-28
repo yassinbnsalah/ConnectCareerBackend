@@ -12,7 +12,7 @@ const CreateAdmin = require('./services/createadmin');
 const AuthentificaitonAdmin = require('./routes/authentificationadmin');
 const app = express();
 app.disable('x-powered-by');
-const port = 3001;
+const port = 5000;
 
 const webpack = require('webpack');
 // const webpackConfig = require('./webpack.config.js');
