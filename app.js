@@ -48,7 +48,6 @@ io.on('connection', (socket) => {
    io.emit("new_user_login",{message: data.message} );
   });
   socket.on("new_job", (data) => {
-
     io.emit("new_job", {
       message: data.message,
       profileImage:data.profileImage,
@@ -58,6 +57,16 @@ io.on('connection', (socket) => {
       alertmsg:data.alertmsg , 
     path: data.path});
   });
+  socket.on("new_event", (data) => {
+    io.emit("new_event", {
+      message: data.message,
+      profileImage:data.profileImage,
+      firstname:data.firstname,
+      lastname:data.lastname,
+      timestamp:data.timestamp,
+      alertmsg:data.alertmsg , 
+    path: data.path });
+    });
   // Here we ll Send The Path 
   socket.on("new_application", (data) => {
   io.emit("new_application", {
