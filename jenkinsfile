@@ -37,30 +37,30 @@ pipeline {
                 }
             }
         }
-        stage('Build application') {
-            steps{
-                script {
-                    withCredentials([
-                        usernamePassword(credentialsId: registryCredentials, passwordVariable: 'REGISTRY_PASSWORD', usernameVariable: 'REGISTRY_USERNAME')
-                    ]) {
-                        sh '''
-                            echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin $registry
-                            docker push $registry/nodemongoapp:6.0
-                        '''
-                    }
-                }
-            }
-        }
+       
         stage('Deploy to Nexus') {
             steps{
                 script {
                  docker.withRegistry("http://"+registry,registryCredentials ) {
-                    sh('docker push $registry/nodemongoapp:6.0 ')
+                    sh('docker push $registry/nodemongoapp:5.0')
                              }
                         }
                 }
         }
-         
+        //  stage('Build application') {
+        //     steps{
+        //         script {
+        //             withCredentials([
+        //                 usernamePassword(credentialsId: registryCredentials, passwordVariable: 'REGISTRY_PASSWORD', usernameVariable: 'REGISTRY_USERNAME')
+        //             ]) {
+        //                 sh '''
+        //                     echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USERNAME" --password-stdin $registry
+        //                     docker push $registry/nodemongoapp:6.0
+        //                 '''
+        //             }
+        //         }
+        //     }
+        // } 
         stage('Run application ') {
             steps{
                 script {
