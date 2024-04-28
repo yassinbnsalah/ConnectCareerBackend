@@ -30,6 +30,20 @@ router.get('/', async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
+  router.put('/notifications/:notificationId', async (req, res) => {
+    const { notificationId } = req.params;
+  
+    try {
+      // Appeler la méthode pour marquer la notification comme lue
+      const updatedNotification = await notificationService.SetIsReadTrue(notificationId);
+      
+      // Répondre avec la notification mise à jour
+      res.json(updatedNotification);
+    } catch (error) {
+      // Gérer les erreurs
+      res.status(500).json({ error: error.message });
+    }
+  });
   router.get('/number/:userID', async (req, res) => {
     const userId = req.params.userID;
     try {
