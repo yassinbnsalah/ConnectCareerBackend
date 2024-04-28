@@ -71,11 +71,7 @@ pipeline {
                         }
                 }
             }
-        stage('SMTP Notification logs'){
-            steps{
-                emailext attachLog: true, body: 'check our logs after running the pipeline', compressLog: true, subject: 'this is Jekins output logs from benamor fedi pipeline', to: 'benamorr.fedi@gmail.com'
-            }
-        }
+        
         stage('Prometheus Setup') {
             steps {
                 sh 'docker compose up -d prometheus'
@@ -84,6 +80,11 @@ pipeline {
         stage('Grafana Setup') {
             steps {
                 sh 'docker compose up -d grafana'
+            }
+        }
+        stage('SMTP Notification logs'){
+            steps{
+                emailext attachLog: true, body: 'check our logs after running the pipeline', compressLog: true, subject: 'this is Jekins output logs from benamor fedi pipeline', to: 'benamorr.fedi@gmail.com'
             }
         }
     }
