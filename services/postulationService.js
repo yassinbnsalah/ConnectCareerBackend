@@ -72,7 +72,7 @@ async function CreateNewCandidate(req, res, admin) {
     const notification = new Notification({
       recipient: recruiter._id,
       sender:owner,
-      message: `A new candidate has applied for the job "${jobD.jobTitle}"`,
+      message: `A new candidate has applied for the Opportunity "${jobD.jobTitle}"`,
       path : '/recruiter/dashboard/job/'+jobD._id
     });
     await notification.save();

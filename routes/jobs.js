@@ -16,7 +16,7 @@ const upload = multer();
 router.post('/add',   upload.fields([{ name: 'jobFile', maxCount: 1 }]), async (req, res) => {
   try {
     const jobs = await jobService.AddJob(req, res,admin);
-    const response = await axios.get('http://127.0.0.1:8000/getRecommandedCondidature/'+jobs._id);
+    const response = await axios.get('https://operateconnectcareer.onrender.com/getRecommandedCondidature/'+jobs._id);
     const data = response.data;
     console.log("Recommanded Condidates Calculated Successully");
     console.log(data)
