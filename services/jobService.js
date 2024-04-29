@@ -245,7 +245,7 @@ async function AddJob(req, res, admin) {
     const notification = new Notification({
       recipient: adminNotif._id,
       sender: recruiter,
-      message: `A new Job has been created by "${entreprise.CompanyName}"`,
+      message: `A new Opportunity has been created by "${entreprise.CompanyName}"`,
       path: '/liste/entreprises/'+entreprise._id
     });
     await notification.save();

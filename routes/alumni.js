@@ -12,6 +12,7 @@ router.get('/', async (req, res) => {
     const alumnis = await alumniService.getListeAlumni();
     res.json(alumnis);
   } catch (error) {
+    
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
